@@ -30,7 +30,7 @@ CREATE TABLE `Category` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -44,7 +44,9 @@ CREATE TABLE `Inventory` (
   `date` date NOT NULL,
   `item_id` int(11) NOT NULL,
   `amount` int(11) DEFAULT NULL,
-  PRIMARY KEY (`date`,`item_id`)
+  PRIMARY KEY (`date`,`item_id`),
+  KEY `fk_Inventory_1_idx` (`item_id`),
+  CONSTRAINT `fk_Inventory_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -57,12 +59,14 @@ DROP TABLE IF EXISTS `Item`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Item` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `category_id` int(11) NOT NULL,
+  `category_id` int(10) unsigned NOT NULL,
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+  UNIQUE KEY `name_UNIQUE` (`name`),
+  KEY `fk_Item_1_idx` (`category_id`),
+  CONSTRAINT `fk_Item_1` FOREIGN KEY (`category_id`) REFERENCES `Category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -93,4 +97,4 @@ CREATE TABLE `User` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-08-08 15:45:02
+-- Dump completed on 2015-08-10 20:32:16

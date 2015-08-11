@@ -54,15 +54,138 @@ function get_updated_items_count($category_id, $date) {
 }
 
 
-function get_categories($date = null) {
+function add_category($category_name) {
     global $conn;
     connect_to_db();
+
+    $sql = 'INSERT INTO inventory_system.Category (name) VALUES ("' .$category_name. '")';
+
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    edit_categories();
+}
+
+
+function remove_category($category_name) {
+    global $conn;
+    connect_to_db();
+
+    $sql = 'DELETE FROM inventory_system.Category WHERE name="' .$category_name. '"';
+
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    edit_categories();
+}
+
+
+function update_items($category_name, $checked_items) {
+    global $conn;
+    connect_to_db();
+
+    $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '"';
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    $category_id = $result->fetch_assoc()['id'];
+
+    foreach ($checked_items as $item) {
+        if ($item == null) {
+            continue;
+        }
+        $sql = 'INSERT INTO Item (category_id, name) VALUES(' .$category_id. ', "' .$item. '") ON DUPLICATE KEY UPDATE category_id = VALUES(category_id)';
+        echo $sql;
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+    }
+
+    get_items($category_name);
+}
+
+
+function get_items($category_name) {
+    global $conn;
+    connect_to_db();
+
+    $sql = 'SELECT Item.name FROM Item INNER JOIN Category ON Item.category_id = Category.id WHERE Category.name = "' .$category_name. '"';
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    $category_items = [];
+    while ($row = $result->fetch_assoc()) {
+        array_push($category_items, $row['name']);
+    }
+
+    $sql = 'SELECT name FROM Item ORDER BY name ASC';
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    echo '<form action="sql_common.php" method="post">';
+    while ($row = $result->fetch_assoc()) {
+        echo '<input type="checkbox" name="checked_items[]" value="' .$row["name"]. '"';
+        if (in_array($row["name"], $category_items)) {
+            echo 'checked';
+        }
+        echo '>' .$row["name"]. '<br>';
+    }
+    echo '<input type="textarea" name="checked_items[]"><br>';
+
+    echo '<input type="hidden" name="func_name" value="update_items">';
+    echo '<input type="hidden" name="category_name" value="' .$category_name. '">';
+    echo '<input type="submit" value="Update">';
+    echo '</form>';
+}
+
+
+function edit_categories() {
+    global $conn;
+    connect_to_db();
+
+    echo '<form action="sql_common.php" method="post">
+          <input type="textarea" name="category">
+          <input type="submit" name="edit_categories_button" value="Add">
+          <input type="submit" name="edit_categories_button" value="Remove"><br>
+          </form>';
 
     $sql = "SELECT * FROM Category ORDER BY id ASC";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
+    }
 
+    echo '<form name="change">';
+    echo '<select name="options" size="4" ONCHANGE="document.getElementById(\'items_frame\').src = this.options[this.selectedIndex].value">';
+    while ($row = $result->fetch_assoc()) {
+        echo '<option value="sql_common.php?func_name=get_items&name=' .$row["name"]. '"> ' .$row["name"];
+    }
+    echo '</select><br><br>';
+    echo '</form>';
+    echo '<iframe name="iframe" id="items_frame" src=""></iframe>';
+}
+
+function get_categories($date = null) {
+    global $conn;
+    connect_to_db();
+
+    echo '<br><a href="sql_common.php?func_name=edit_categories">Edit Categories</a><br>';
+
+    $sql = "SELECT * FROM Category ORDER BY id ASC";
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
     }
 
     if ($date == null) {
@@ -146,10 +269,10 @@ function update_inventory($category_id, $date, $items, $values) {
             continue;
         }
 
-        $sql = ' INSERT INTO Inventory (`date`, `item_id`, `amount`)
-                 VALUES ("' .$date. '", ' .$items[$i]. ', ' .$values[$i]. ')
-                 ON DUPLICATE KEY UPDATE 
-                 date=VALUES(date), item_id = VALUES(item_id), amount = VALUES(amount)';
+        $sql = 'INSERT INTO Inventory (`date`, `item_id`, `amount`)
+                VALUES ("' .$date. '", ' .$items[$i]. ', ' .$values[$i]. ')
+                ON DUPLICATE KEY UPDATE 
+                date=VALUES(date), item_id = VALUES(item_id), amount = VALUES(amount)';
 
         $result = $conn->query($sql); 
         if ($result == False) {
@@ -169,8 +292,19 @@ if (strcmp($_POST['func_name'], 'get_inventory') == 0) {
     $values = $_POST['values'];
     $date = $_POST['date'];
     $category_id = $_POST['category_id'];
-
     update_inventory($category_id, $date, $items, $values);
+} else if(strcmp($_GET['func_name'], 'edit_categories') == 0) {
+    echo edit_categories();
+} else if(strcmp($_GET['func_name'], 'get_items') == 0) {
+    echo get_items($_GET['name']);
+} else if(strcmp($_POST['func_name'], 'update_items') == 0) {
+    update_items($_POST['category_name'], $_POST['checked_items']);
+} else if(array_key_exists('edit_categories_button', $_POST)) {
+    if (strcmp($_POST['edit_categories_button'], 'Add') == 0) {
+        add_category($_POST['category']);
+    } else if (strcmp($_POST['edit_categories_button'], 'Remove') == 0) {
+        remove_category($_POST['category']);
+    }
 }
 
 ?>
