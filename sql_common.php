@@ -84,7 +84,7 @@ function remove_category($category_name) {
 }
 
 
-function update_items($category_name, $checked_items) {
+function update_items_category($category_name, $checked_items) {
     global $conn;
     connect_to_db();
 
@@ -100,8 +100,33 @@ function update_items($category_name, $checked_items) {
         if ($item == null) {
             continue;
         }
-        $sql = 'INSERT INTO Item (category_id, name) VALUES(' .$category_id. ', "' .$item. '") ON DUPLICATE KEY UPDATE category_id = VALUES(category_id)';
-        echo $sql;
+        $sql = 'UPDATE Item SET category_id = ' .$category_id. ' WHERE name = "' .$item. '"';
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+    }
+
+    get_items($category_name);
+}
+
+
+function add_new_item($category_name, $item_name, $item_unit) {
+    global $conn;
+    connect_to_db();
+
+    $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '"';
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    $category_id = $result->fetch_assoc()['id'];
+
+    if ($item_name != null) {
+        $sql = 'INSERT INTO Item (category_id, name, unit) 
+                VALUES(' .$category_id. ', "' .$item_name. '", "' .$item_unit. '") 
+                ON DUPLICATE KEY UPDATE category_id = VALUES(category_id), unit = VALUES(unit)';
         $result = $conn->query($sql); 
         if ($result == False) {
             echo "<br> Query failed <br>";
@@ -141,11 +166,20 @@ function get_items($category_name) {
         }
         echo '>' .$row["name"]. '<br>';
     }
-    echo '<input type="textarea" name="checked_items[]"><br>';
-
     echo '<input type="hidden" name="func_name" value="update_items">';
     echo '<input type="hidden" name="category_name" value="' .$category_name. '">';
     echo '<input type="submit" value="Update">';
+    echo '</form><br>';
+
+    echo '<form action="sql_common.php" method="post">';
+    echo '<b>Add/Update item</b><br>';
+    echo 'Name: ';
+    echo '<input type="textarea" name="item_name"><br>';
+    echo 'Unit:  ';
+    echo '<input type="textarea" name="item_unit"><br>';
+    echo '<input type="hidden" name="func_name" value="add_new_item">';
+    echo '<input type="hidden" name="category_name" value="' .$category_name. '">';
+    echo '<input type="submit" value="Submit">';
     echo '</form>';
 }
 
@@ -154,8 +188,9 @@ function edit_categories() {
     global $conn;
     connect_to_db();
 
+    echo '<a href="index.php"> Home </a><br><br>';
     echo '<form action="sql_common.php" method="post">
-          <input type="textarea" name="category">
+          <input type="textarea" name="category" id="category_name">
           <input type="submit" name="edit_categories_button" value="Add">
           <input type="submit" name="edit_categories_button" value="Remove"><br>
           </form>';
@@ -166,21 +201,26 @@ function edit_categories() {
         echo "<br> Query failed <br>";
     }
 
+    echo '<script>
+    function categorySelect(obj) {
+        document.getElementById("items_frame").src = obj.value;
+        document.getElementById("category_name").value = obj.options[obj.selectedIndex].text;
+    }
+    </script>';
+
     echo '<form name="change">';
-    echo '<select name="options" size="4" ONCHANGE="document.getElementById(\'items_frame\').src = this.options[this.selectedIndex].value">';
+    echo '<select name="options" size="4" onchange=categorySelect(this)>';
     while ($row = $result->fetch_assoc()) {
         echo '<option value="sql_common.php?func_name=get_items&name=' .$row["name"]. '"> ' .$row["name"];
     }
     echo '</select><br><br>';
     echo '</form>';
-    echo '<iframe name="iframe" id="items_frame" src=""></iframe>';
+    echo '<iframe name="iframe" id="items_frame" width="50%" height="50%" style="border:none" src=""></iframe>';
 }
 
 function get_categories($date = null) {
     global $conn;
     connect_to_db();
-
-    echo '<br><a href="sql_common.php?func_name=edit_categories">Edit Categories</a><br>';
 
     $sql = "SELECT * FROM Category ORDER BY id ASC";
     $result = $conn->query($sql); 
@@ -209,6 +249,7 @@ function get_categories($date = null) {
         <td>' .get_updated_items_count($row['id'], $date). '/' . get_total_items($row['id']) . '</td></tr>';
     }
     echo "</table>";
+    echo '<br><a href="sql_common.php?func_name=edit_categories">Edit Categories</a><br>';
 }
 
 function get_inventory($category_id, $date) {
@@ -228,6 +269,7 @@ function get_inventory($category_id, $date) {
         echo "<br> Query failed <br>";
     }
 
+    echo '<a href="index.php"> Home </a><br><br>';
     echo '<br><form action="sql_common.php" method="post">
     <input type="hidden" name="category_id" value="' .$category_id. '">
     <input type="hidden" name="func_name" value="get_inventory">
@@ -245,7 +287,7 @@ function get_inventory($category_id, $date) {
     while ($row = $result->fetch_assoc()) {
         $inventory_items[$i] = $row["id"];
 
-        echo '<br><form action="sql_common.php" method="post">
+        echo '<form action="sql_common.php" method="post">
               <tr><td>' . $row["name"]. '</td>
                   <td>' . $row["unit"]. '</td>
                   <td>' . $row["amount"]. '</td>
@@ -298,7 +340,9 @@ if (strcmp($_POST['func_name'], 'get_inventory') == 0) {
 } else if(strcmp($_GET['func_name'], 'get_items') == 0) {
     echo get_items($_GET['name']);
 } else if(strcmp($_POST['func_name'], 'update_items') == 0) {
-    update_items($_POST['category_name'], $_POST['checked_items']);
+    update_items_category($_POST['category_name'], $_POST['checked_items']);
+} else if(strcmp($_POST['func_name'], 'add_new_item') == 0) {
+    add_new_item($_POST['category_name'], $_POST['item_name'], $_POST['item_unit']);
 } else if(array_key_exists('edit_categories_button', $_POST)) {
     if (strcmp($_POST['edit_categories_button'], 'Add') == 0) {
         add_category($_POST['category']);
