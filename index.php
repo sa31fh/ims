@@ -5,7 +5,7 @@
 <body>
 
 <?php
-include "sql_common.php";
+include "category_status.php";
 
 echo "<br>";
 get_categories();
