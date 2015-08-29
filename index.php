@@ -5,11 +5,7 @@
 <body>
 
 <?php
-include "category_status.php";
-
-echo "<br>";
-get_categories();
-echo "<br>";
+include_once 'login.php';
 ?>
 
 </body>

@@ -30,7 +30,7 @@ CREATE TABLE `Category` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE `Item` (
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `fk_Item_1_idx` (`category_id`),
   CONSTRAINT `fk_Item_1` FOREIGN KEY (`category_id`) REFERENCES `Category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -78,10 +78,28 @@ DROP TABLE IF EXISTS `User`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `User` (
   `username` varchar(45) NOT NULL,
-  `password` text,
+  `password_hash` text NOT NULL,
+  `userrole_id` int(11) NOT NULL,
   PRIMARY KEY (`username`),
-  UNIQUE KEY `username_UNIQUE` (`username`)
+  UNIQUE KEY `username_UNIQUE` (`username`),
+  KEY `fk_User_1_idx` (`userrole_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `UserRole`
+--
+
+DROP TABLE IF EXISTS `UserRole`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `UserRole` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `role_UNIQUE` (`role`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,4 +115,4 @@ CREATE TABLE `User` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-08-10 20:32:16
+-- Dump completed on 2015-08-29 15:49:40

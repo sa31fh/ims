@@ -1,6 +1,6 @@
 <?php
 
-include "sql_common.php";
+include_once "sql_common.php";
 
 
 function get_total_items($category_id) {
@@ -70,7 +70,13 @@ function get_categories($date = null) {
         <td>' .get_updated_items_count($row['id'], $date). '/' . get_total_items($row['id']) . '</td></tr>';
     }
     echo "</table>";
-    echo '<br><a href="edit_categories.php?func_name=edit_categories">Edit Categories</a><br>';
+    echo '<br><a href="edit_categories.php?func_name=edit_categories">Edit Categories</a><br><br><br>';
+
+    echo '<br><form action="login.php" method="post">
+    <input type="hidden" name="func_name" value="logout">
+    <b>' .$_SESSION['username']. '</b>
+    <input type="submit" value="Logout"> </form><br>';
+
 }
 
 if(strcmp($_POST['func_name'], 'get_categories') == 0) {
