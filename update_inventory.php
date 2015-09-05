@@ -25,6 +25,7 @@ function get_inventory($category_id, $date) {
           </style></head>';
 
     echo '<a href="index.php">Back</a><br><br>';
+
     echo '<br><form action="update_inventory.php" method="post">
     <input type="hidden" name="category_id" value="' .$category_id. '">
     <input type="hidden" name="func_name" value="get_inventory">
@@ -40,13 +41,13 @@ function get_inventory($category_id, $date) {
     $i = 0;
     $inventory_items = [];
 
+    echo '<form action="update_inventory.php" method="post">';
     while ($row = $result->fetch_assoc()) {
         $inventory_items[$i] = $row["id"];
-        echo '<form action="update_inventory.php" method="post">
-              <tr><td>' . $row["name"]. '</td>
+        echo '<tr><td>' . $row["name"]. '</td>
                   <td>' . $row["unit"]. '</td>
-                  <td><input id="inp" type="number" min="0" value="' .$row["amount"]. '" name="values[]" onchange="this.form.submit()"</td>
-                  <td><input type="text" min="0" value="' .$row["notes"]. '" name="notes[]" onchange="this.form.submit()"</td></tr>';
+                  <td><input id="inp" type="number" min="0" value="' .$row["amount"]. '" name="values[]" onchange="this.form.submit()"></td>
+                  <td><input type="text" min="0" value="' .$row["notes"]. '" name="notes[]" onchange="this.form.submit()"></td></tr>';
         ++$i;
     }
     echo '</table><br>

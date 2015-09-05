@@ -33,62 +33,61 @@ function remove_category($category_name) {
 }
 
 
-function update_items_category($category_name, $checked_items) {
+function update_items_category($category_name, $items) {
     global $conn;
     connect_to_db();
 
-    $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '"';
-    $result = $conn->query($sql); 
-    if ($result == False) {
-        echo "<br> Query failed <br>";
+    $category_id = null;
+
+    if ($category_name != null) {
+        $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '"';
+
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+
+        $category_id = $result->fetch_assoc()['id'];
     }
 
-    $category_id = $result->fetch_assoc()['id'];
-
-    foreach ($checked_items as $item) {
+    foreach ($items as $item) {
         if ($item == null) {
             continue;
         }
-        $sql = 'UPDATE Item SET category_id = ' .$category_id. ' WHERE name = "' .$item. '"';
+
+        $sql = 'UPDATE Item SET category_id = ' .($category_id == null ? "null":$category_id). ' WHERE name = "' .$item. '"';
         $result = $conn->query($sql); 
         if ($result == False) {
             echo "<br> Query failed <br>";
         }
     }
-
-    get_items($category_name);
-}
-
-
-function add_new_item($category_name, $item_name, $item_unit) {
-    global $conn;
-    connect_to_db();
-
-    $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '"';
-    $result = $conn->query($sql); 
-    if ($result == False) {
-        echo "<br> Query failed <br>";
-    }
-
-    $category_id = $result->fetch_assoc()['id'];
-
-    if ($item_name != null) {
-        $sql = 'INSERT INTO Item (category_id, name, unit) 
-                VALUES(' .$category_id. ', "' .$item_name. '", "' .$item_unit. '") 
-                ON DUPLICATE KEY UPDATE category_id = VALUES(category_id), unit = VALUES(unit)';
-        $result = $conn->query($sql); 
-        if ($result == False) {
-            echo "<br> Query failed <br>";
-        }
-    }
-
-    get_items($category_name);
 }
 
 
 function get_items($category_name) {
     global $conn;
     connect_to_db();
+
+    echo '<head> 
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script> 
+
+    <script type="text/javascript">
+        $(function(){
+            $("#categorize_button").click(function(){
+                $("#uncategorized_list > option:selected").each(function(){
+                    $(this).remove().appendTo("#categorized_list");
+                });
+            });
+            
+            $("#uncategorize_button").click(function(){
+                $("#categorized_list > option:selected").each(function(){
+                    $(this).remove().appendTo("#uncategorized_list");
+                });
+            });
+        });
+    </script>
+    </head>';
+
 
     $sql = 'SELECT Item.name FROM Item INNER JOIN Category ON Item.category_id = Category.id WHERE Category.name = "' .$category_name. '"';
     $result = $conn->query($sql); 
@@ -101,35 +100,39 @@ function get_items($category_name) {
         array_push($category_items, $row['name']);
     }
 
-    $sql = 'SELECT name, unit FROM Item ORDER BY name ASC';
+
+    $sql = 'SELECT * FROM Item WHERE Item.category_id IS NULL';
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
     }
 
     echo '<form action="edit_categories.php" method="post">';
+    echo '<select id="uncategorized_list" multiple="multiple" rows=2 name="categorize_item[]">';
     while ($row = $result->fetch_assoc()) {
-        echo '<input type="checkbox" name="checked_items[]" value="' .$row["name"]. '"';
-        if (in_array($row["name"], $category_items)) {
-            echo 'checked';
-        }
-        echo '>' .$row["name"]. ' (' .$row["unit"]. ') <br>';
+        echo '<option value="' .$row["name"]. '">' .$row["name"]. ' (' .$row["unit"]. ') </option>';
     }
+    echo '</select>';
+
+    echo '<input id="uncategorize_button" type="button" value="<-" onclick="this.form.submit()"/>
+          <input id="categorize_button" type="button" value="->" onclick="this.form.submit()"/>';
+
+    $sql = 'SELECT name, unit FROM Item ORDER BY name ASC';
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+    echo '<select id="categorized_list" multiple="multiple" rows=2 name="uncategorize_item[]">';
+    while ($row = $result->fetch_assoc()) {
+        if (in_array($row["name"], $category_items)) {
+            echo '<option value="' .$row["name"]. '">' .$row["name"]. ' (' .$row["unit"]. ') </option>';
+        }
+    }
+    echo '</select>';
+
     echo '<input type="hidden" name="func_name" value="update_items">';
     echo '<input type="hidden" name="category_name" value="' .$category_name. '">';
-    echo '<input type="submit" value="Update">';
     echo '</form><br>';
-
-    echo '<form action="edit_categories.php" method="post">';
-    echo '<b>Add/Update item</b><br>';
-    echo 'Name: ';
-    echo '<input type="textarea" name="item_name"><br>';
-    echo 'Unit:  ';
-    echo '<input type="textarea" name="item_unit"><br>';
-    echo '<input type="hidden" name="func_name" value="add_new_item">';
-    echo '<input type="hidden" name="category_name" value="' .$category_name. '">';
-    echo '<input type="submit" value="Submit">';
-    echo '</form>';
 }
 
 
@@ -173,9 +176,12 @@ if(strcmp($_GET['func_name'], 'edit_categories') == 0) {
 } else if(strcmp($_GET['func_name'], 'get_items') == 0) {
     echo get_items($_GET['name']);
 } else if(strcmp($_POST['func_name'], 'update_items') == 0) {
-    update_items_category($_POST['category_name'], $_POST['checked_items']);
-} else if(strcmp($_POST['func_name'], 'add_new_item') == 0) {
-    add_new_item($_POST['category_name'], $_POST['item_name'], $_POST['item_unit']);
+    if (array_key_exists('categorize_item', $_POST)) {
+        update_items_category($_POST['category_name'], $_POST['categorize_item']);
+    } else if (array_key_exists('uncategorize_item', $_POST)) {
+        update_items_category(null, $_POST['uncategorize_item']);
+    }
+    get_items($_POST['category_name']);
 } else if(array_key_exists('edit_categories_button', $_POST)) {
     if (strcmp($_POST['edit_categories_button'], 'Add') == 0) {
         add_category($_POST['category']);
