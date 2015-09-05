@@ -137,7 +137,7 @@ function edit_categories() {
     global $conn;
     connect_to_db();
 
-    echo '<a href="index.php"> Home </a><br><br>';
+    echo '<a href="index.php">Back</a><br><br>';
     echo '<form action="edit_categories.php" method="post">
           <input type="textarea" name="category" id="category_name">
           <input type="submit" name="edit_categories_button" value="Add">

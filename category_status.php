@@ -56,8 +56,9 @@ function get_categories($date = null) {
     }
 
     echo '<br><form action="category_status.php" method="post" style="display:inline">
-    <input type="date" name="date" value="' .$date. '">
-    <input type="submit" name="get_categories"></form><br><br>';
+    <input type="date" name="date" value="' .$date. '" onchange="this.form.submit()">
+    <input type="hidden" name="get_categories">
+    </form><br><br>';
 
     echo '<table border="1px solid black" width="200">';
     echo '<tr><td colspan="2" align="center" style="padding:5px">' .date('D, M d Y', strtotime($date)). '</td></tr>';
@@ -97,7 +98,8 @@ function print_preview($date = null) {
         $date = date('Y-m-d');
     }
 
-    $sql = "SELECT Category.name as category_name, Item.name as item_name, IFNULL(unit, '-') as unit, IFNULL(amount, '-') as amount FROM Category
+    $sql = "SELECT Category.name as category_name, Item.name as item_name, IFNULL(unit, '-') as unit, IFNULL(amount, '-') as amount, Inv.notes as notes 
+        FROM Category
         INNER JOIN Item ON Item.category_id = Category.id
         LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='" .$date. "') AS Inv ON Inv.item_id = Item.id
         ORDER BY Category.name, Item.name";
@@ -108,21 +110,23 @@ function print_preview($date = null) {
     }
 
     $current_category = null;
-    echo '<table border="2px solid black" width="600" align="center">';
-    echo '<tr><td colspan="3" align="center">' .date('D, M d Y', strtotime($date)). '</td></tr>';
+    echo '<table border="2px solid black" width="800" align="center">';
+    echo '<tr><td colspan="4" align="center">' .date('D, M d Y', strtotime($date)). '</td></tr>';
     while ($row = $result->fetch_assoc()) {
         if ($row['category_name'] != $current_category) {
             $current_category = $row['category_name'];
-            echo '<th colspan="3" style="padding:10px;margin:100">' .$current_category. '</th>
+            echo '<th colspan="4" style="padding:10px;margin:100">' .$current_category. '</th>
                   <tr><td align="center"><b>Item<b></td>
                   <td align="center"><b>Unit<b></td>
-                  <td align="center"><b>Amount<b></td></tr>';
+                  <td align="center"><b>Amount<b></td>
+                  <td align="center"><b>Notes<b></td></tr>';
         }
 
         echo '<tr>
         <td align="center">' .$row['item_name']. '</td>
         <td align="center">' .$row['unit']. '</td>
         <td align="center">' .$row['amount']. '</td>
+        <td align="center">' .$row['notes']. '</td>
         </tr>';
     }
     echo "</table>";
