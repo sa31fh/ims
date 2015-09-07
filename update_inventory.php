@@ -6,7 +6,7 @@ function get_inventory($category_id, $date) {
     global $conn;
     connect_to_db();
 
-    $sql = 'SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.amount, "-") AS amount, T1.notes AS notes FROM
+    $sql = 'SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, "-") AS quantity, T1.notes AS notes FROM
             (SELECT * from Inventory
             WHERE Inventory.date = "' .$date. '") AS T1
             RIGHT JOIN
@@ -35,7 +35,7 @@ function get_inventory($category_id, $date) {
     echo '<table border="1px solid black">';
     echo '<th>Item</th>
           <th>Unit</th>
-          <th>Amount</th>
+          <th>Quantity Present</th>
           <th>Notes</th>';
 
     $i = 0;
@@ -46,7 +46,7 @@ function get_inventory($category_id, $date) {
         $inventory_items[$i] = $row["id"];
         echo '<tr><td>' . $row["name"]. '</td>
                   <td>' . $row["unit"]. '</td>
-                  <td><input id="inp" type="number" min="0" value="' .$row["amount"]. '" name="values[]" onchange="this.form.submit()"></td>
+                  <td><input id="inp" type="number" min="0" value="' .$row["quantity"]. '" name="values[]" onchange="this.form.submit()"></td>
                   <td><input type="text" min="0" value="' .$row["notes"]. '" name="notes[]" onchange="this.form.submit()"></td></tr>';
         ++$i;
     }
@@ -67,10 +67,10 @@ function update_inventory($category_id, $date, $items, $values, $notes) {
             continue;
         }
 
-        $sql = 'INSERT INTO Inventory (`date`, `item_id`, `amount`, `notes`)
+        $sql = 'INSERT INTO Inventory (`date`, `item_id`, `quantity`, `notes`)
                 VALUES ("' .$date. '", ' .$items[$i]. ', ' .$values[$i]. ', "' .$notes[$i]. '")
                 ON DUPLICATE KEY UPDATE 
-                date=VALUES(date), item_id = VALUES(item_id), amount = VALUES(amount), notes = VALUES(notes)';
+                date=VALUES(date), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)';
 
         $result = $conn->query($sql); 
         if ($result == False) {

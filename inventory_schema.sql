@@ -18,6 +18,22 @@ USE `inventory_system`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `BaseQuantity`
+--
+
+DROP TABLE IF EXISTS `BaseQuantity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `BaseQuantity` (
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  PRIMARY KEY (`item_id`),
+  UNIQUE KEY `item_id_UNIQUE` (`item_id`),
+  CONSTRAINT `fk_BaseQuantity_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `Category`
 --
 
@@ -30,7 +46,7 @@ CREATE TABLE `Category` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +59,7 @@ DROP TABLE IF EXISTS `Inventory`;
 CREATE TABLE `Inventory` (
   `date` date NOT NULL,
   `item_id` int(11) NOT NULL,
-  `amount` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
   `notes` text,
   PRIMARY KEY (`date`,`item_id`),
   KEY `fk_Inventory_1_idx` (`item_id`),
@@ -104,6 +120,20 @@ CREATE TABLE `UserRole` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `Variables`
+--
+
+DROP TABLE IF EXISTS `Variables`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Variables` (
+  `name` varchar(45) NOT NULL,
+  `value` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping routines for database 'inventory_system'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -116,4 +146,4 @@ CREATE TABLE `UserRole` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-09-05 18:59:06
+-- Dump completed on 2015-09-06 20:46:25

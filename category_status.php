@@ -74,6 +74,11 @@ function get_categories($date = null) {
     }
     echo "</table>";
 
+    echo '<br><form action="category_status.php" method="post" style="display:inline">
+    <p style="display:inline"><b>Expected Sales ($):</b></p>
+    <input type="hidden" name="date" value="' .$date. '">
+    <input type="number" name="expected_sales" value="' .get_expected_sales(). '" onchange="this.form.submit()"></form><br/>';
+
     echo '<br><form action="category_status.php" method="post" target="_blank" style="display:inline">
     <input type="hidden" name="date" value="' .$date. '">
     <input type="submit" name="print_preview" value="Print Preview"></form><br>';
@@ -91,6 +96,16 @@ function get_categories($date = null) {
 }
 
 
+function get_estimated_quantity($factor, $item_name) {
+    if ($factor == null) {
+        $factor = get_expected_sales() / get_base_sales();
+    }
+
+    $quantity = (int) $quantity;
+    return round(get_base_quantity($item_name) * $factor, 2);
+}
+
+
 function print_preview($date = null) {
     global $conn;
     connect_to_db();
@@ -99,7 +114,9 @@ function print_preview($date = null) {
         $date = date('Y-m-d');
     }
 
-    $sql = "SELECT Category.name as category_name, Item.name as item_name, IFNULL(unit, '-') as unit, IFNULL(amount, '-') as amount, Inv.notes as notes 
+    $sales_factor = get_expected_sales() / get_base_sales();
+
+    $sql = "SELECT Category.name as category_name, Item.name as item_name, IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes 
         FROM Category
         INNER JOIN Item ON Item.category_id = Category.id
         LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='" .$date. "') AS Inv ON Inv.item_id = Item.id
@@ -112,21 +129,23 @@ function print_preview($date = null) {
 
     $current_category = null;
     echo '<table border="2px solid black" width="800" align="center">';
-    echo '<tr><td colspan="4" align="center">' .date('D, M d Y', strtotime($date)). '</td></tr>';
+    echo '<tr><td colspan="5" align="center">' .date('D, M d Y', strtotime($date)). '</td></tr>';
     while ($row = $result->fetch_assoc()) {
         if ($row['category_name'] != $current_category) {
             $current_category = $row['category_name'];
-            echo '<th colspan="4" style="padding:10px;margin:100">' .$current_category. '</th>
+            echo '<th colspan="5" style="padding:10px;margin:100">' .$current_category. '</th>
                   <tr><td align="center"><b>Item<b></td>
                   <td align="center"><b>Unit<b></td>
-                  <td align="center"><b>Amount<b></td>
+                  <td align="center"><b>Quantity Present<b></td>
+                  <td align="center"><b>Quantity Required<b></td>
                   <td align="center"><b>Notes<b></td></tr>';
         }
 
         echo '<tr>
         <td align="center">' .$row['item_name']. '</td>
         <td align="center">' .$row['unit']. '</td>
-        <td align="center">' .$row['amount']. '</td>
+        <td align="center">' .$row['quantity']. '</td>
+        <td align="center">' .(is_numeric($row['quantity']) ? get_estimated_quantity($sales_factor, $row['item_name']) - (int)$row['quantity'] : "-"). '</td>
         <td align="center">' .$row['notes']. '</td>
         </tr>';
     }
@@ -138,6 +157,9 @@ if (isset($_POST['get_categories'])) {
     get_categories($_POST['date']);
 } else if (isset($_POST['print_preview'])) {
     print_preview($_POST['date']);
+} else if (isset($_POST['expected_sales'])) {
+    update_expected_sales($_POST['expected_sales']);
+    get_categories($_POST['date']);
 }
 
 ?>

@@ -2,38 +2,6 @@
 include_once 'sql_common.php';
 
 
-function add_new_item($item_name, $item_unit) {
-    global $conn;
-    connect_to_db();
-
-    if ($item_name != null) {
-        $sql = 'INSERT INTO Item (name, unit) 
-                VALUES("' .$item_name. '", "' .$item_unit. '") 
-                ON DUPLICATE KEY UPDATE name = VALUES(name), unit = VALUES(unit)';
-        $result = $conn->query($sql); 
-        if ($result == False) {
-            echo "<br> Query failed <br>";
-        }
-    }
-}
-
-
-function update_item_details($original_name, $new_name, $new_unit) {
-    global $conn;
-    connect_to_db();
-
-    $sql = 'UPDATE Item 
-            SET name="' .$new_name. '", 
-                unit="' .$new_unit. '"
-            WHERE name="' .$original_name. '"';
-
-    $result = $conn->query($sql);
-    if ($result == False) {
-        echo '<br>Query Failed<br>';
-    }
-}
-
-
 function display_items() {
     global $conn;
     connect_to_db();
@@ -50,7 +18,9 @@ function display_items() {
     <input type="submit" value="Submit">
     </form>';
 
-    $sql = 'SELECT name, unit FROM Item ORDER BY name ASC';
+    $sql = 'SELECT name, unit, quantity FROM Item 
+            LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
+            ORDER BY name ASC';
     
     $result = $conn->query($sql);
     if ($result == False) {
@@ -65,12 +35,17 @@ function display_items() {
 
     echo '<table border="1px solid black">';
     echo '<th>Item</th>
-          <th>Unit</th>';
+          <th>Unit</th>
+          <th>Quantity for sales ($)<br>
+              <form action="edit_items.php" method="post" style="display:inline">
+              <input type="number" value="' .get_base_sales(). '" name="base_sales" onchange="this.form.submit()" required>
+          </form></th>';
 
     while ($row = $result->fetch_assoc()) {
         echo '<form action="edit_items.php" method="post">';
         echo '<tr><td><input type="text" value="' .$row['name']. '" name="item_name" onchange="this.form.submit()" required></td>
-                  <td><input type="text" value="' .$row['unit']. '" name="item_unit" onchange="this.form.submit()" required></td></tr>';
+                  <td><input type="text" value="' .$row['unit']. '" name="item_unit" onchange="this.form.submit()" required></td>
+                  <td><input type="number" value="' .$row['quantity']. '" name="base_quantity" onchange="this.form.submit()" required></td></tr>';
         echo '<input type="hidden" name="original_item_name" value="' .$row['name']. '"></form>';
     }
 
@@ -82,6 +57,10 @@ if(strcmp($_POST['func_name'], 'add_new_item') == 0) {
     add_new_item($_POST['item_name'], $_POST['item_unit']);
 } else if(array_key_exists('original_item_name', $_POST)) {
     update_item_details($_POST['original_item_name'], $_POST['item_name'], $_POST['item_unit']);
-} 
+    update_base_quantity($_POST['original_item_name'], $_POST['base_quantity']);
+} else if(array_key_exists('base_sales', $_POST)) {
+    update_base_sales($_POST['base_sales']);
+}
+
 display_items();
 ?>
