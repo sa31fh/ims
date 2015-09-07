@@ -21,6 +21,24 @@ function connect_to_db() {
 }
 
 
+function update_password($username, $new_password) {
+    global $conn;
+    connect_to_db();
+
+    $sql = 'UPDATE User
+            SET password_hash="' .password_hash($new_password, PASSWORD_DEFAULT). '" 
+            WHERE username="' .$username. '"';
+
+    $result = $conn->query($sql);
+    if ($result == False) {
+        echo '<br> Query failed <br>';
+        return False;
+    }
+
+    return True;
+}
+
+
 function add_new_item($item_name, $item_unit) {
     global $conn;
     connect_to_db();

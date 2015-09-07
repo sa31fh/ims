@@ -92,7 +92,9 @@ function get_categories($date = null) {
     echo '<br><br><br><form action="login.php" method="post">
     <input type="hidden" name="func_name" value="logout">
     <b>' .$_SESSION['username']. '</b>
-    <input type="submit" value="Logout"> </form><br>';
+    <input type="submit" value="Logout"> </form>';
+
+    echo '<a href="change_password.php" style="font-size:80%">Change Password</a>';
 }
 
 
