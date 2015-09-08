@@ -86,7 +86,8 @@ function get_categories($date = null) {
     if (strcmp($_SESSION['userrole'], 'admin') == 0) {
         echo '<br><br><b>Admin Tasks</b><br>
             <a href="edit_categories.php?func_name=edit_categories">Manage Categories</a><br>
-            <a href="edit_items.php?func_name=display_items">Manage Items</a><br>';
+            <a href="edit_items.php?func_name=display_items">Manage Items</a><br>
+            <a href="manage_users.php">Manage Users</a><br>';
     }
 
     echo '<br><br><br><form action="login.php" method="post">

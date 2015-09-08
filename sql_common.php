@@ -21,13 +21,94 @@ function connect_to_db() {
 }
 
 
-function update_password($username, $new_password) {
+function add_new_user($username, $password, $userrole) {
+    global $conn;
+    connect_to_db();
+
+    if ($username == null) {
+        echo 'Error: Username cannot be null!';
+        return False;
+    }
+
+    $sql = 'SELECT * FROM User  
+            WHERE  name = "' .$username. '"';
+
+    $result = $conn->query($sql);
+    if ($result != False) {
+        echo '<br>Error: Username already exists!<br>';
+        return False;
+    }
+
+    $sql = 'INSERT INTO User (username, password_hash, userrole_id) 
+            VALUES("' .$username. '","' .password_hash($password, PASSWORD_DEFAULT). '", 
+                    (SELECT id FROM UserRole WHERE role="' .$userrole. '"))';
+
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+        return False;
+    }
+
+    return True;
+}
+
+
+function delete_user($username) {
+    global $conn;
+    connect_to_db();
+
+    if ($username == null) {
+        echo 'Error: Username cannot be null!';
+        return False;
+    }
+
+    $sql = 'SELECT * FROM User  
+            WHERE username = "' .$username. '"';
+
+    $result = $conn->query($sql);
+    if ($result == false) {
+        echo '<br>Error: Username does not exists!<br>';
+        return False;
+    }
+
+    $sql = "DELETE FROM User WHERE username='$username'";
+
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Delete Query failed <br>";
+        return False;
+    }
+
+    return True;
+}
+
+
+
+function update_user_password($username, $new_password) {
     global $conn;
     connect_to_db();
 
     $sql = 'UPDATE User
             SET password_hash="' .password_hash($new_password, PASSWORD_DEFAULT). '" 
             WHERE username="' .$username. '"';
+
+    $result = $conn->query($sql);
+    if ($result == False) {
+        echo '<br> Query failed <br>';
+        return False;
+    }
+
+    return True;
+}
+
+
+function update_user_role($username, $role) {
+    global $conn;
+    connect_to_db();
+
+    $sql = "UPDATE User 
+            SET userrole_id= (SELECT id FROM UserRole WHERE role='$role') 
+            WHERE username='$username'";
 
     $result = $conn->query($sql);
     if ($result == False) {

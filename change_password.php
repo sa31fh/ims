@@ -80,7 +80,7 @@ function verify_password($username, $password) {
 
 if (isset($_POST['new_password'])) {
     if (verify_password($_SESSION['username'], $_POST['current_password'])) {
-        if (update_password($_SESSION['username'], $_POST['new_password'])) {
+        if (update_user_password($_SESSION['username'], $_POST['new_password'])) {
             echo 'Password update successful!<br>';
         } else {
             echo 'Password update failed!<br>';
