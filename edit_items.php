@@ -45,7 +45,7 @@ function display_items() {
         echo '<form action="edit_items.php" method="post">';
         echo '<tr><td><input type="text" value="' .$row['name']. '" name="item_name" onchange="this.form.submit()" required></td>
                   <td><input type="text" value="' .$row['unit']. '" name="item_unit" onchange="this.form.submit()" required></td>
-                  <td><input type="number" value="' .$row['quantity']. '" name="base_quantity" onchange="this.form.submit()" required></td></tr>';
+                  <td><input type="number" step="0.01" value="' .$row['quantity']. '" name="base_quantity" onchange="this.form.submit()" required></td></tr>';
         echo '<input type="hidden" name="original_item_name" value="' .$row['name']. '"></form>';
     }
 

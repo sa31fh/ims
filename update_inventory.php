@@ -46,7 +46,7 @@ function get_inventory($category_id, $date) {
         $inventory_items[$i] = $row["id"];
         echo '<tr><td>' . $row["name"]. '</td>
                   <td>' . $row["unit"]. '</td>
-                  <td><input id="inp" type="number" min="0" value="' .$row["quantity"]. '" name="values[]" onchange="this.form.submit()"></td>
+                  <td><input id="inp" type="number" step="0.01" min="0" value="' .$row["quantity"]. '" name="values[]" onchange="this.form.submit()"></td>
                   <td><input type="text" min="0" value="' .$row["notes"]. '" name="notes[]" onchange="this.form.submit()"></td></tr>';
         ++$i;
     }

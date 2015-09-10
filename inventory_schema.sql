@@ -26,7 +26,7 @@ DROP TABLE IF EXISTS `BaseQuantity`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `BaseQuantity` (
   `item_id` int(11) NOT NULL,
-  `quantity` int(11) DEFAULT NULL,
+  `quantity` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`item_id`),
   UNIQUE KEY `item_id_UNIQUE` (`item_id`),
   CONSTRAINT `fk_BaseQuantity_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -46,7 +46,7 @@ CREATE TABLE `Category` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -59,7 +59,7 @@ DROP TABLE IF EXISTS `Inventory`;
 CREATE TABLE `Inventory` (
   `date` date NOT NULL,
   `item_id` int(11) NOT NULL,
-  `quantity` int(11) DEFAULT NULL,
+  `quantity` decimal(11,2) DEFAULT NULL,
   `notes` text,
   PRIMARY KEY (`date`,`item_id`),
   KEY `fk_Inventory_1_idx` (`item_id`),
@@ -83,7 +83,7 @@ CREATE TABLE `Item` (
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `fk_Item_1_idx` (`category_id`),
   CONSTRAINT `fk_Item_1` FOREIGN KEY (`category_id`) REFERENCES `Category` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,4 +146,4 @@ CREATE TABLE `Variables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-09-08 17:56:55
+-- Dump completed on 2015-09-09 20:20:31
