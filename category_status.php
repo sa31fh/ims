@@ -45,15 +45,16 @@ function get_categories($date = null) {
     global $conn;
     connect_to_db();
 
-    $sql = "SELECT * FROM Category ORDER BY id ASC";
+    if ($date == null) {
+        $date = date('Y-m-d');
+    }
+
+    $sql = "SELECT * FROM Category WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' OR deletion_date IS NULL) ORDER BY id ASC";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
     }
 
-    if ($date == null) {
-        $date = date('Y-m-d');
-    }
 
     echo '<br><form action="category_status.php" method="post" style="display:inline">
     <input type="date" name="date" value="' .$date. '" onchange="this.form.submit()">

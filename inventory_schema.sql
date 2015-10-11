@@ -43,10 +43,11 @@ DROP TABLE IF EXISTS `Category`;
 CREATE TABLE `Category` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
+  `creation_date` date NOT NULL,
+  `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,6 +80,8 @@ CREATE TABLE `Item` (
   `category_id` int(10) unsigned DEFAULT NULL,
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) NOT NULL,
+  `creation_date` date DEFAULT NULL,
+  `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `fk_Item_1_idx` (`category_id`),
@@ -146,4 +149,4 @@ CREATE TABLE `Variables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-09-09 20:20:31
+-- Dump completed on 2015-10-10 21:41:01

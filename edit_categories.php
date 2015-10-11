@@ -7,11 +7,27 @@ function add_category($category_name) {
     global $conn;
     connect_to_db();
 
-    $sql = 'INSERT INTO inventory_system.Category (name) VALUES ("' .$category_name. '")';
+    $sql = 'SELECT * FROM inventory_system.Category WHERE name = "'.$category_name.'" AND deletion_date IS NULL';
+    $result = $conn->query($sql);
 
-    $result = $conn->query($sql); 
-    if ($result == False) {
-        echo "<br> Query failed <br>";
+    if ($result->num_rows == 0) {
+        $date = date('Y-m-d');
+        $sql = "SELECT * FROM inventory_system.Category WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
+
+        $result = $conn->query($sql); 
+        if ($result->num_rows == 0) {
+            $sql = "INSERT INTO inventory_system.Category (name, creation_date) VALUES ('{$category_name}', '{$date}')";
+        } else {
+            $sql = "UPDATE Category SET deletion_date = NULL WHERE name = '{$category_name}' and creation_date = '{$date}'";
+        }
+
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+            echo $sql;
+        }
+    } else {
+        echo "Category already exists! <br/>";
     }
 
     edit_categories();
@@ -22,7 +38,7 @@ function remove_category($category_name) {
     global $conn;
     connect_to_db();
 
-    $sql = 'DELETE FROM inventory_system.Category WHERE name="' .$category_name. '"';
+    $sql = 'UPDATE Category SET deletion_date = "'.date('Y-m-d').'" WHERE name = "' .$category_name. '" and deletion_date IS NULL';
 
     $result = $conn->query($sql); 
     if ($result == False) {
@@ -40,7 +56,7 @@ function update_items_category($category_name, $items) {
     $category_id = null;
 
     if ($category_name != null) {
-        $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '"';
+        $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '" AND deletion_date IS NULL';
 
         $result = $conn->query($sql); 
         if ($result == False) {
@@ -147,7 +163,8 @@ function edit_categories() {
           <input type="submit" name="edit_categories_button" value="Remove"><br>
           </form>';
 
-    $sql = "SELECT * FROM Category ORDER BY id ASC";
+    $sql = "SELECT * FROM Category WHERE creation_date <='" .date('Y-m-d'). "' AND (deletion_date > '" .date('Y-m-d'). "' OR deletion_date IS NULL) ORDER BY id ASC";
+
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
