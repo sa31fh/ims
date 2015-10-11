@@ -7,18 +7,22 @@ function add_category($category_name) {
     global $conn;
     connect_to_db();
 
-    $sql = 'SELECT * FROM inventory_system.Category WHERE name = "'.$category_name.'" AND deletion_date IS NULL';
+    $sql = 'SELECT * FROM inventory_system.Category 
+            WHERE name = "'.$category_name.'" AND deletion_date IS NULL';
     $result = $conn->query($sql);
 
     if ($result->num_rows == 0) {
         $date = date('Y-m-d');
-        $sql = "SELECT * FROM inventory_system.Category WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
+        $sql = "SELECT * FROM inventory_system.Category 
+                WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
 
         $result = $conn->query($sql); 
         if ($result->num_rows == 0) {
-            $sql = "INSERT INTO inventory_system.Category (name, creation_date) VALUES ('{$category_name}', '{$date}')";
+            $sql = "INSERT INTO inventory_system.Category (name, creation_date) 
+                    VALUES ('{$category_name}', '{$date}')";
         } else {
-            $sql = "UPDATE Category SET deletion_date = NULL WHERE name = '{$category_name}' and creation_date = '{$date}'";
+            $sql = "UPDATE Category SET deletion_date = NULL 
+                    WHERE name = '{$category_name}' and deletion_date = '{$date}'";
         }
 
         $result = $conn->query($sql); 
@@ -38,7 +42,8 @@ function remove_category($category_name) {
     global $conn;
     connect_to_db();
 
-    $sql = 'UPDATE Category SET deletion_date = "'.date('Y-m-d').'" WHERE name = "' .$category_name. '" and deletion_date IS NULL';
+    $sql = 'UPDATE Category SET deletion_date = "'.date('Y-m-d').'" 
+            WHERE name = "' .$category_name. '" and deletion_date IS NULL';
 
     $result = $conn->query($sql); 
     if ($result == False) {
@@ -105,7 +110,9 @@ function get_items($category_name) {
     </head>';
 
 
-    $sql = 'SELECT Item.name FROM Item INNER JOIN Category ON Item.category_id = Category.id WHERE Category.name = "' .$category_name. '"';
+    $sql = "SELECT Item.name FROM Item 
+            INNER JOIN Category ON Item.category_id = Category.id 
+            WHERE Category.name = '{$category_name}' AND Item.deletion_date IS NULL";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
@@ -117,7 +124,7 @@ function get_items($category_name) {
     }
 
 
-    $sql = 'SELECT * FROM Item WHERE Item.category_id IS NULL';
+    $sql = 'SELECT * FROM Item WHERE Item.category_id IS NULL AND deletion_date IS NULL';
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";

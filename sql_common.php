@@ -124,13 +124,53 @@ function add_new_item($item_name, $item_unit) {
     global $conn;
     connect_to_db();
 
+    $date = date('Y-m-d');
+
+    if ($item_name == null) {
+        return;
+    }
+
+    $sql = "SELECT * FROM Item
+            WHERE name = '{$item_name}' AND deletion_date IS NULL";
+
+    $result = $conn->query($sql);
+    if ($result->num_rows == 0) {
+        $sql = "SELECT * FROM Item 
+                WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
+        $result = $conn->query($sql);
+        if ($result->num_rows == 0) {
+            $sql = "INSERT INTO Item (name, unit, creation_date) 
+                    VALUES('{$item_name}', '{$item_unit}', '{$date}')";
+        } else {
+            $sql = "UPDATE Item 
+                    SET deletion_date = null, unit = '{$item_unit}' 
+                    WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
+        }
+    } else {
+        echo "Item already exists! <br/>";
+    }
+
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+}
+
+
+function delete_item($item_name) {
+    global $conn;
+    connect_to_db();
+
+    $date = date('Y-m-d');
+
     if ($item_name != null) {
-        $sql = 'INSERT INTO Item (name, unit) 
-                VALUES("' .$item_name. '", "' .$item_unit. '") 
-                ON DUPLICATE KEY UPDATE name = VALUES(name), unit = VALUES(unit)';
+        $sql = "UPDATE Item 
+                SET deletion_date = '{$date}' 
+                WHERE name = '{$item_name}'";
         $result = $conn->query($sql); 
         if ($result == False) {
             echo "<br> Query failed <br>";
+            echo $sql;
         }
     }
 }

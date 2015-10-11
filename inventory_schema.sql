@@ -80,13 +80,12 @@ CREATE TABLE `Item` (
   `category_id` int(10) unsigned DEFAULT NULL,
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) NOT NULL,
-  `creation_date` date DEFAULT NULL,
+  `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `fk_Item_1_idx` (`category_id`),
   CONSTRAINT `fk_Item_1` FOREIGN KEY (`category_id`) REFERENCES `Category` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,4 +148,4 @@ CREATE TABLE `Variables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-10-10 21:41:01
+-- Dump completed on 2015-10-11 15:25:24
