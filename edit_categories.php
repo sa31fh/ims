@@ -7,8 +7,8 @@ function add_category($category_name) {
     global $conn;
     connect_to_db();
 
-    $sql = 'SELECT * FROM inventory_system.Category 
-            WHERE name = "'.$category_name.'" AND deletion_date IS NULL';
+    $sql = "SELECT * FROM inventory_system.Category 
+            WHERE name = '{$category_name}' AND deletion_date IS NULL";
     $result = $conn->query($sql);
 
     if ($result->num_rows == 0) {
@@ -61,7 +61,8 @@ function update_items_category($category_name, $items) {
     $category_id = null;
 
     if ($category_name != null) {
-        $sql = 'SELECT Category.id FROM Category WHERE Category.name = "' .$category_name. '" AND deletion_date IS NULL';
+        $sql = 'SELECT Category.id FROM Category 
+                WHERE Category.name = "' .$category_name. '" AND deletion_date IS NULL';
 
         $result = $conn->query($sql); 
         if ($result == False) {
@@ -131,7 +132,7 @@ function get_items($category_name) {
     }
 
     echo '<form action="edit_categories.php" method="post">';
-    echo '<select id="uncategorized_list" multiple="multiple" rows=2 name="categorize_item[]">';
+    echo '<select id="uncategorized_list" multiple="multiple" size=8 name="categorize_item[]">';
     while ($row = $result->fetch_assoc()) {
         echo '<option value="' .$row["name"]. '">' .$row["name"]. ' (' .$row["unit"]. ') </option>';
     }
@@ -145,7 +146,7 @@ function get_items($category_name) {
     if ($result == False) {
         echo "<br> Query failed <br>";
     }
-    echo '<select id="categorized_list" multiple="multiple" rows=2 name="uncategorize_item[]">';
+    echo '<select id="categorized_list" multiple="multiple" size=8 name="uncategorize_item[]">';
     while ($row = $result->fetch_assoc()) {
         if (in_array($row["name"], $category_items)) {
             echo '<option value="' .$row["name"]. '">' .$row["name"]. ' (' .$row["unit"]. ') </option>';
@@ -170,7 +171,10 @@ function edit_categories() {
           <input type="submit" name="edit_categories_button" value="Remove"><br>
           </form>';
 
-    $sql = "SELECT * FROM Category WHERE creation_date <='" .date('Y-m-d'). "' AND (deletion_date > '" .date('Y-m-d'). "' OR deletion_date IS NULL) ORDER BY id ASC";
+    $sql = "SELECT * FROM Category 
+            WHERE creation_date <='" .date('Y-m-d'). "' 
+                AND (deletion_date > '" .date('Y-m-d'). "' OR deletion_date IS NULL) 
+            ORDER BY name ASC";
 
     $result = $conn->query($sql); 
     if ($result == False) {
@@ -185,13 +189,13 @@ function edit_categories() {
     </script>';
 
     echo '<form name="change">';
-    echo '<select name="options" size="4" onchange=categorySelect(this)>';
+    echo '<select name="options" size="10" onchange=categorySelect(this)>';
     while ($row = $result->fetch_assoc()) {
         echo '<option value="edit_categories.php?func_name=get_items&name=' .$row["name"]. '"> ' .$row["name"];
     }
     echo '</select><br><br>';
     echo '</form>';
-    echo '<iframe name="iframe" id="items_frame" width="50%" height="50%" style="border:none" src=""></iframe>';
+    echo '<iframe name="iframe" id="items_frame" width="100%" height="50%" style="border:none" src=""></iframe>';
 }
 
 
