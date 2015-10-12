@@ -131,12 +131,13 @@ function get_items($category_name) {
         echo "<br> Query failed <br>";
     }
 
-    echo '<form action="edit_categories.php" method="post">';
+    echo '<table style="display:inline"><th>Uncategorized</th><tr><td>';
+    echo '<form action="edit_categories.php" method="post" style="display:inline">';
     echo '<select id="uncategorized_list" multiple="multiple" size=8 name="categorize_item[]">';
     while ($row = $result->fetch_assoc()) {
         echo '<option value="' .$row["name"]. '">' .$row["name"]. ' (' .$row["unit"]. ') </option>';
     }
-    echo '</select>';
+    echo '</select></td></tr></table>';
 
     echo '<input id="uncategorize_button" type="button" value="<-" onclick="this.form.submit()"/>
           <input id="categorize_button" type="button" value="->" onclick="this.form.submit()"/>';
@@ -146,13 +147,15 @@ function get_items($category_name) {
     if ($result == False) {
         echo "<br> Query failed <br>";
     }
+
+    echo '<table style="display:inline"><th>Categorized</th><tr><td>';
     echo '<select id="categorized_list" multiple="multiple" size=8 name="uncategorize_item[]">';
     while ($row = $result->fetch_assoc()) {
         if (in_array($row["name"], $category_items)) {
             echo '<option value="' .$row["name"]. '">' .$row["name"]. ' (' .$row["unit"]. ') </option>';
         }
     }
-    echo '</select>';
+    echo '</select></td></tr></table>';
 
     echo '<input type="hidden" name="func_name" value="update_items">';
     echo '<input type="hidden" name="category_name" value="' .$category_name. '">';
