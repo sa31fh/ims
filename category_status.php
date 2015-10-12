@@ -12,7 +12,8 @@ function get_total_items($category_id) {
     $sql = "SELECT COUNT(Item.name) AS num
             from Category INNER JOIN Item 
             ON Category.id = Item.category_id
-            WHERE Category.id = " . $category_id;
+            WHERE Category.id = {$category_id} AND Category.deletion_date IS NULL 
+                AND Item.deletion_date IS NULL";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
@@ -27,10 +28,11 @@ function get_updated_items_count($category_id, $date) {
     global $conn;
     connect_to_db();
 
-    $sql = 'SELECT COUNT(Item.name) as num
+    $sql = "SELECT COUNT(Item.name) as num
             from Category INNER JOIN Item ON Category.id = Item.category_id 
             LEFT JOIN Inventory ON Item.id = Inventory.item_id 
-            WHERE Category.id = ' .$category_id. ' and Inventory.date = "' .$date. '"';
+            WHERE Category.id = {$category_id} AND Inventory.date = '{$date}' 
+                AND Category.deletion_date IS NULL AND Item.deletion_date IS NULL";
 
     $result = $conn->query($sql); 
     if ($result == False) {
@@ -49,7 +51,9 @@ function get_categories($date = null) {
         $date = date('Y-m-d');
     }
 
-    $sql = "SELECT * FROM Category WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' OR deletion_date IS NULL) ORDER BY id ASC";
+    $sql = "SELECT * FROM Category 
+            WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' 
+                OR deletion_date IS NULL) ORDER BY name ASC";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
@@ -120,11 +124,13 @@ function print_preview($date = null) {
 
     $sales_factor = get_expected_sales() / get_base_sales();
 
-    $sql = "SELECT Category.name as category_name, Item.name as item_name, IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes 
-        FROM Category
-        INNER JOIN Item ON Item.category_id = Category.id
-        LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='" .$date. "') AS Inv ON Inv.item_id = Item.id
-        ORDER BY Category.name, Item.name";
+    $sql = "SELECT Category.name as category_name, Item.name as item_name, 
+                IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes 
+            FROM Category
+            INNER JOIN Item ON Item.category_id = Category.id
+            LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id 
+            WHERE Category.deletion_date IS NULL AND Item.deletion_date IS NULL 
+            ORDER BY Category.name, Item.name";
 
     $result = $conn->query($sql); 
     if ($result == False) {

@@ -6,13 +6,13 @@ function get_inventory($category_id, $date) {
     global $conn;
     connect_to_db();
 
-    $sql = 'SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, "-") AS quantity, T1.notes AS notes FROM
+    $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, \"-\") AS quantity, T1.notes AS notes FROM
             (SELECT * from Inventory
-            WHERE Inventory.date = "' .$date. '") AS T1
+            WHERE Inventory.date = '{$date}') AS T1
             RIGHT JOIN
             (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit from Item
             INNER JOIN Category ON Item.category_id = Category.id
-            WHERE Category.id = ' .$category_id. ') AS T2  ON T2.item_id = T1.item_id';
+            WHERE Category.id = {$category_id}) AS T2  ON T2.item_id = T1.item_id";
 
     $result = $conn->query($sql); 
     if ($result == False) {
