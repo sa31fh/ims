@@ -12,7 +12,8 @@ function get_inventory($category_id, $date) {
             RIGHT JOIN
             (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit from Item
             INNER JOIN Category ON Item.category_id = Category.id
-            WHERE Category.id = {$category_id}) AS T2  ON T2.item_id = T1.item_id";
+            WHERE Category.id = {$category_id} AND Category.deletion_date IS NULL 
+                AND Item.deletion_date IS NULL) AS T2 ON T2.item_id = T1.item_id";
 
     $result = $conn->query($sql); 
     if ($result == False) {
