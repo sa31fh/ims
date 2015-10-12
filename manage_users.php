@@ -22,7 +22,7 @@ function display_users() {
 
 
     echo '<form action="manage_users.php" method="post">
-    <b>Add New User</b><br>
+    <b>Add/Edit User</b><br>
     <pre>';
     echo 'Username: <input type="textarea" name="new_username" required><br>';
     echo 'Password: <input type="password" name="password" required></pre>';

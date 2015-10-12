@@ -39,9 +39,10 @@ function add_new_user($username, $password, $userrole) {
         return False;
     }
 
-    $sql = 'INSERT INTO User (username, password_hash, userrole_id) 
-            VALUES("' .$username. '","' .password_hash($password, PASSWORD_DEFAULT). '", 
-                    (SELECT id FROM UserRole WHERE role="' .$userrole. '"))';
+    $sql = "INSERT INTO User (username, password_hash, userrole_id) 
+            VALUES('{$username}', '" .password_hash($password, PASSWORD_DEFAULT). "', 
+                    (SELECT id FROM UserRole WHERE role='{$userrole}')) 
+            ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), userrole_id=VALUES(userrole_id)";
 
     $result = $conn->query($sql); 
     if ($result == False) {
