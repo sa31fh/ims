@@ -42,8 +42,16 @@ function remove_category($category_name) {
     global $conn;
     connect_to_db();
 
-    $sql = 'UPDATE Category SET deletion_date = "'.date('Y-m-d').'" 
-            WHERE name = "' .$category_name. '" and deletion_date IS NULL';
+    $sql = "UPDATE Category SET deletion_date = '" .date('Y-m-d'). "' 
+            WHERE name = '{$category_name}' and deletion_date IS NULL";
+
+    $result = $conn->query($sql); 
+    if ($result == False) {
+        echo "<br> Query failed <br>";
+    }
+
+    $sql = "UPDATE Item SET category_id = NULL  
+            WHERE deletion_date IS NULL AND category_id = (SELECT id FROM Category WHERE name='{$category_name}')";
 
     $result = $conn->query($sql); 
     if ($result == False) {
