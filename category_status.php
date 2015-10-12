@@ -5,15 +5,16 @@ include_once "sql_common.php";
 session_start();
 
 
-function get_total_items($category_id) {
+function get_total_items($category_id, $date) {
     global $conn;
     connect_to_db();
 
     $sql = "SELECT COUNT(Item.name) AS num
             from Category INNER JOIN Item 
             ON Category.id = Item.category_id
-            WHERE Category.id = {$category_id} AND Category.deletion_date IS NULL 
-                AND Item.deletion_date IS NULL";
+            WHERE Category.id = {$category_id} 
+                AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
@@ -32,7 +33,8 @@ function get_updated_items_count($category_id, $date) {
             from Category INNER JOIN Item ON Category.id = Item.category_id 
             LEFT JOIN Inventory ON Item.id = Inventory.item_id 
             WHERE Category.id = {$category_id} AND Inventory.date = '{$date}' 
-                AND Category.deletion_date IS NULL AND Item.deletion_date IS NULL";
+                AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))";
 
     $result = $conn->query($sql); 
     if ($result == False) {
@@ -52,8 +54,8 @@ function get_categories($date = null) {
     }
 
     $sql = "SELECT * FROM Category 
-            WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' 
-                OR deletion_date IS NULL) ORDER BY name ASC";
+            WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' OR deletion_date IS NULL) 
+            ORDER BY name ASC";
     $result = $conn->query($sql); 
     if ($result == False) {
         echo "<br> Query failed <br>";
@@ -75,7 +77,7 @@ function get_categories($date = null) {
             <input type="hidden" name="date" value="' .$date. '">
             <input type="hidden" name="category_id" value="' . $row["id"] . '">
             <input type="submit" value="' . $row["name"]. '"></form></td>
-            <td align="center">' .get_updated_items_count($row['id'], $date). '/' . get_total_items($row['id']) . '</td></tr>';
+            <td align="center">' .get_updated_items_count($row['id'], $date). '/' . get_total_items($row['id'], $date) . '</td></tr>';
     }
     echo "</table>";
 
@@ -129,7 +131,8 @@ function print_preview($date = null) {
             FROM Category
             INNER JOIN Item ON Item.category_id = Category.id
             LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id 
-            WHERE Category.deletion_date IS NULL AND Item.deletion_date IS NULL 
+            WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)) 
             ORDER BY Category.name, Item.name";
 
     $result = $conn->query($sql); 
