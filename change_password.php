@@ -1,9 +1,7 @@
 <?php
-
-include_once 'sql_common.php';
-
 session_start();
 
+include_once 'sql_common.php';
 
 function request_credentials() {
     echo '<a href="index.php">Back</a><br><br>';

@@ -1,9 +1,7 @@
 <?php
-
-include_once "sql_common.php";
-
 session_start();
 
+include_once "sql_common.php";
 
 function get_total_items($category_id, $date) {
     global $conn;

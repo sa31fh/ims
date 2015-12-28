@@ -1,9 +1,8 @@
 <?php
+session_start();
 
 include_once 'sql_common.php';
 include_once "category_status.php";
-
-session_start();
 
 function request_credentials() {
     if (isset($_SESSION['username'])) {
