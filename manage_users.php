@@ -1,7 +1,22 @@
 <?php
-session_start();
+
+if(!isset($_SESSION)){
+session_start();}
 
 include_once 'sql_common.php';
+
+if(!isset($_SESSION["username"])){
+ 
+    echo "NOT LOGGED IN";
+    header("Refresh: 1; login.php");
+    exit();
+    
+   //echo "NOT LOGGED IN";
+   // include_once "login.php";
+
+}
+
+else{
 
 
 function display_users() {
@@ -105,6 +120,6 @@ if (array_key_exists('delete_user', $_POST)) {
     update_user_role($_POST['username'], $_POST['new_userrole']);
 }
 
-display_users();
+display_users();}
 ?>
 
