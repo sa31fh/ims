@@ -11,9 +11,6 @@
     if (isset($_POST["delete_item"])) {
         delete_item($_POST["delete_item"]);
     }
-    if (isset($_POST["item_quantity"])) {
-        update_base_quantity($_POST["item_id"], $_POST["item_quantity"]);
-    }
     if (isset($_POST["item_name"]) OR isset($_POST["item_unit"])) {
         update_item_details($_POST["item_id"], $_POST["item_name"], $_POST["item_unit"]);
     }
@@ -33,7 +30,7 @@
     <?php include_once "new_nav.php" ?>
 
     <div>
-        <table border="1px" >
+        <table id="table" border="1px" >
             <tr>
                 <th>Item</th>
                 <th>Unit</th>
@@ -46,10 +43,10 @@
             <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
                     <form action="edit_items.php" method="post">
-                    <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()"></td>
+                    <td><input type="text" id="item_name" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()"></td>
                     <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()"></td>
-                    <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange="this.form.submit()"></td>
-                    <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
+                    <td><input type="number" id="item_quantity" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this)></td>
+                    <input type="hidden" id="item_id" name="item_id" value="<?php echo $row["id"] ?>">
                     </form>
                 </tr>
             <?php  endwhile ?>
@@ -86,4 +83,17 @@
     </div>
 </body>
 </html>
+
+<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    function quantityChange(obj){
+        var quantity = obj.value;
+        var rowindex = obj.parentNode.parentNode.rowIndex;
+        var item_id = document.getElementById("table").rows[rowindex].children[4].value;
+
+        $(function(){
+            $.post("sql_common.php", {item_id: item_id, quantity: quantity});
+        });
+    }
+</script>
 
