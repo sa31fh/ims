@@ -1,125 +1,88 @@
 <?php
-
-if(!isset($_SESSION)){
-session_start();}
-
-include_once 'sql_common.php';
-
-if(!isset($_SESSION["username"])){
- 
-    echo "NOT LOGGED IN";
-    header("Refresh: 1; login.php");
-    exit();
-    
-   //echo "NOT LOGGED IN";
-   // include_once "login.php";
-
-}
-
-else{
-
-
-function display_users() {
-    global $conn;
-    connect_to_db();
-
-    echo '<br><a href="index.php">Back</a><br><br><br>';
-
-    $userroles = array();
-
-    $sql = 'SELECT role FROM UserRole 
-            ORDER BY role ASC';
-    
-    $result = $conn->query($sql);
-    if ($result == False) {
-        echo '<br>Query Failed<br>';
+    include "sql_common.php";
+    session_start();
+    if (!isset($_SESSION["username"])) {
+        header("Location: login.php");
+        exit();
     }
-
-
-    echo '<form action="manage_users.php" method="post">
-    <b>Add/Edit User</b><br>
-    <pre>';
-    echo 'Username: <input type="textarea" name="new_username" required><br>';
-    echo 'Password: <input type="password" name="password" required></pre>';
-
-    echo '<select name="userrole">';
-    while ($row = $result->fetch_assoc()) {
-        echo '<option value="' .$row['role']. '">' .$row['role']. '</option>';
-        array_push($userroles, $row['role']);
+    if (isset($_POST["new_username"])) {
+        add_new_user($_POST['new_username'], $_POST['new_password'], $_POST['userrole']);
     }
-    echo '</select>';
-
-    echo '
-    <input type="hidden" name="func_name" value="add_new_user">
-    <input type="submit" value="Submit">
-    </form>';
-
-    $sql = 'SELECT username, role FROM User 
-            INNER JOIN UserRole ON User.userrole_id = UserRole.id
-            ORDER BY username ASC';
-    
-    $result = $conn->query($sql);
-    if ($result == False) {
-        echo '<br>Query Failed<br>';
+    if(isset($_POST["delete_user"])){
+        delete_user($_POST["delete_select"]);
     }
-
-    echo '<head><style>
-                td {text-align:center}
-                input {text-align:center}
-          </style></head>';
-
-    echo '<br/><br/><table border="1px solid black" width=300>';
-    echo '<th>Username</th>
-          <th>Role</th>';
-
-    $users = array();
-
-    while ($row = $result->fetch_assoc()) {
-        array_push($users, $row['username']);
-
-        echo '<tr><td>' .$row['username']. '</td>';
-        echo '<td><form action="manage_users.php" method="post" style="display:inline">
-                  <select name="new_userrole"';
-                    if ($row['username'] == $_SESSION['username']) {
-                        echo ' disabled ';
-                    }
-                    echo ' onchange="this.form.submit()">';
-                    foreach ($userroles as $role){
-                        echo '<option value="' .$role. '"';
-                        if ($role == $row['role']) {
-                            echo ' selected ';
-                        }
-
-                        echo '>' .$role. '</option>';
-                    }
-        echo '<input type="hidden" name="username" value="' .$row['username']. '">';
-        echo '</select></form></td>';
-        echo '</tr>';
-    }
-
-    echo '</table>';
-
-    echo '<br><form action="manage_users.php" method="post" style="display:inline">
-          <select name="delete_user">';
-          foreach ($users as $user) {
-                if ($user == $_SESSION['username']) {
-                    continue;
-                }
-                echo '<option value="' .$user. '">' .$user. '</option>';
-          }
-
-    echo '</select> <input type="submit" value="Delete User"></form>';
-}
-
-
-if (array_key_exists('delete_user', $_POST)) {
-    delete_user($_POST['delete_user']);
-} else if (array_key_exists('new_username', $_POST)) {
-    add_new_user($_POST['new_username'], $_POST['password'], $_POST['userrole']);
-} else if (array_key_exists('new_userrole', $_POST)) {
-    update_user_role($_POST['username'], $_POST['new_userrole']);
-}
-
-display_users();}
 ?>
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <?php include_once "new_nav.php" ?>
+
+    <div>
+        <div><h4>Add New User</h4></div>
+        <div class="user_view">
+            <span>UserName</span><br>
+            <span>Password</span><br>
+            <span>UserRole</span>
+        </div>
+        <div class="user_view">
+            <form action="manage_users.php" method="post">
+                <input type="text" name="new_username" required><br/>
+                <input type="password" name="new_password" required><br/>
+                <select name="userrole" class="none">
+                    <?php $result = get_role(); ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <option   value="<?php echo $row["role"]?>" > <?php echo $row["role"] ?> </option>
+                    <?php endwhile ?>
+                </select>
+                <input type="submit" value="Add" class="button">
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <div><h4>User List</h4></div>
+        <table border="1px">
+            <tr>
+                <th>User</th>
+                <th>Role</th>
+            </tr>
+            <?php $result2 = get_users(); ?>
+            <?php while ($userdata = $result2->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo $userdata["username"]; ?> </td>
+                    <td>
+                        <select name="" id=""class="none">
+                            <?php $result = get_role(); ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                                <option value="<?php $row["role"]?>" > <?php echo $row["role"] ?> </option>
+                            <?php endwhile ?>
+                        </select>
+                    </td>
+                </tr>
+            <?php endwhile ?>
+        </table>
+    </div>
+
+    <div>
+        <div><h4>Delete User</h4></div>
+        <form action="manage_users.php" method="post">
+            <select name="delete_select" class="none">
+                <?php $result = get_users(); ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <option value="<?php echo $row["username"] ?>" > <?php echo $row["username"] ?> </option>
+                <?php endwhile ?>
+            </select>
+            <input type="submit" name="delete_user" value ="Delete" class="button">
+        </form>
+    </div>
+
+</body>
+</html>
 

@@ -1,79 +1,89 @@
 <?php
-include_once 'sql_common.php';
-
-
-function display_items() {
-    global $conn;
-    connect_to_db();
-
-    echo '<a href="index.php">Back</a><br><br><br/>';
-
-    $sql = 'SELECT name, unit, quantity FROM Item 
-            LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
-            WHERE Item.deletion_date IS NULL 
-            ORDER BY name ASC';
-    
-    $result = $conn->query($sql);
-    if ($result == False) {
-        echo '<br>Query Failed<br>';
+    include "sql_common.php";
+    session_start(); 
+    if (!isset($_SESSION["username"])) {
+        header("Location: login.php");
+        exit();
     }
-
-    echo '<head><style>
-                td {text-align:center}
-                input {text-align:center}
-          </style></head>';
-
-
-    echo '<table border="1px solid black">';
-    echo '<th>Item</th>
-          <th>Unit</th>
-          <th>Quantity for sales ($)<br>
-              <form action="edit_items.php" method="post" style="display:inline">
-              <input type="number" value="' .get_base_sales(). '" name="base_sales" onchange="this.form.submit()" required>
-          </form></th>';
-
-    $item_names = array();
-
-    while ($row = $result->fetch_assoc()) {
-        array_push($item_names, $row['name']);
-        echo '<form action="edit_items.php" method="post">';
-        echo '<tr><td><input type="text" value="' .$row['name']. '" name="item_name" onchange="this.form.submit()" required></td>
-                  <td><input type="text" value="' .$row['unit']. '" name="item_unit" onchange="this.form.submit()" required></td>
-                  <td><input type="number" step="0.01" value="' .$row['quantity']. '" name="base_quantity" onchange="this.form.submit()" required></td></tr>';
-        echo '<input type="hidden" name="original_item_name" value="' .$row['name']. '"></form>';
+    if (isset($_POST["new_item_name"])) {
+        add_new_item($_POST["new_item_name"], $_POST["new_item_unit"]);
     }
+    if (isset($_POST["delete_item"])) {
+        delete_item($_POST["delete_item"]);
+    }
+    if (isset($_POST["item_quantity"])) {
+        update_base_quantity($_POST["item_id"], $_POST["item_quantity"]);
+    }
+    if (isset($_POST["item_name"]) OR isset($_POST["item_unit"])) {
+        update_item_details($_POST["item_id"], $_POST["item_name"], $_POST["item_unit"]);
+    }
+    if (isset($_POST["base_sales"])) {
+        update_base_sales($_POST["base_sales"]);
+    }
+ ?>
 
-    echo '</table>';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <?php include_once "new_nav.php" ?>
 
-    echo '<br/><br/><form action="edit_items.php" method="post">
-    <b>Add New Item</b><br>
-    <pre>';
-    echo 'Name: <input type="textarea" name="item_name" required><br>';
-    echo 'Unit: <input type="textarea" name="item_unit" required></pre>';
-    echo '
-    <input type="hidden" name="func_name" value="add_new_item">
-    <input type="submit" value="Submit">
-    </form>';
+    <div>
+        <table border="1px" >
+            <tr>
+                <th>Item</th>
+                <th>Unit</th>
+                <th>Quantity for sales ($)<br/>
+                    <form action="edit_items.php" method="post" >
+                        <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()"></form>
+                </th>
+            </tr>
+            <?php $result = get_items(); ?>
+            <?php while($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <form action="edit_items.php" method="post">
+                    <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()"></td>
+                    <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()"></td>
+                    <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange="this.form.submit()"></td>
+                    <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
+                    </form>
+                </tr>
+            <?php  endwhile ?>
 
-    echo '<br><form action="edit_items.php" method="post" style="display:inline">
-      <select name="delete_item">';
-      foreach ($item_names as $item_name) {
-            echo '<option value="' .$item_name. '">' .$item_name. '</option>';
-      }
+        </table>
+    </div>
 
-    echo '</select> <input type="submit" value="Delete Item"></form>';
-}
+    <div>
+        <div><h4>Add New Item</h4></div>
+        <div class="user_view">
+            <span>Name</span><br>
+            <span>Unit</span>
+        </div>
+        <div class="user_view">
+            <form action="edit_items.php" method="post">
+                <input type="text" name="new_item_name" required><br/>
+                <input type="text" name="new_item_unit" required><br/>
+                <input type="submit" value="Add Item" class="button">
+            </form>
+        </div>
+    </div>
 
-if(strcmp($_POST['func_name'], 'add_new_item') == 0) {
-    add_new_item($_POST['item_name'], $_POST['item_unit']);
-} else if(array_key_exists('original_item_name', $_POST)) {
-    update_item_details($_POST['original_item_name'], $_POST['item_name'], $_POST['item_unit']);
-    update_base_quantity($_POST['original_item_name'], $_POST['base_quantity']);
-} else if(array_key_exists('base_sales', $_POST)) {
-    update_base_sales($_POST['base_sales']);
-} else if(array_key_exists('delete_item', $_POST)) {
-    delete_item($_POST['delete_item']);
-}
+    <div>
+        <div><h4>Delete Item</h4></div>
+        <form action="edit_items.php" method="post">
+            <select name="delete_item" class="none">
+                <?php $result = get_items(); ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <option value= "<?php echo $row["name"] ?> "> <?php echo $row["name"] ?> </option>
+                <?php endwhile ?>
+            </select >
+            <input type="submit" value="Delete" class="button">
+        </form>
+    </div>
+</body>
+</html>
 
-display_items();
-?>
