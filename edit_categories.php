@@ -1,20 +1,19 @@
 <?php
     include "sql_common.php";
-    session_start();
+    session_start(); 
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
         exit();
     }
-    if(isset($_POST["add_button"])){
+    if(isset($_POST["add_button"]) AND !empty($_POST["category"])){
         add_category($_POST["category"]);
     }
-    if(isset($_POST["delete_button"])){
+    if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
         remove_category($_POST["category"]);
     }
 ?>
 
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,10 +22,10 @@
 </head>
 <body>
     <?php include_once "new_nav.php" ?>
-
+    
     <div>
         <form action="edit_categories.php" method="post">
-            <input type="text" name="category" id="category_name" value="">
+            <input type="text" name="category" id="category_name" placeholder="Category">
             <input type="submit" name="add_button" value="Add" class="button">
             <input type="submit" name="delete_button" id="delete_button" value="Delete" class="button">
         </form>
@@ -64,7 +63,7 @@
         </div>
         <input type="button" value="<- Uncategorize" id="uncategorize_button" class="button">
     </div>
-
+    
 </body>
 </html>
 
@@ -75,7 +74,7 @@
         document.getElementById("category_name").value = obj.value;
 
         $(function(){
-            $.post("sql_common.php", {category_name: categoryName}, function(data,status){
+            $.post("sql_common.php", {categoryName: categoryName}, function(data,status){
                  document.getElementById("div").innerHTML = data;
             });
         });
@@ -83,7 +82,6 @@
 
     $(function(){
         $("#categorize_button").click(function(){
-           
             var uncatValue = document.getElementById("uncategorized_list").value;
             var categoryName = document.getElementById("category_select").value;
 
