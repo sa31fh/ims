@@ -36,37 +36,30 @@
                 <th>Unit</th>
                 <th>Quantity for sales ($)<br/>
                     <form action="edit_items.php" method="post" >
-                        <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()"></form>
+                        <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
                 </th>
             </tr>
             <?php $result = get_items(); ?>
             <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
                     <form action="edit_items.php" method="post">
-                    <td><input type="text" id="item_name" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()"></td>
-                    <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()"></td>
-                    <td><input type="number" id="item_quantity" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this)></td>
-                    <input type="hidden" id="item_id" name="item_id" value="<?php echo $row["id"] ?>">
+                    <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()" class="align_center"></td>
+                    <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()" class="align_center"></td>
+                    <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this) class="align_center"></td>
+                    <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
                     </form>
                 </tr>
             <?php  endwhile ?>
-
         </table>
     </div>
 
     <div>
         <div><h4>Add New Item</h4></div>
-        <div class="user_view">
-            <span>Name</span><br>
-            <span>Unit</span>
-        </div>
-        <div class="user_view">
-            <form action="edit_items.php" method="post">
-                <input type="text" name="new_item_name" required><br/>
-                <input type="text" name="new_item_unit" required><br/>
-                <input type="submit" value="Add Item" class="button">
-            </form>
-        </div>
+        <form action="edit_items.php" method="post">
+            <input type="text" name="new_item_name" placeholder="Item Name" required><br/>
+            <input type="text" name="new_item_unit" placeholder="Item Unit" required><br/>
+            <input type="submit" value="Add Item" class="button">
+        </form>
     </div>
 
     <div>
