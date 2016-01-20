@@ -30,7 +30,7 @@
             return False;
         }
 
-        $sql = "INSERT INTO User (username, password_hash, userrole_id)
+        $sql = "INSERT INTO User (username, password_hash, userrole_id) 
                 VALUES('{$username}', '" .password_hash($password, PASSWORD_DEFAULT). "', 
                         (SELECT id FROM UserRole WHERE role='{$userrole}')) 
                 ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), userrole_id=VALUES(userrole_id)";
@@ -116,6 +116,69 @@
         }
     }
 
+    function verify_password($username, $password) {
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT * FROM User
+                INNER JOIN UserRole ON User.userrole_id = UserRole.id
+                WHERE username='" .$username. "'";
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br> Query failed <br>';
+        }
+        $row = $result->fetch_assoc();
+
+        if ($row == null) {
+            return False;
+        }
+        if (!password_verify($password, $row['password_hash'])) {
+            return False;
+        }
+        return True;
+    }
+
+    if (isset($_POST["userName"])) {
+        global $conn;
+        connect_to_db();
+
+        $username = $_POST["userName"];
+        $password = $_POST["password"];
+
+        $sql = "SELECT * FROM User
+                INNER JOIN UserRole ON User.userrole_id = UserRole.id
+                WHERE username='" .$username. "'";
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br> Query failed <br>';
+        }
+        $row = $result->fetch_assoc();
+
+        if ($row == null) {
+            return False;
+        }
+        if (!password_verify($password, $row['password_hash'])) {
+            echo "false";
+        } else {
+        echo "true";}
+    }
+
+    function update_user_password($username, $new_password) {
+        global $conn;
+        connect_to_db();
+
+        $sql = 'UPDATE User
+                SET password_hash="' .password_hash($new_password, PASSWORD_DEFAULT). '" 
+                WHERE username="' .$username. '"';
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br> Query failed <br>';
+            return false;
+        }
+        return true;
+    }
+
     function get_categories($date) {
         global $conn;
         connect_to_db();
@@ -141,31 +204,34 @@
         global $conn;
         connect_to_db();
 
-        $sql = "SELECT * FROM Category 
-                WHERE name = '{$category_name}' AND deletion_date IS NULL";
-        $result = $conn->query($sql);
+        if ($category_name != null) {
 
-        if ($result->num_rows == 0) {
-            $date = date('Y-m-d');
             $sql = "SELECT * FROM Category 
-                    WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
+                    WHERE name = '{$category_name}' AND deletion_date IS NULL";
+            $result = $conn->query($sql);
 
-            $result = $conn->query($sql); 
             if ($result->num_rows == 0) {
-                $sql = "INSERT INTO Category (name, creation_date) 
-                        VALUES ('{$category_name}', '{$date}')";
-            } else {
-                $sql = "UPDATE Category SET deletion_date = NULL 
-                        WHERE name = '{$category_name}' and deletion_date = '{$date}'";
-            }
+                $date = date('Y-m-d');
+                $sql = "SELECT * FROM Category 
+                        WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
 
-            $result = $conn->query($sql); 
-            if ($result == False) {
-                echo "<br> Query failed <br>";
-                echo $sql;
+                $result = $conn->query($sql); 
+                if ($result->num_rows == 0) {
+                    $sql = "INSERT INTO Category (name, creation_date) 
+                            VALUES ('{$category_name}', '{$date}')";
+                } else {
+                    $sql = "UPDATE Category SET deletion_date = NULL 
+                            WHERE name = '{$category_name}' and deletion_date = '{$date}'";
+                }
+
+                $result = $conn->query($sql); 
+                if ($result == False) {
+                    echo "<br> Query failed <br>";
+                    echo $sql;
+                }
+            } else {
+                echo "Category already exists! </br>";
             }
-        } else {
-            echo "Category already exists! </br>";
         }
     }
 
@@ -269,6 +335,150 @@
         }
     }
 
+    function get_total_items($category_id, $date) {
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT COUNT(Item.name) AS num
+                from Category INNER JOIN Item 
+                ON Category.id = Item.category_id
+                WHERE Category.id = {$category_id} 
+                    AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                    AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))";
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+
+        return $result->fetch_assoc()['num'];
+    }
+
+    function get_updated_items_count($category_id, $date) {
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT COUNT(Item.name) as num
+                from Category INNER JOIN Item ON Category.id = Item.category_id 
+                LEFT JOIN Inventory ON Item.id = Inventory.item_id 
+                WHERE Category.id = {$category_id} AND Inventory.date = '{$date}' 
+                    AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                    AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))";
+
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        } else{
+            return $result->fetch_assoc()['num'];
+        }
+    }
+
+    function get_inventory($category_id, $date) {
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, \"-\") AS quantity, T1.notes AS notes FROM
+                (SELECT * from Inventory
+                WHERE Inventory.date = '{$date}') AS T1
+                RIGHT JOIN
+                (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit from Item
+                INNER JOIN Category ON Item.category_id = Category.id
+                WHERE Category.id = {$category_id} 
+                    AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                    AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))) AS T2 ON T2.item_id = T1.item_id 
+                ORDER BY T2.item_name";
+
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+        return $result;
+    }
+
+    function update_inventory($category_id, $date, $items, $values, $notes) {
+        global $conn;
+        connect_to_db();
+
+        for ($i = 0; $i < count($items); $i++) {
+            if ($values[$i] == null) {
+                continue;
+            }
+
+            $sql = 'INSERT INTO Inventory (`date`, `item_id`, `quantity`, `notes`)
+                    VALUES ("' .$date. '", ' .$items[$i]. ', ' .$values[$i]. ', "' .$notes[$i]. '")
+                    ON DUPLICATE KEY UPDATE 
+                    date=VALUES(date), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)';
+
+            $result = $conn->query($sql); 
+            if ($result == False) {
+                echo "<br> Query failed <br>";
+            }
+        }
+    }
+
+    if (isset($_POST["itQuan"])) {
+        global $conn;
+        connect_to_db();
+
+        $date = $_POST["itDate"];
+        $item_id = $_POST["itId"];
+        $quantity = $_POST["itQuan"];
+        $item_note = $_POST["itNote"];
+
+        $sql = 'INSERT INTO Inventory (`date`, `item_id`, `quantity`, `notes`)
+                VALUES ("' .$date. '", ' .$item_id. ', ' .$quantity. ', "' .$item_note. '")
+                ON DUPLICATE KEY UPDATE 
+                date=VALUES(date), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)';
+
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+    }
+
+    function get_expected_sales() {
+        global $conn;
+        connect_to_db();
+
+        $sql = 'SELECT value FROM Variables WHERE name="ExpectedSales"';
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br>Query Failed<br>';
+        }
+
+        return (int) $result->fetch_assoc()['value'];
+    }
+
+    function update_expected_sales($expected_sales) {
+        global $conn;
+        connect_to_db();
+        
+        $sql = 'INSERT INTO Variables (name, value)  
+                VALUES ("ExpectedSales", ' .$expected_sales. ') 
+                ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)';
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br>Query Failed<br>';
+        }
+    }
+
+    if (isset($_POST["sales"])) {
+        global $conn;
+        connect_to_db();
+
+        $expected_sales = $_POST["sales"];
+        
+        $sql = 'INSERT INTO Variables (name, value)  
+                VALUES ("ExpectedSales", ' .$expected_sales. ') 
+                ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)';
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br>Query Failed<br>';
+        }
+    }
+
     function get_base_quantity($item_name) {
         global $conn;
         connect_to_db();
@@ -287,6 +497,23 @@
     function update_base_quantity($item_id, $quantity) {
         global $conn;
         connect_to_db();
+
+        $sql = 'INSERT INTO BaseQuantity (item_id, quantity)  
+                VALUES (' .$item_id.' , ' .$quantity. ') 
+                ON DUPLICATE KEY UPDATE item_id = VALUES(item_id), quantity = VALUES(quantity)';
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br>Query Failed<br>';
+        }
+    }
+
+    if (isset($_POST["quantity"])) {
+        global $conn;
+        connect_to_db();
+
+        $quantity = $_POST["quantity"];
+        $item_id = $_POST["item_id"];
 
         $sql = 'INSERT INTO BaseQuantity (item_id, quantity)  
                 VALUES (' .$item_id.' , ' .$quantity. ') 
@@ -325,6 +552,11 @@
         }
     }
 
+    function get_estimated_quantity($factor, $item_name) {
+       
+        return round(get_base_quantity($item_name) * $factor, 2);
+    }
+
     function get_categorized_items($category_name){
         global $conn;
         connect_to_db();
@@ -340,11 +572,11 @@
         return $result;
     }
 
-    if (isset($_POST["category_name"])) {
+    if (isset($_POST["categoryName"])) {
         global $conn;
         connect_to_db();
-        $category_name = $_POST["category_name"];
-
+        $category_name = $_POST["categoryName"];
+            
         $sql = "SELECT Item.name, Item.unit FROM Item 
                 INNER JOIN Category ON Item.category_id = Category.id 
                 WHERE Category.name = '{$category_name}' AND Item.deletion_date IS NULL";
@@ -436,5 +668,27 @@
         if ($result == False) {
                 echo "<br> Query failed <br>";
         }
+    }
+
+    function print_preview(){
+        global $conn;
+        connect_to_db();
+
+        $date = date('Y-m-d');
+
+        $sql = "SELECT Category.name as category_name, Item.name as item_name, 
+                IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes 
+            FROM Category
+            INNER JOIN Item ON Item.category_id = Category.id
+            LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id 
+            WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)) 
+            ORDER BY Category.name, Item.name";
+
+        $result = $conn->query($sql); 
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+        return $result;
     }
 ?>
