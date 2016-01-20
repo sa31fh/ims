@@ -1,10 +1,13 @@
 <?php 
     include "sql_common.php";
     session_start();
+     if (isset($_SESSION["username"])) {
+        header("Location: category_status.php");
+        exit();
+    }
 ?>
 
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,17 +16,11 @@
 </head>
 <body>
     <div>
-        <div class="user_view">
-            <span>UserName</span><br>
-            <span>Password</span>
-        </div>
-        <div class="user_view">
-            <form action="login.php" method="post">
-                <input type="text" name="username" required><br/>
-                <input type="password" name="password" required><br/>
-                <input type="submit" value="login" class="button">
-            </form>
-        </div>
+        <form action="login.php" method="post">
+            <input type="text" name="username" placeholder="Username" required><br/>
+            <input type="password" name="password" placeholder="Password" required><br/>
+            <input type="submit" value="login" class="button">
+        </form>
     </div>
 </body>
 </html>
