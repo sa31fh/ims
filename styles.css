@@ -33,6 +33,15 @@ iframe{
     width: 800px;
 }
 
+.main{
+    margin-top: 55px;
+}
+
+.main_messages{
+    margin-left: 150px;
+    margin-top: 55px;
+}
+
 .inline{
     display: inline-block;
     margin: 15px;
@@ -99,6 +108,10 @@ iframe{
     background : gray;
 }
 
+#message_frame{
+    width: 100%;
+}
+
 table{
     margin-top: 20px;
     border:1px solid lightgrey;
@@ -106,7 +119,6 @@ table{
     }
 
 th,td{
-    border: 0;
     border: 1px solid #777;
     padding: 15px;
     text-align: center;
@@ -148,6 +160,56 @@ select:not(.none){
     text-align: center;
 }
 
+/* --------------------------MESSAGES TABLE STYLE--------------------- */
+.message_table{
+    width: 100%;
+}
+.message_table, .message_table th, .message_table td{
+    border: 0;
+    text-align: left;
+}
+.message_table tr{
+    transition:background-color .25s;
+}
+.message_table tr:nth-child(even){
+    background-color: white;
+}
+.title{
+    width: 65%;
+}
+.date{
+    width: 10%;
+    text-align: right;
+}
+.message_table tr:hover{
+    background-color: #91E373;
+}
+
+/* ---------------------MESSAGE STYLE--------------------- */
+.message{
+    display: block;
+    margin: 23px;
+}
+.message span{
+    display: inline-block;
+}
+.message #message{
+    width: 50%;
+    min-width: 200px;
+    margin: 10px 20px;
+}
+.reply_div{
+    display: block;
+}
+#message_text{
+    width: 60%;
+    height: 30%;
+    min-width: 200px;
+    min-height: 100px;
+    max-height: 30%;
+    max-width: 60%;
+}
+
 
 /* ----------NAVIGATION BAR STYLING-------------- */
 
@@ -155,6 +217,10 @@ nav{
     background: #333;
     padding: 0;
     margin: 0;
+    position: fixed;
+    width: 100%;
+    top: 0px;
+    box-shadow: 0px 0px 8px;
 }
 
 nav ul{
@@ -189,7 +255,7 @@ nav ul ul {
     padding:0;
     position:absolute;
     top: 100%;
-    box-shadow: 0px 3px 10px -2px #888;
+    box-shadow: 0px 3px 8px -2px #444;
 }
 
 nav ul li:hover > ul{
@@ -243,5 +309,49 @@ nav ul ul li a{
 }
 
 #logout input:active{
+    background-color: #3e8e41;
+}
+
+/* ----------------------SIDE NAVIGATION BAR STYLE------------------- */
+
+.sidenav{
+    list-style-type: none;
+    margin: 0;
+    padding:0;
+    width: 150px;
+    background-color: #e6e6e6;
+    position: fixed;
+    top: 50px;
+    height: 100%;
+    padding-top: 20px
+}
+
+.sidenav li{
+    text-align: center;
+}
+
+.sidenav li a {
+    display: block;
+    padding: 10px 0px;
+    margin: 5px 0px;
+    text-decoration: none;
+    color: #000;
+    transition:all .25s;
+}
+
+.sidenav li:hover a:not(composeButton){
+    color: white;
+    background-color: #4CAF50;
+}
+
+.composeButton{
+    display: none;
+    background: #4CAF50;
+    border-radius: 2px;
+    text-align: center;
+}
+
+.active{
+     color: white;
     background-color: #3e8e41;
 }
