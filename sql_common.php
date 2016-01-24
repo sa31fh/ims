@@ -691,4 +691,96 @@
         }
         return $result;
     }
+
+    function sent_conversations($sender_name){
+        global $conn;
+        connect_to_db();
+
+        $sql = 'SELECT * FROM conversations
+                WHERE sender = "'.$sender_name.'"
+                ORDER BY `timestamp` DESC';
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+        return $result;
+    }
+
+    function received_conversations($receiver_name){
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT * FROM conversations
+                WHERE sender = '$receiver_name' OR receiver = '$receiver_name'
+                ORDER BY `timestamp` DESC";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+        return $result;
+    }
+
+    function new_conversation($sender_name, $receiver_name, $title, $message, $date, $attachment){
+        global $conn;
+        connect_to_db();
+
+        $sql = "INSERT INTO conversations (`timestamp`, sender, `receiver`, `title`)
+                VALUES ('$date' , '$sender_name' , '$receiver_name' , '$title')";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+
+        $sql = "SELECT id from conversations ORDER BY id DESC LIMIT 1";
+        $result = $conn->query($sql);
+        $id = (int) $result->fetch_assoc()['id'];
+
+        $sql = "INSERT INTO messages (time, sender, receiver, message, attachment, conversation_id)
+                VALUES ('$date', '$sender_name', '$receiver_name', '$message', '$attachment', '$id')";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+    }
+
+    function get_messages($id){
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT * FROM messages
+                WHERE conversation_id = '$id'";
+
+        $result = $conn->query($sql);
+         if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+
+        return $result;
+    }
+
+    function add_messages($sender, $receiver, $message, $id, $date){
+        global $conn;
+        connect_to_db();
+
+        $sql = "INSERT INTO messages (time, sender, receiver, message, conversation_id)
+                VALUES ('$date', '$sender', '$receiver', '$message', '$id')";
+
+        $result = $conn->query($sql);
+         if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+
+        $sql = "UPDATE conversations 
+                SET `timestamp`='$date'
+                WHERE id = '$id'";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+    }
 ?>
