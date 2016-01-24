@@ -28,51 +28,52 @@
 </head>
 <body>
     <?php include_once "new_nav.php" ?>
-
-    <div>
-        <table id="table" border="1px" >
-            <tr>
-                <th>Item</th>
-                <th>Unit</th>
-                <th>Quantity for sales ($)<br/>
-                    <form action="edit_items.php" method="post" >
-                        <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
-                </th>
-            </tr>
-            <?php $result = get_items(); ?>
-            <?php while($row = $result->fetch_assoc()): ?>
+    <div class="main">
+        <div>
+            <table id="table" border="1px" >
                 <tr>
-                    <form action="edit_items.php" method="post">
-                    <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()" class="align_center"></td>
-                    <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()" class="align_center"></td>
-                    <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this) class="align_center"></td>
-                    <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
-                    </form>
+                    <th>Item</th>
+                    <th>Unit</th>
+                    <th>Quantity for sales ($)<br/>
+                        <form action="edit_items.php" method="post" >
+                            <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
+                    </th>
                 </tr>
-            <?php  endwhile ?>
-        </table>
-    </div>
-
-    <div>
-        <div><h4>Add New Item</h4></div>
-        <form action="edit_items.php" method="post">
-            <input type="text" name="new_item_name" placeholder="Item Name" required><br/>
-            <input type="text" name="new_item_unit" placeholder="Item Unit" required><br/>
-            <input type="submit" value="Add Item" class="button">
-        </form>
-    </div>
-
-    <div>
-        <div><h4>Delete Item</h4></div>
-        <form action="edit_items.php" method="post">
-            <select name="delete_item" class="none">
                 <?php $result = get_items(); ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <option value= "<?php echo $row["name"] ?> "> <?php echo $row["name"] ?> </option>
-                <?php endwhile ?>
-            </select >
-            <input type="submit" value="Delete" class="button">
-        </form>
+                <?php while($row = $result->fetch_assoc()): ?>
+                    <tr>
+                        <form action="edit_items.php" method="post">
+                        <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()" class="align_center"></td>
+                        <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()" class="align_center"></td>
+                        <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this) class="align_center"></td>
+                        <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
+                        </form>
+                    </tr>
+                <?php  endwhile ?>
+            </table>
+        </div>
+
+        <div>
+            <div><h4>Add New Item</h4></div>
+            <form action="edit_items.php" method="post">
+                <input type="text" name="new_item_name" placeholder="Item Name" required><br/>
+                <input type="text" name="new_item_unit" placeholder="Item Unit" required><br/>
+                <input type="submit" value="Add Item" class="button">
+            </form>
+        </div>
+
+        <div>
+            <div><h4>Delete Item</h4></div>
+            <form action="edit_items.php" method="post">
+                <select name="delete_item" class="none">
+                    <?php $result = get_items(); ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <option value= "<?php echo $row["name"] ?> "> <?php echo $row["name"] ?> </option>
+                    <?php endwhile ?>
+                </select >
+                <input type="submit" value="Delete" class="button">
+            </form>
+        </div>
     </div>
 </body>
 </html>
