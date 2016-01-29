@@ -15,9 +15,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <input type="hidden" id="date" value="<?php echo $_POST["date"] ?>">
     <div>
-        <table id="table">
+        <table class="user_table" id="table">
             <caption><?php echo $_POST["category_name"] ?></caption>
             <tr>
                 <th>Item</th>
@@ -25,7 +24,7 @@
                 <th>Quantity Present</th>
                 <th>Notes</th>
             </tr>
-            <?php $result = get_inventory($_POST["category_id"], $_POST["date"]) ?>
+            <?php $result = get_inventory($_POST["category_id"], $_SESSION["date"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
                     <td><span value="<?php echo $row["name"] ?>"><?php echo $row["name"] ?></span></td>
@@ -37,6 +36,7 @@
             <?php endwhile ?>
         </table>
     </div>
+    <input type="hidden" id="date" value="<?php echo $_SESSION["date"]; ?>">
 </body>
 </html>
 
