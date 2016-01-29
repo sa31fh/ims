@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `new_inventory` /*!40100 DEFAULT CHARACTER SET latin1 */;
-USE `new_inventory`;
 -- MySQL dump 10.13  Distrib 5.7.9, for Win32 (AMD64)
 --
 -- Host: localhost    Database: new_inventory
@@ -18,13 +16,13 @@ USE `new_inventory`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `basequantity`
+-- Table structure for table `Basequantity`
 --
 
-DROP TABLE IF EXISTS `basequantity`;
+DROP TABLE IF EXISTS `Basequantity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `basequantity` (
+CREATE TABLE `Basequantity` (
   `item_id` int(11) NOT NULL,
   `quantity` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`item_id`),
@@ -33,23 +31,23 @@ CREATE TABLE `basequantity` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `basequantity`
+-- Dumping data for table `Basequantity`
 --
 
-LOCK TABLES `basequantity` WRITE;
-/*!40000 ALTER TABLE `basequantity` DISABLE KEYS */;
-INSERT INTO `basequantity` VALUES (1,12.00),(2,100.00),(3,14.00),(4,20.00),(5,12.00),(6,15.00),(7,203.00),(9,4.00);
-/*!40000 ALTER TABLE `basequantity` ENABLE KEYS */;
+LOCK TABLES `Basequantity` WRITE;
+/*!40000 ALTER TABLE `Basequantity` DISABLE KEYS */;
+INSERT INTO `Basequantity` VALUES (1,12.00),(2,129.00),(3,14.00),(4,20.00),(5,12.00),(6,15.00),(7,203.00),(9,4.00);
+/*!40000 ALTER TABLE `Basequantity` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `category`
+-- Table structure for table `Category`
 --
 
-DROP TABLE IF EXISTS `category`;
+DROP TABLE IF EXISTS `Category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `category` (
+CREATE TABLE `Category` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `creation_date` date NOT NULL,
@@ -60,50 +58,53 @@ CREATE TABLE `category` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `category`
+-- Dumping data for table `Category`
 --
 
-LOCK TABLES `category` WRITE;
-/*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'Walk In Fridge','2015-01-01',NULL),(2,'Drinks','2015-01-01',NULL),(3,'Grocery','2015-01-01',NULL),(4,'Frozen','2015-01-01',NULL),(5,'Paper Products','2015-01-01',NULL),(6,'New Thing','2016-01-11','2016-01-11'),(7,'','2016-01-13','2016-01-13'),(8,'','2016-01-17','2016-01-17'),(9,'test','2016-01-17','2016-01-17'),(10,'Dry Ration','2016-01-20','2016-01-20');
-/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+LOCK TABLES `Category` WRITE;
+/*!40000 ALTER TABLE `Category` DISABLE KEYS */;
+INSERT INTO `Category` VALUES (1,'Walk In Fridge','2015-01-01',NULL),(2,'Drinks','2015-01-01',NULL),(3,'Grocery','2015-01-01',NULL),(4,'Frozen','2015-01-01',NULL),(5,'Paper Products','2015-01-01',NULL),(6,'New Thing','2016-01-11','2016-01-11'),(7,'','2016-01-13','2016-01-13'),(8,'','2016-01-17','2016-01-17'),(9,'test','2016-01-17','2016-01-17'),(10,'Dry Ration','2016-01-20','2016-01-20');
+/*!40000 ALTER TABLE `Category` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `conversations`
+-- Table structure for table `Conversation`
 --
 
-DROP TABLE IF EXISTS `conversations`;
+DROP TABLE IF EXISTS `Conversation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `conversations` (
+CREATE TABLE `Conversation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `timestamp` varchar(45) NOT NULL,
+  `timestamp` datetime NOT NULL,
   `sender` varchar(45) NOT NULL,
   `receiver` varchar(45) NOT NULL,
   `title` text,
+  `sender_delete` tinyint(4) DEFAULT NULL,
+  `receiver_delete` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `conversations`
+-- Dumping data for table `Conversation`
 --
 
-LOCK TABLES `conversations` WRITE;
-/*!40000 ALTER TABLE `conversations` DISABLE KEYS */;
-/*!40000 ALTER TABLE `conversations` ENABLE KEYS */;
+LOCK TABLES `Conversation` WRITE;
+/*!40000 ALTER TABLE `Conversation` DISABLE KEYS */;
+INSERT INTO `Conversation` VALUES (2,'2016-01-27 18:54:00','wasif','atif','new message',0,0);
+/*!40000 ALTER TABLE `Conversation` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `inventory`
+-- Table structure for table `Inventory`
 --
 
-DROP TABLE IF EXISTS `inventory`;
+DROP TABLE IF EXISTS `Inventory`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `inventory` (
+CREATE TABLE `Inventory` (
   `date` date NOT NULL,
   `item_id` int(11) NOT NULL,
   `quantity` decimal(11,2) DEFAULT NULL,
@@ -113,23 +114,23 @@ CREATE TABLE `inventory` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `inventory`
+-- Dumping data for table `Inventory`
 --
 
-LOCK TABLES `inventory` WRITE;
-/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
-INSERT INTO `inventory` VALUES ('2016-01-18',1,4.00,''),('2016-01-20',1,10.00,''),('2016-01-16',2,1.00,''),('2016-01-16',3,0.00,''),('2016-01-19',4,4.00,''),('2016-01-15',5,2006.00,''),('2016-01-17',5,20.00,''),('2016-01-18',5,20.00,''),('2016-01-19',5,3.00,''),('2016-01-20',5,10.00,''),('2016-01-16',7,4.00,'');
-/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
+LOCK TABLES `Inventory` WRITE;
+/*!40000 ALTER TABLE `Inventory` DISABLE KEYS */;
+INSERT INTO `Inventory` VALUES ('2016-01-18',1,4.00,''),('2016-01-20',1,10.00,''),('2016-01-16',2,1.00,''),('2016-01-16',3,0.00,''),('2016-01-12',4,2.00,''),('2016-01-19',4,4.00,''),('2016-01-15',5,2006.00,''),('2016-01-17',5,20.00,''),('2016-01-18',5,20.00,''),('2016-01-19',5,3.00,''),('2016-01-20',5,10.00,''),('2016-01-22',5,12.00,''),('2016-01-25',5,12.00,''),('2016-01-26',6,0.00,''),('2016-01-16',7,4.00,'');
+/*!40000 ALTER TABLE `Inventory` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `item`
+-- Table structure for table `Item`
 --
 
-DROP TABLE IF EXISTS `item`;
+DROP TABLE IF EXISTS `Item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item` (
+CREATE TABLE `Item` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `category_id` int(10) DEFAULT NULL,
   `name` varchar(45) NOT NULL,
@@ -137,56 +138,59 @@ CREATE TABLE `item` (
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `item`
+-- Dumping data for table `Item`
 --
 
-LOCK TABLES `item` WRITE;
-/*!40000 ALTER TABLE `item` DISABLE KEYS */;
-INSERT INTO `item` VALUES (1,4,'Paratha','un-opened pack','2016-01-11',NULL),(2,5,'Big Biryani Box','un-opened sleeve','2016-01-11',NULL),(3,5,'Shawarma','kg','2016-01-11',NULL),(4,3,'Water','bottles','2016-01-11',NULL),(5,2,'tandoori chicken','quater leg','2016-01-11',NULL),(6,1,'Shezan mango','bottles','2016-01-11',NULL),(7,5,'Pakola','bottles','2016-01-11',NULL),(8,NULL,'test','test','2016-01-11','2016-01-11'),(9,NULL,'Meat','Packaged','2016-01-13','2016-01-13'),(10,1,'Bread','bags','2016-01-20','2016-01-20');
-/*!40000 ALTER TABLE `item` ENABLE KEYS */;
+LOCK TABLES `Item` WRITE;
+/*!40000 ALTER TABLE `Item` DISABLE KEYS */;
+INSERT INTO `Item` VALUES (1,4,'Paratha','un-opened pack','2016-01-11',NULL),(2,5,'Big Biryani Box','un-opened sleeve','2016-01-11',NULL),(3,5,'Shawarma','kg','2016-01-11',NULL),(4,2,'Water','bottles','2016-01-11',NULL),(5,4,'tandoori chicken','quater leg','2016-01-11',NULL),(6,1,'Shezan mango','bottles','2016-01-11',NULL),(7,5,'Pakola','bottles','2016-01-11',NULL),(8,NULL,'test','test','2016-01-11','2016-01-26'),(9,NULL,'Meat','Packaged','2016-01-13','2016-01-13'),(10,1,'Bread','bags','2016-01-20','2016-01-20'),(11,NULL,'test','test','2016-01-26','2016-01-26');
+/*!40000 ALTER TABLE `Item` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `messages`
+-- Table structure for table `Message`
 --
 
-DROP TABLE IF EXISTS `messages`;
+DROP TABLE IF EXISTS `Message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `messages` (
+CREATE TABLE `Message` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `time` varchar(45) DEFAULT NULL,
+  `timestamp` datetime DEFAULT NULL,
   `sender` varchar(45) NOT NULL,
   `receiver` varchar(45) NOT NULL,
   `message` text NOT NULL,
   `attachment` text,
   `conversation_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `messages`
+-- Dumping data for table `Message`
 --
 
-LOCK TABLES `messages` WRITE;
-/*!40000 ALTER TABLE `messages` DISABLE KEYS */;
-/*!40000 ALTER TABLE `messages` ENABLE KEYS */;
+LOCK TABLES `Message` WRITE;
+/*!40000 ALTER TABLE `Message` DISABLE KEYS */;
+INSERT INTO `Message` VALUES (2,'2016-01-27 18:54:00','wasif','atif','something something something','',2);
+/*!40000 ALTER TABLE `Message` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `user`
+-- Table structure for table `User`
 --
 
-DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `User`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
+CREATE TABLE `User` (
   `username` varchar(45) NOT NULL,
+  `first_name` varchar(45) DEFAULT NULL,
+  `last_name` varchar(45) DEFAULT NULL,
   `password_hash` text NOT NULL,
   `userrole_id` int(11) NOT NULL,
   PRIMARY KEY (`username`),
@@ -195,23 +199,23 @@ CREATE TABLE `user` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `user`
+-- Dumping data for table `User`
 --
 
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES ('atif','$2y$10$6VAqJO.drovsN5lw8bquduvlNHhxs.TvDzs6vF7Z1macdMO5o8zBm',1),('wasif','$2y$10$U8Pv2Dqt/cx7BFLh7NVP8uHlAFkRDRmrnanvTRFF.rJ6Eje1muJXi',2);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+LOCK TABLES `User` WRITE;
+/*!40000 ALTER TABLE `User` DISABLE KEYS */;
+INSERT INTO `User` VALUES ('atif','','','$2y$10$KsOcnbX5rpai/AdGwXQ6ke5hVrMel9M0vj2CY4EA/0Wt6jWAl6htK',1),('wasif',NULL,NULL,'$2y$10$TFudUNXchh2Lj.9jiR9oyOvdiko9bgSjU6h6VnXtMHFaatUqxgC7e',1);
+/*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `userrole`
+-- Table structure for table `UserRole`
 --
 
-DROP TABLE IF EXISTS `userrole`;
+DROP TABLE IF EXISTS `UserRole`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `userrole` (
+CREATE TABLE `UserRole` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `role` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
@@ -221,23 +225,23 @@ CREATE TABLE `userrole` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `userrole`
+-- Dumping data for table `UserRole`
 --
 
-LOCK TABLES `userrole` WRITE;
-/*!40000 ALTER TABLE `userrole` DISABLE KEYS */;
-INSERT INTO `userrole` VALUES (1,'admin'),(2,'data_user');
-/*!40000 ALTER TABLE `userrole` ENABLE KEYS */;
+LOCK TABLES `UserRole` WRITE;
+/*!40000 ALTER TABLE `UserRole` DISABLE KEYS */;
+INSERT INTO `UserRole` VALUES (1,'admin'),(2,'data_user');
+/*!40000 ALTER TABLE `UserRole` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `variables`
+-- Table structure for table `Variables`
 --
 
-DROP TABLE IF EXISTS `variables`;
+DROP TABLE IF EXISTS `Variables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `variables` (
+CREATE TABLE `Variables` (
   `name` varchar(45) NOT NULL,
   `value` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`name`)
@@ -245,13 +249,13 @@ CREATE TABLE `variables` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `variables`
+-- Dumping data for table `Variables`
 --
 
-LOCK TABLES `variables` WRITE;
-/*!40000 ALTER TABLE `variables` DISABLE KEYS */;
-INSERT INTO `variables` VALUES ('BaseSales','2005'),('ExpectedSales','2000');
-/*!40000 ALTER TABLE `variables` ENABLE KEYS */;
+LOCK TABLES `Variables` WRITE;
+/*!40000 ALTER TABLE `Variables` DISABLE KEYS */;
+INSERT INTO `Variables` VALUES ('BaseSales','2005'),('ExpectedSales','2000');
+/*!40000 ALTER TABLE `Variables` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -263,4 +267,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-01-24 19:12:04
+-- Dump completed on 2016-01-28 16:49:39
