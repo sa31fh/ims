@@ -11,23 +11,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Print Preview</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <?php $date = date("Y-m-d"); ?>
     <div>
         <a href="category_status.php" class="buttonBack">Back</a>
         <input type="button" onclick=sendPrint() value="Send Table" class="button">
     </div>
 
     <div id="table">
-        <table >
+        <table class="user_table">
             <tr>
-                <th colspan="5"><?php echo date('D, M d Y', strtotime($date)); ?></th>
+                <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
             </tr>
             <?php $current_category = null;
-                  $result = print_preview(); ?>
+                  $result = print_preview($_SESSION["date"]); ?>
             <?php while ($row =$result->fetch_assoc()): ?>
                 <?php if ($row["category_name"] != $current_category): ?>
                     <?php $current_category = $row["category_name"] ?>
