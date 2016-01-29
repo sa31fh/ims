@@ -5,43 +5,37 @@
         header("Location: login.php");
         exit();
     }
-    if(!isset($_POST["dateview"])) {
-            $date = date("Y-m-d");
-    } else {$date = $_POST["dateview"];}
+    if (!isset($_SESSION["date"])) {
+        $_SESSION["date"] = date("Y-m-d");
+    }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Home</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <?php include_once "new_nav.php" ?>
+    <?php $page = "home";
+          include_once "new_nav.php" ?>
     <div class="main">
-        <div>
-            <form action="category_status.php" method="post">
-                <input type="date" name="dateview" onchange="this.form.submit()" value="<?php echo $date; ?>" >
-            </form>
-        </div>
-
         <div class="inline">
-           <table border="1px">
-            <tr><td colspan="2" ><?php echo date('D, M d Y', strtotime($date)); ?></td></tr>
+           <table class="user_table">
+            <tr><td colspan="2" ><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></td></tr>
             <tr>
                 <th>Category</th>
                 <th>Status</th>
             </tr>
-            <?php $result = get_categories($date);
+            <?php $result = get_categories($_SESSION["date"]);
                  while ($row = $result->fetch_assoc()): ?>
                     <tr>
                         <td><form action="update_inventory.php" method="post" target="ifram">
                             <input type="submit" name="category_name" value="<?php echo $row["name"]; ?>" class="button">
                             <input type="hidden" name="category_id" value="<?php echo $row["id"] ?>">
-                            <input type="hidden" name="date" value="<?php echo $date ?>">
                             </form></td>
-                        <td><?php echo get_updated_items_count($row['id'], $date). '/' .get_total_items($row['id'], $date) ?></td>
+                        <td><?php echo get_updated_items_count($row['id'], $_SESSION["date"]). '/' .get_total_items($row['id'], $_SESSION["date"]) ?></td>
                     </tr>
             <?php  endwhile ?>
             </table>
@@ -63,7 +57,7 @@
         var iframe = document.getElementById(iframeID);
         var nHeight = iframe.contentWindow.document .body.scrollHeight;
 
-        iframe.height = (nHeight + 20) + "px";
+        iframe.height = (nHeight + 60) + "px";
     }
 
     function updateSales(obj){
