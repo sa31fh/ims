@@ -20,25 +20,24 @@
         global $conn;
         connect_to_db();
 
-        $sql = 'SELECT username FROM user  
-                WHERE  user = "' .$username. '"';
+        $sql = 'SELECT username FROM User  
+                WHERE  username = "' .$username. '"';
 
         $result = $conn->query($sql);
-        if ($result != false AND !null) {
-            
+        $row = $result->fetch_assoc();
+        if ($row["username"] == $username) {
             echo '<br>Error: Username already exists!<br>';
             return False;
         }
 
         $sql = "INSERT INTO User (username, password_hash, userrole_id) 
                 VALUES('{$username}', '" .password_hash($password, PASSWORD_DEFAULT). "', 
-                        (SELECT id FROM UserRole WHERE role='{$userrole}')) 
-                ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), userrole_id=VALUES(userrole_id)";
+                        (SELECT id FROM UserRole WHERE role='{$userrole}'))";
 
         $result = $conn->query($sql);
 
         if ($result == False) {
-            echo "<br> Query failed <br>";
+            echo "<br> Query failed to add new user <br>";
             return False; 
              }
         return True;    
@@ -60,6 +59,22 @@
         }
         return $result;
     }
+    function update_user_details($user, $first, $last){
+        global $conn;
+        connect_to_db();
+
+        $sql = "UPDATE User
+                SET username = '$user', 
+                    first_name = '$first',
+                    last_name = '$last'
+                WHERE username = '$user'";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Update User Detail Query failed <br>";
+            return False; 
+        }
+    }
 
     function delete_user($username) {
         global $conn;
@@ -80,7 +95,7 @@
         global $conn;
         connect_to_db();
 
-        $sql = "SELECT * FROM userrole";
+        $sql = "SELECT * FROM UserRole";
 
         $result = $conn->query($sql);
 
@@ -89,6 +104,43 @@
             return false;
         }
         return $result;
+    }
+
+    function update_user_role($username, $role) {
+        global $conn;
+        connect_to_db();
+
+        $sql = "UPDATE User 
+                SET userrole_id= (SELECT id FROM UserRole WHERE role='$role') 
+                WHERE username='$username'";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br> Query failed <br>';
+            return False;
+        }
+
+        return True;
+    }
+
+    if (isset($_POST["newRole"])) {
+         global $conn;
+        connect_to_db();
+
+        $role = $_POST["newRole"];
+        $username = $_POST["userName"];
+
+        $sql = "UPDATE User 
+                SET userrole_id= (SELECT id FROM UserRole WHERE role='$role') 
+                WHERE username='$username'";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo '<br> Query failed <br>';
+            return False;
+        }
+
+        return True;
     }
 
     function verify_credentials($username, $password) {
@@ -111,31 +163,9 @@
            return false;
         } else {
             $_SESSION["username"] = $username;
-            $_SESSION['userrole'] = $row["role"];
+            $_SESSION["userrole"] = $row["role"];
             return true;
         }
-    }
-
-    function verify_password($username, $password) {
-        global $conn;
-        connect_to_db();
-
-        $sql = "SELECT * FROM User
-                INNER JOIN UserRole ON User.userrole_id = UserRole.id
-                WHERE username='" .$username. "'";
-        $result = $conn->query($sql);
-        if ($result == False) {
-            echo '<br> Query failed <br>';
-        }
-        $row = $result->fetch_assoc();
-
-        if ($row == null) {
-            return False;
-        }
-        if (!password_verify($password, $row['password_hash'])) {
-            return False;
-        }
-        return True;
     }
 
     if (isset($_POST["userName"])) {
@@ -445,7 +475,6 @@
         if ($result == False) {
             echo '<br>Query Failed<br>';
         }
-
         return (int) $result->fetch_assoc()['value'];
     }
 
@@ -585,7 +614,7 @@
         if ($result == False) {
             echo "<br> Query failed <br>";
         }
-        echo '<select id="categorized_list" size=8>';
+        echo '<select class="category_select" id="categorized_list" size=8>';
         while ($row = $result->fetch_assoc()) {
             echo '<option value="' .$row["name"]. '">' .$row["name"]. ' </option>';
         }
@@ -670,11 +699,9 @@
         }
     }
 
-    function print_preview(){
+    function print_preview($date){
         global $conn;
         connect_to_db();
-
-        $date = date('Y-m-d');
 
         $sql = "SELECT Category.name as category_name, Item.name as item_name, 
                 IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes 
@@ -692,27 +719,12 @@
         return $result;
     }
 
-    function sent_conversations($sender_name){
+    function sent_conversations($user){
         global $conn;
         connect_to_db();
 
-        $sql = 'SELECT * FROM conversations
-                WHERE sender = "'.$sender_name.'"
-                ORDER BY `timestamp` DESC';
-
-        $result = $conn->query($sql);
-        if ($result == False) {
-            echo "<br> Query failed <br>";
-        }
-        return $result;
-    }
-
-    function received_conversations($receiver_name){
-        global $conn;
-        connect_to_db();
-
-        $sql = "SELECT * FROM conversations
-                WHERE sender = '$receiver_name' OR receiver = '$receiver_name'
+        $sql = "SELECT * FROM Conversation
+                WHERE sender = '$user'
                 ORDER BY `timestamp` DESC";
 
         $result = $conn->query($sql);
@@ -722,23 +734,55 @@
         return $result;
     }
 
+    function received_conversations($user){
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT * FROM Conversation
+                WHERE (sender = '$user' AND sender_delete = false )
+                OR (receiver = '$user'AND receiver_delete = false)
+                ORDER BY `timestamp` DESC";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Query failed <br>";
+        }
+        return $result;
+    }
+
+    function show_deleted_conversations($user){
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT * FROM Conversation
+                WHERE (sender = '$user' AND sender_delete = true )
+                OR (receiver = '$user'AND receiver_delete = true)
+                ORDER BY `timestamp` DESC";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> Show Deleted Conversation Query failed <br>";
+        }
+        return $result;     
+    }
+
     function new_conversation($sender_name, $receiver_name, $title, $message, $date, $attachment){
         global $conn;
         connect_to_db();
 
-        $sql = "INSERT INTO conversations (`timestamp`, sender, `receiver`, `title`)
-                VALUES ('$date' , '$sender_name' , '$receiver_name' , '$title')";
+        $sql = "INSERT INTO Conversation (`timestamp`, sender, `receiver`, `title`, sender_delete, receiver_delete)
+                VALUES ('$date' , '$sender_name' , '$receiver_name' , '$title', 'false', 'false')";
 
         $result = $conn->query($sql);
         if ($result == False) {
             echo "<br> Query failed <br>";
         }
 
-        $sql = "SELECT id from conversations ORDER BY id DESC LIMIT 1";
+        $sql = "SELECT id from Conversation ORDER BY id DESC LIMIT 1";
         $result = $conn->query($sql);
         $id = (int) $result->fetch_assoc()['id'];
 
-        $sql = "INSERT INTO messages (time, sender, receiver, message, attachment, conversation_id)
+        $sql = "INSERT INTO Message (`timestamp`, sender, receiver, message, attachment, conversation_id)
                 VALUES ('$date', '$sender_name', '$receiver_name', '$message', '$attachment', '$id')";
 
         $result = $conn->query($sql);
@@ -747,11 +791,34 @@
         }
     }
 
+    function delete_conversation($con_id){
+        global $conn;
+        connect_to_db();
+
+        $sql = "SELECT sender FROM Conversation
+                WHERE id = '$con_id'";
+
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+        if ($row["sender"] == $_SESSION["username"]) {
+            $deletefrom = "sender_delete";
+        }else {$deletefrom = 'receiver_delete';}
+
+        $sql = "UPDATE Conversation 
+                SET " .$deletefrom. " = true
+                WHERE id = '$con_id'";
+
+        $result = $conn->query($sql);
+        if ($result == False) {
+            echo "<br> delete conversation query failed <br>";
+        }
+    }
+
     function get_messages($id){
         global $conn;
         connect_to_db();
 
-        $sql = "SELECT * FROM messages
+        $sql = "SELECT * FROM Message
                 WHERE conversation_id = '$id'";
 
         $result = $conn->query($sql);
@@ -766,7 +833,7 @@
         global $conn;
         connect_to_db();
 
-        $sql = "INSERT INTO messages (time, sender, receiver, message, conversation_id)
+        $sql = "INSERT INTO Message (`timestamp`, sender, receiver, message, conversation_id)
                 VALUES ('$date', '$sender', '$receiver', '$message', '$id')";
 
         $result = $conn->query($sql);
@@ -774,7 +841,7 @@
             echo "<br> Query failed <br>";
         }
 
-        $sql = "UPDATE conversations 
+        $sql = "UPDATE Conversation 
                 SET `timestamp`='$date'
                 WHERE id = '$id'";
 
@@ -782,5 +849,46 @@
         if ($result == False) {
             echo "<br> Query failed <br>";
         }
+    }
+
+    if (isset($_POST["timeZoneRegion"])) {
+            switch ($_POST["timeZoneRegion"]) {
+                case 'Africa':
+                    $region = '1';
+                    break;
+
+                case 'America':
+                    $region = '2';
+                    break;
+
+                case 'Asia':
+                    $region = '16';
+                    break;
+
+                case 'Australia':
+                    $region = '64';
+                    break;
+
+                case 'Europe':
+                    $region = '128';
+                    break;
+                
+                default:
+                    $region = '1';
+                    break;
+            }
+
+
+            foreach (timezone_identifiers_list($region) as $tz){
+                $tzs = explode("/", $tz, 2);
+                echo  '<option value="' .$tzs[1]. '">' .$tzs[1]. '</option>' ;
+           }       
+    }
+
+    function convert_date_timezone($date){
+
+        $newDate = date_create($date, "GMT");
+        $tz_date = date_timezone_set($newDate, timezone_open($_SESSION["user_timezone"]));
+        return date_format($tz_date, "h:ia");
     }
 ?>
