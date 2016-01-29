@@ -5,11 +5,15 @@
         header("Location: login.php");
         exit();
     }
+    if ($_SESSION["userrole"] != "admin") {
+        header("Location: login.php");
+        exit();
+    }
     if (isset($_POST["new_username"])) {
         add_new_user($_POST['new_username'], $_POST['new_password'], $_POST['userrole']);
     } 
-    if(isset($_POST["delete_user"])){
-        delete_user($_POST["delete_select"]);
+    if(isset($_POST["delete_username"])){
+        delete_user($_POST["delete_username"]);
     }
 ?>
 
@@ -21,57 +25,63 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <?php include_once "new_nav.php" ?>
-    <div class="main">
-        <div>
-            <caption>Add New User</caption>
-            <form action="manage_users.php" method="post">
-                <input type="text" name="new_username" placeholder="Username" required><br/>
-                <input type="password" name="new_password" placeholder="Password" required><br/>
-                <label for="userrole">User Role</label><select name="userrole" class="none">
-                    <?php $result = get_role(); ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <option   value="<?php echo $row["role"]?>" > <?php echo $row["role"] ?> </option>
-                    <?php endwhile ?>
-                </select>
-                <input type="submit" value="Add" class="button">
-            </form>
-        </div>
-
-        <div>
-            <table border="1px">
-                <caption>User List</caption>
+    <div class="user_table_div">
+        <table class="user_table" id="table" >
+            <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th></th>
+            </tr>
+            <?php $result = get_users(); ?>
+            <?php while ($userdata = $result->fetch_assoc()): ?>
                 <tr>
-                    <th>User</th>
-                    <th>Role</th>
+                    <td id="name"><span><?php echo $userdata["username"]; ?></span></td>
+                    <td id="role">
+                        <select onchange=updateRole(this) name="" id=""class="none" <?php if ($userdata["username"] == $_SESSION["username"]) {echo "disabled";} ?>>
+                            <?php $result2 = get_role(); ?>
+                            <?php while ($row = $result2->fetch_assoc()): ?>
+                                <option  value="<?php echo $row["role"]?>" <?php if ($userdata["role"] == $row["role"]) {echo "selected";}?> > <?php echo $row["role"] ?> </option>
+                            <?php endwhile ?>
+                        </select>
+                    </td>
+                    <td id="delete">
+                        <form action="manage_users.php" method="post">
+                            <input type="hidden" name="delete_username" value="<?php echo $userdata["username"] ?>">
+                            <input type="submit" value="delete" class="button" <?php if ($userdata["username"] == $_SESSION["username"]) { echo "disabled";} ?>>
+                        </form>
+                    </td>
                 </tr>
-                <?php $result = get_users(); ?>
-                <?php while ($userdata = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo $userdata["username"]; ?> </td>
-                        <td>
-                            <select name="" id=""class="none">
-                                    <option value="<?php $userdata["role"]?>" > <?php echo $userdata["role"] ?> </option>
-                            </select>
-                        </td>
-                    </tr>
-                <?php endwhile ?>
-            </table>
-        </div>
-        
-        <div>
-            <caption>Delete User</caption>
-            <form action="manage_users.php" method="post">
-                <select name="delete_select" class="none">
-                    <?php $result = get_users(); ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <option value="<?php echo $row["username"] ?>" > <?php echo $row["username"] ?> </option>
-                    <?php endwhile ?>
-                </select>
-                <input type="submit" name="delete_user" value ="Delete" class="button">
-            </form>
-        </div>
+            <?php endwhile ?>
+        </table>
     </div>
+
+    <div class="user_add_div">
+        <h4>Add New User</h4>
+        <form action="manage_users.php" method="post">
+            <input class="userinput" type="text" name="new_username" placeholder="Username" required><br/>
+            <input class="userinput" type="password" name="new_password" placeholder="Password" required><br/>
+            <label for="userrole">User Role:</label><select name="userrole" class="none role_select">
+                <?php $result = get_role(); ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <option   value="<?php echo $row["role"]?>" > <?php echo $row["role"] ?> </option>
+                <?php endwhile ?>
+            </select>
+            <input type="submit" value="Add" class="button">
+        </form>
+    </div>
+    
 </body>
 </html>
+
+<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+     function updateRole(obj){
+        var role = obj.value;
+        var rowindex = obj.parentNode.parentNode.rowIndex;
+        var username = document.getElementById("table").rows[rowindex].cells[0].innerHTML;
+        $(function(){
+            $.post("sql_common.php", {newRole: role, userName: username});
+        });
+    }
+</script>
 

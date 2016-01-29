@@ -5,6 +5,10 @@
         header("Location: login.php");
         exit();
     }
+    if ($_SESSION["userrole"] != "admin") {
+        header("Location: login.php");
+        exit();
+    }
     if(isset($_POST["add_button"]) AND !empty($_POST["category"])){
         add_category($_POST["category"]);
     }
@@ -21,48 +25,45 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <?php include_once "new_nav.php" ?>
-    <div class="main">
-        <div>
-            <form action="edit_categories.php" method="post">
-                <input type="text" name="category" id="category_name" placeholder="Category">
-                <input type="submit" name="add_button" value="Add" class="button">
-                <input type="submit" name="delete_button" id="delete_button" value="Delete" class="button">
-            </form>
-        </div>
+    <div>
+        <form action="edit_categories.php" method="post">
+            <input class="userinput" type="text" name="category" id="category_name" placeholder="Category">
+            <input type="submit" name="add_button" value="Add" class="button">
+            <input type="submit" name="delete_button" id="delete_button" value="Delete" class="button">
+        </form>
+    </div>
 
-        <div class="category_view">
-            <h5>Categories</h5>
-            <form action="edit_categories.php" method="get">
-                <select name="options" id="category_select" size="10" onchange=categorySelect(this);>
-                    <?php $result = get_categories($date = date('Y-m-d')) ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <option value="<?php echo $row['name']; ?>" > <?php echo $row["name"] ?> </option>
-                    <?php endwhile ?>
-                </select>
-            </form>
-        </div>
+    <div class="category_div">
+        <h5>Categories</h5>
+        <form action="edit_categories.php" method="get">
+            <select class="category_select" name="options" id="category_select" size="10" onchange=categorySelect(this);>
+                <?php $result = get_categories($date = date('Y-m-d')) ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <option value="<?php echo $row['name']; ?>" > <?php echo $row["name"] ?> </option>
+                <?php endwhile ?>
+            </select>
+        </form>
+    </div>
 
-        <div class="category_view">
-            <h5>Uncategorized Items</h5>
-            <form action="edit_categories.php" method="get">
-                <select name="select_uncat" id="uncategorized_list" size="10" >
-                    <?php $result = get_uncategorized_items(); ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <option value="<?php echo $row['name']; ?>"> <?php echo $row["name"]; ?></option>
-                    <?php endwhile ?>
-                </select>
-            </form>
-            <input type="button" value="Categorize ->" id="categorize_button" class="button">
-        </div>
+    <div class="category_div">
+        <h5>Uncategorized Items</h5>
+        <form action="edit_categories.php" method="get">
+            <select class="category_select" name="select_uncat" id="uncategorized_list" size="10" >
+                <?php $result = get_uncategorized_items(); ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <option value="<?php echo $row['name']; ?>"> <?php echo $row["name"]; ?></option>
+                <?php endwhile ?>
+            </select>
+        </form>
+        <input type="button" value="Categorize ->" id="categorize_button" class="button">
+    </div>
 
-        <div class="category_view">
-            <h5>Categorized Items</h5>
-            <div id="div" class="none">
-                <select name="" id="" size=8 ></select>
-            </div>
-            <input type="button" value="<- Uncategorize" id="uncategorize_button" class="button">
+    <div class="category_div">
+        <h5>Categorized Items</h5>
+        <div id="div" class="none">
+            <select class="category_select" name="" id="" size=8 ></select>
         </div>
+        <input type="button" value="<- Uncategorize" id="uncategorize_button" class="button">
     </div>
 </body>
 </html>
