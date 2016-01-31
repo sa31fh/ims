@@ -11,18 +11,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Messages</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <ul class="sidenav" id="sideNav">
         <li><a href="compose_messages.php" target="message_frame" >Compose</a></li>
-        <li><a href="received_messages.php" target="message_frame" >Inbox</a></li>
-        <li><a href="sent_messages.php" target="message_frame">Sent</a></li>
-        <li><a href="">Deleted</a></li>
+        <li><a class="active" href="received_messages.php" target="message_frame" >Inbox</a></li>
+        <li><a href="deleted_messages.php" target="message_frame">Deleted</a></li>
     </ul>
-    <?php include_once "new_nav.php" ?>
+    <?php $page = "messages";
+          include_once "new_nav.php" ?>
 
     <div class="main_messages">
         <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload=adjustHeight(id) ></iframe>
@@ -41,6 +40,13 @@
         var nHeight = iframe.contentWindow.document .body.scrollHeight;
         iframe.height = (nHeight + 60) + "px";
     }
+
+    $(function() {
+        $('#sideNav li a').click(function() {
+           $('#sideNav li a').removeClass();
+           $(this).addClass('active');
+        });
+     });
 </script>
 
 <?php if (isset($_POST["print_data"])): ?>
