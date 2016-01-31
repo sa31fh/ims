@@ -35,7 +35,7 @@
             <?php $result = get_users(); ?>
             <?php while ($userdata = $result->fetch_assoc()): ?>
                 <tr>
-                    <td id="name"><span><?php echo $userdata["username"]; ?></span></td>
+                    <td id="name"><?php echo $userdata["username"]; ?></td>
                     <td id="role">
                         <select onchange=updateRole(this) name="" id=""class="none" <?php if ($userdata["username"] == $_SESSION["username"]) {echo "disabled";} ?>>
                             <?php $result2 = get_role(); ?>
@@ -79,8 +79,9 @@
         var role = obj.value;
         var rowindex = obj.parentNode.parentNode.rowIndex;
         var username = document.getElementById("table").rows[rowindex].cells[0].innerHTML;
+        
         $(function(){
-            $.post("sql_common.php", {newRole: role, userName: username});
+            $.post("sql_common.php", {newRole: role, UserName: username});
         });
     }
 </script>
