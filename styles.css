@@ -258,9 +258,11 @@ select{
 }
 .message_table, .message_table th, .message_table td{
     border: 0;
+    border-collapse: collapse;
     text-align: left;
+    padding: 10px;
 }
-.message_table tr{
+.message_table td{
     transition:background-color .25s;
 }
 .message_table tr:nth-child(even){
@@ -272,8 +274,9 @@ select{
 .date{
     width: 10%;
     text-align: right;
+    font-size: 16px;
 }
-.message_table tr:hover{
+.message_table tr:hover td:not(.delete){
     background-color: #91E373;
 }
 
@@ -285,16 +288,28 @@ select{
 .message span{
     display: inline-block;
 }
+.message #name{
+    font-weight: bold;
+    font-size: 17px;
+    color: #717171;
+}
 .message #message{
     width: 50%;
     min-width: 200px;
     margin: 10px 20px;
     text-align: left;
+    word-wrap: break-word;
 }
+.message #time{
+    width: 10%;
+    font-size: 16px;
+    text-align: left;
+}
+
 .reply_div{
     display: block;
 }
-#message_text{
+#reply_text{
     width: 60%;
     height: 30%;
     min-width: 150px;
@@ -330,8 +345,8 @@ nav ul li{
     float: left;
     transition: background-color .25s;
 }
-nav ul li:hover:not(#logout):not(#userrole_li){
-    background-color: #4CAF50;
+nav ul li:hover:not(#logout):not(#userrole_li):not(#timezone_li){
+    background-color: rgba(57, 204, 63, 0.67);
 }
 
 nav ul li a{
@@ -371,6 +386,13 @@ nav ul ul li a{
 
 #nav_right{
     float: right;
+}
+
+#timezone{
+    display: block;
+    padding: 4px;
+    color: white;
+    font-size: 18px
 }
 
 #date_display{
@@ -419,6 +441,8 @@ nav ul ul li a{
 #logout input{
     margin: 0px 10px 0px 2px;
 }
+
+
 
 /* ----------------------SIDE NAVIGATION BAR STYLE------------------- */
 
