@@ -13,7 +13,9 @@
         }
     } 
     if (isset($_POST["update_user"])) {
-        update_user_details($_POST["update_user"], $_POST["update_first"], $_POST["update_last"]);
+        $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
+        $_SESSION["timezone"] = $tz;
+        update_user_details($_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz);
     }
 ?>
 
@@ -30,15 +32,28 @@
 
         <div>
             <h4>Edit Credentials</h4>
-            <?php $result = get_users(); ?>
+            <?php $result = get_user_details($_SESSION["username"]); ?>
             <?php $row = $result->fetch_assoc(); ?>
             <form action="user_account.php" method="post">
                 <input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"><br/>
                 <input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name">*<br/>
                 <input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name">*<br/>
+                <select name="region_select" id="region_select" onchange=onTimeZoneSelect(this)>
+                    <?php $oldregion = ""; ?>
+                    <?php foreach (timezone_identifiers_list() as $tz): ?>
+                        <?php $region = explode("/", $tz); ?>
+                        <?php $removetz = array('Pacific', 'Antarctica', 'Arctic', 'UTC', 'Indian', 'Atlantic', $oldregion); ?>
+                        <?php if (!in_array($region[0], $removetz, true)): ?>
+                            <option value="<?php echo $region[0] ?>"> <?php echo $region[0] ?></option>
+                        <?php endif ?>
+                    <?php $oldregion= $region[0]; endforeach ?>
+                </select>
+                <select name="city_select" id="city_select">
+                </select><br/>
                 <input class="button" type="submit" value="Save"><span>   *optional</span>
             </form>
         </div>
+        
 
         <div>
             <h4>Edit Password</h4>
@@ -102,5 +117,15 @@
         if (verified == "true" && newPass == "true") {
             submit_pass.disabled = false;
         } else {submit_pass.disabled = true;}
+    }
+
+     function onTimeZoneSelect(obj){
+        var region = obj.value;
+
+         $(function(){
+            $.post("sql_common.php", {timeZoneRegion: region}, function(data,status){
+                 document.getElementById("city_select").innerHTML = data;
+            });
+        });
     }
 </script>
