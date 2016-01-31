@@ -26,7 +26,7 @@
                 <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
             </tr>
             <?php $current_category = null;
-                  $result = print_preview($_SESSION["date"]); ?>
+                  $result = get_print_preview($_SESSION["date"]); ?>
             <?php while ($row =$result->fetch_assoc()): ?>
                 <?php if ($row["category_name"] != $current_category): ?>
                     <?php $current_category = $row["category_name"] ?>
