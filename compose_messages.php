@@ -6,7 +6,7 @@
         exit();
     }
     if (isset($_POST["message"])) {
-        new_conversation($_SESSION["username"], $_POST["recipient"], $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), $_POST["attached"]);
+        set_new_conversation($_SESSION["username"], $_POST["recipient"], $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), $_POST["attached"]);
         header("Location: received_messages.php" );
         exit();
     }

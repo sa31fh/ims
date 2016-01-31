@@ -17,7 +17,7 @@
 <body>
     <div>
         <table class="message_table" id="table">
-            <?php $result = show_deleted_conversations($_SESSION["username"]) ?>
+            <?php $result = get_deleted_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr onclick=openMessage(this)>
                     <td class="name"> <?php if ($row["sender"] == $_SESSION["username"]) {
