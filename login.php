@@ -6,9 +6,9 @@
         exit();
     }
     if(isset($_POST["username"])){
-        $result = verify_credentials($_POST["username"], $_POST["password"]);
 
-        if ($result == true) {
+        if (verify_credentials($_POST["username"], $_POST["password"])) {
+            set_session_variables($_POST["username"]);
             header("Location: category_status.php");
             exit();
         } else{
