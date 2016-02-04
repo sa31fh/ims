@@ -4,7 +4,10 @@
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
         exit();
-    } 
+    }
+    if (isset($_POST["conversation_id"])) {
+        change_conversation_status($_POST["conversation_id"], "read");
+    }
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +28,10 @@
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?> </td>
                     <td class="title"> <?php echo $row["title"] ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
-                    <input type="hidden" name="conversation_id" value="<?php echo $row["id"] ?>"></form>
+                    <td class="delete"><form action="deleted_messages.php" method="post">
+                        <input class="button" type="submit" value="undelete">
+                        <input type="hidden" name="conversation_id" value="<?php echo $row["id"] ?>"></form>
+                    </td>
                 </tr>
             <?php endwhile ?>
         </table>
@@ -41,7 +47,7 @@
 <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
 <script>
     function openMessage(obj){
-        var id = document.getElementById("table").rows[obj.rowIndex].children[3].value;
+        var id = document.getElementById("table").rows[obj.rowIndex].cells[3].children[0].children[1].value;
         var receiver = document.getElementById("table").rows[obj.rowIndex].children[0].value;
         document.getElementById("conversation_id").value = id;
         document.getElementById("receiver_name").value = receiver;
