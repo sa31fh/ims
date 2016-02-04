@@ -16,7 +16,18 @@ function connect_to_db(){
     }
 }
 
-function add_new_user($username, $password, $userrole) {
+/**
+ * Adds a new user in the database.
+ *
+ * The function first checks whether the username already exists. If the username does not
+ * exist in the database, an INSERT INTO query is created and new user details are stored.
+ * 
+ * @param string $username string name of the new user.
+ * @param string $password the string value for the pasword, to be converted into hash.
+ * @param string $userrole string value of the userrole.
+ * @return void 
+ */
+function add_new_user($username, $first_name, $last_name, $password, $userrole) {
     global $conn;
     connect_to_db();
 
@@ -30,8 +41,8 @@ function add_new_user($username, $password, $userrole) {
         return False;
     }
 
-    $sql = "INSERT INTO User (username, password_hash, userrole_id) 
-            VALUES('{$username}', '" .password_hash($password, PASSWORD_DEFAULT). "', 
+    $sql = "INSERT INTO User (username, first_name, last_name, password_hash, userrole_id) 
+            VALUES('$username', '$first_name', '$last_name', '" .password_hash($password, PASSWORD_DEFAULT). "', 
                     (SELECT id FROM UserRole WHERE role='{$userrole}'))";
 
     if ($result = $conn->query($sql)) {
@@ -42,7 +53,11 @@ function add_new_user($username, $password, $userrole) {
     }
 
 }
-
+/**
+ * Retrieve data from Users table
+ * 
+ * @return [type] [description]
+ */
 function get_users(){
     global $conn;
     connect_to_db();
@@ -78,14 +93,15 @@ function update_user_details($user, $first_name, $last_name, $time_zone){
     global $conn;
     connect_to_db();
 
-    $sql = "UPDATE User
-            SET username = '$user', 
+    $sql = "UPDATE User 
+            SET username = '$user',
                 first_name = '$first_name',
                 last_name = '$last_name',
                 time_zone = '$time_zone'
-            WHERE username = '$user'";
+            WHERE username ='" .$_SESSION['username']. "'";
 
     if ($result = $conn->query($sql)) {
+        $_SESSION["username"] = $user;
         return true;
     } else {
         echo "<br> update_user Query failed <br>";
@@ -335,7 +351,8 @@ function add_new_item($item_name, $item_unit) {
     $date = date('Y-m-d');
 
     $sql = "SELECT * FROM Item
-            WHERE name = '{$item_name}' AND deletion_date IS NULL";
+            WHERE name = '$item_name' 
+            AND deletion_date IS NULL";
 
     if($result = $conn->query($sql)){
         if ($result->num_rows == 0) {
@@ -510,7 +527,7 @@ if (isset($_POST["itQuan"])) {
     $sql = "INSERT INTO Inventory (`date`, item_id, quantity, notes)
             VALUES ('$date', '$item_id', '$quantity', '$item_note')
             ON DUPLICATE KEY UPDATE 
-            date=VALUES(date), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
+            `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
 
     if ($result = $conn->query($sql)) {
         return $result; 
@@ -782,7 +799,7 @@ function get_print_preview($date) {
         INNER JOIN Item ON Item.category_id = Category.id
         LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id 
         WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL)) 
-            AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)) 
+        AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)) 
         ORDER BY Category.name, Item.name";
 
     if ($result = $conn->query($sql)) {
@@ -814,7 +831,9 @@ function get_received_conversations($user) {
     connect_to_db();
 
     $sql = "SELECT * FROM Conversation
-            WHERE (sender = '$user' AND sender_delete = false )
+            INNER JOIN (SELECT first_name, last_name, username FROM USER) AS nameTable
+            ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
+            WHERE (sender = '$user' AND sender_delete = false)
             OR (receiver = '$user'AND receiver_delete = false)
             ORDER BY `timestamp` DESC";
 
@@ -831,6 +850,8 @@ function get_deleted_conversations($user) {
     connect_to_db();
 
     $sql = "SELECT * FROM Conversation
+            INNER JOIN (SELECT first_name, last_name, username FROM USER) AS nameTable
+            ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
             WHERE (sender = '$user' AND sender_delete = true )
             OR (receiver = '$user' AND receiver_delete = true)
             ORDER BY `timestamp` DESC";
@@ -905,6 +926,8 @@ function get_messages($conversation_id) {
     connect_to_db();
 
     $sql = "SELECT * FROM Message
+            INNER JOIN (SELECT first_name, last_name, username FROM User) as nameTable
+            ON nameTable.username = Message.sender
             WHERE conversation_id = '$conversation_id'";
 
     if ($result = $conn->query($sql)) {
