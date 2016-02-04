@@ -6,7 +6,7 @@
         exit();
     } 
     if (isset($_POST["conversation_id"])) {
-        delete_conversation($_POST["conversation_id"]);
+        change_conversation_status($_POST["conversation_id"], "deleted");
     }
 ?>
 
