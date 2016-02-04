@@ -186,6 +186,10 @@ select{
     font-size: 18px
 }
 
+.select_user{
+    width: 200px;
+}
+
 .user_table_div{
     margin: 30px;
     display: block;
