@@ -37,6 +37,7 @@
 <script>
     function adjustHeight(iframeID){
         var iframe = document.getElementById(iframeID);
+        iframe.height = 0 + "px";
         var nHeight = iframe.contentWindow.document .body.scrollHeight;
         iframe.height = (nHeight + 60) + "px";
     }
