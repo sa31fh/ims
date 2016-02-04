@@ -830,11 +830,15 @@ function get_received_conversations($user) {
     global $conn;
     connect_to_db();
 
-    $sql = "SELECT * FROM Conversation
+    $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, senderStatus, receiverStatus, title FROM Conversation
             INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
             ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
-            WHERE (sender = '$user' AND sender_delete = false)
-            OR (receiver = '$user'AND receiver_delete = false)
+            INNER JOIN (SELECT id as sstId, status AS senderStatus FROM ConversationStatus) as senderStatusTable
+            ON senderStatusTable.sstId = sender_conversationStatusId
+            INNER JOIN (SELECT id as rstId, `status` AS receiverStatus FROM ConversationStatus) as receiverStatusTable
+            ON receiverStatusTable.rstId = receiver_conversationStatusId 
+            WHERE (sender = '$user' AND senderStatus != 'deleted')
+            OR (receiver = '$user'AND receiverStatus != 'deleted')
             ORDER BY `timestamp` DESC";
 
     if ($result = $conn->query($sql)) {
@@ -849,11 +853,15 @@ function get_deleted_conversations($user) {
     global $conn;
     connect_to_db();
 
-    $sql = "SELECT * FROM Conversation
+    $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, senderStatus, receiverStatus, title FROM Conversation
             INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
             ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
-            WHERE (sender = '$user' AND sender_delete = true )
-            OR (receiver = '$user' AND receiver_delete = true)
+            INNER JOIN (SELECT id as sstId, status AS senderStatus FROM ConversationStatus) as senderStatusTable
+            ON senderStatusTable.sstId = sender_conversationStatusId
+            INNER JOIN (SELECT id as rstId, `status` AS receiverStatus FROM ConversationStatus) as receiverStatusTable
+            ON receiverStatusTable.rstId = receiver_conversationStatusId 
+            WHERE (sender = '$user' AND senderStatus = 'deleted' )
+            OR (receiver = '$user' AND receiverStatus = 'deleted')
             ORDER BY `timestamp` DESC";
 
     if ($result = $conn->query($sql)) {
@@ -864,12 +872,13 @@ function get_deleted_conversations($user) {
     }    
 }
 
-function set_new_conversation($sender_name, $receiver_name, $title, $message, $date, $attachment) {
+function set_new_conversation($sender_name, $receiver_name, $title, $message, $date, $attachment, $sender_status, $receiver_status) {
     global $conn;
     connect_to_db();
 
-    $sql = "INSERT INTO Conversation (`timestamp`, sender, receiver, title, sender_delete, receiver_delete)
-            VALUES ('$date' , '$sender_name' , '$receiver_name' , '$title', 'false', 'false')";
+    $sql = "INSERT INTO Conversation (`timestamp`, sender, receiver, title, sender_conversationStatusId, receiver_conversationStatusId)
+            VALUES ('$date' , '$sender_name' , '$receiver_name' , '$title', (SELECT id FROM ConversationStatus WHERE status = '$sender_status'), 
+                   (SELECT id FROM ConversationStatus WHERE status = '$receiver_status'))";
 
     if ($result = $conn->query($sql)) {
         $sql = "SELECT id from Conversation ORDER BY id DESC LIMIT 1";
@@ -892,7 +901,7 @@ function set_new_conversation($sender_name, $receiver_name, $title, $message, $d
     }
 }
 
-function delete_conversation($conversation_id) {
+function change_conversation_status($conversation_id, $status){
     global $conn;
     connect_to_db();
 
@@ -902,13 +911,13 @@ function delete_conversation($conversation_id) {
     if($result = $conn->query($sql)){
         $row = $result->fetch_assoc();
         if ($row["sender"] == $_SESSION["username"]) {
-            $deletefrom = "sender_delete";
+            $deletefrom = "sender_conversationStatusId";
         } else {
-            $deletefrom = "receiver_delete";
+            $deletefrom = "receiver_conversationStatusId";
         }
 
         $sql = "UPDATE Conversation 
-                SET " .$deletefrom. " = true
+                SET " .$deletefrom. " = (SELECT id FROM ConversationStatus WHERE status = '$status')
                 WHERE id = '$conversation_id'";
 
         if($result = $conn->query($sql)){
