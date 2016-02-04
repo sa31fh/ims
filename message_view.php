@@ -22,7 +22,7 @@
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="message"><?php echo $row["attachment"] ?></div>
         <div class="message">
-            <span id="name"><?php echo $row["sender"] ?></span><br/>
+            <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span><br/>
             <span id="message"><?php echo $row["message"] ?></span>
             <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
 
