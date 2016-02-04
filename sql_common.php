@@ -831,7 +831,7 @@ function get_received_conversations($user) {
     connect_to_db();
 
     $sql = "SELECT * FROM Conversation
-            INNER JOIN (SELECT first_name, last_name, username FROM USER) AS nameTable
+            INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
             ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
             WHERE (sender = '$user' AND sender_delete = false)
             OR (receiver = '$user'AND receiver_delete = false)
@@ -850,7 +850,7 @@ function get_deleted_conversations($user) {
     connect_to_db();
 
     $sql = "SELECT * FROM Conversation
-            INNER JOIN (SELECT first_name, last_name, username FROM USER) AS nameTable
+            INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
             ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
             WHERE (sender = '$user' AND sender_delete = true )
             OR (receiver = '$user' AND receiver_delete = true)
