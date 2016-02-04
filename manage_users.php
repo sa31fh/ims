@@ -10,7 +10,7 @@
         exit();
     }
     if (isset($_POST["new_username"])) {
-        add_new_user($_POST['new_username'], $_POST['new_password'], $_POST['userrole']);
+        add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole']);
     } 
     if(isset($_POST["delete_username"])){
         delete_user($_POST["delete_username"]);
@@ -29,6 +29,8 @@
         <table class="user_table" id="table" >
             <tr>
                 <th>User</th>
+                <th>FirstName</th>
+                <th>LastName</th>
                 <th>Role</th>
                 <th></th>
             </tr>
@@ -36,8 +38,10 @@
             <?php while ($userdata = $result->fetch_assoc()): ?>
                 <tr>
                     <td id="name"><?php echo $userdata["username"]; ?></td>
+                    <td> <?php echo $userdata["first_name"]; ?></td>
+                    <td> <?php echo $userdata["last_name"]; ?></td>
                     <td id="role">
-                        <select onchange=updateRole(this) name="" id=""class="none" <?php if ($userdata["username"] == $_SESSION["username"]) {echo "disabled";} ?>>
+                        <select onchange=updateRole(this) id=""class="none" <?php if ($userdata["username"] == $_SESSION["username"]) {echo "disabled";} ?>>
                             <?php $result2 = get_role(); ?>
                             <?php while ($row = $result2->fetch_assoc()): ?>
                                 <option  value="<?php echo $row["role"]?>" <?php if ($userdata["role"] == $row["role"]) {echo "selected";}?> > <?php echo $row["role"] ?> </option>
@@ -59,6 +63,8 @@
         <h4>Add New User</h4>
         <form action="manage_users.php" method="post">
             <input class="userinput" type="text" name="new_username" placeholder="Username" required><br/>
+            <input class="userinput" type="text" name="new_firstname" placeholder="First Name" required><br/>
+            <input class="userinput" type="text" name="new_lastname" placeholder="Last Name" required><br/>
             <input class="userinput" type="password" name="new_password" placeholder="Password" required><br/>
             <label for="userrole">User Role:</label><select name="userrole" class="none role_select">
                 <?php $result = get_role(); ?>
