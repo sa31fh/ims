@@ -13,8 +13,11 @@
         }
     } 
     if (isset($_POST["update_user"])) {
-        $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
-        $_SESSION["timezone"] = $tz;
+        $tz = null;
+        if (!empty($_POST["city_select"])) {
+            $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
+            $_SESSION["timezone"] = $tz;
+        }
         update_user_details($_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz);
     }
 ?>
@@ -36,8 +39,8 @@
             <?php $row = $result->fetch_assoc(); ?>
             <form action="user_account.php" method="post">
                 <input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"><br/>
-                <input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name">*<br/>
-                <input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name">*<br/>
+                <input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name"><br/>
+                <input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name"><br/>
                 <select name="region_select" id="region_select" onchange=onTimeZoneSelect(this)>
                     <?php $oldregion = ""; ?>
                     <?php foreach (timezone_identifiers_list() as $tz): ?>
@@ -50,7 +53,7 @@
                 </select>
                 <select name="city_select" id="city_select">
                 </select><br/>
-                <input class="button" type="submit" value="Save"><span>   *optional</span>
+                <input class="button" type="submit" value="Save">
             </form>
         </div>
         
