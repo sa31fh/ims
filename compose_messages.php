@@ -22,11 +22,11 @@
 <body>
     <div>
         <form action="compose_messages.php" method="post">
-            <select name="recipient" id="recipient">
+            <select class="select_user" name="recipient" id="recipient">
                 <?php $result = get_users(); ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <?php if ($row["username"] != $_SESSION["username"]): ?>
-                        <option value="<?php echo $row["username"] ?>"><?php echo $row["username"] ?></option>
+                        <option value="<?php echo $row["username"] ?>"><?php echo $row["first_name"]." ".$row["last_name"]."(".$row["username"].")"; ?></option>
                     <?php endif ?>
                 <?php endwhile ?>
             </select><br/>
