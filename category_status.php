@@ -64,7 +64,7 @@
         var sales = obj.value;
 
         $(function(){
-            $.post("sql_common.php", {sales: sales});
+            $.post("jq_ajax.php", {sales: sales});
         });
     }
 </script>
