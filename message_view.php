@@ -6,7 +6,7 @@
         exit();
     }
     if (isset($_POST["reply"])) {
-        set_new_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"));
+        create_new_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"));
     }
 ?>
 
@@ -25,7 +25,6 @@
             <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span><br/>
             <span id="message"><?php echo $row["message"] ?></span>
             <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
-
         </div>
     <?php endwhile ?>
     <div class="reply_div">
