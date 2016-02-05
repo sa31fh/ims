@@ -18,7 +18,9 @@
             $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
             $_SESSION["timezone"] = $tz;
         }
-        update_user_details($_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz);
+        if(update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
+            $_SESSION["username"] = $_POST["update_user"];
+        }
     }
 ?>
 
@@ -32,11 +34,10 @@
 <body>
     <?php include_once "new_nav.php" ?>
     <div class="main">
-
         <div>
             <h4>Edit Credentials</h4>
-            <?php $result = get_user_details($_SESSION["username"]); ?>
-            <?php $row = $result->fetch_assoc(); ?>
+            <?php $result = get_user_details($_SESSION["username"]);
+                  $row = $result->fetch_assoc(); ?>
             <form action="user_account.php" method="post">
                 <input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"><br/>
                 <input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name"><br/>
@@ -47,16 +48,14 @@
                         <?php $region = explode("/", $tz); ?>
                         <?php $removetz = array('Pacific', 'Antarctica', 'Arctic', 'UTC', 'Indian', 'Atlantic', $oldregion); ?>
                         <?php if (!in_array($region[0], $removetz, true)): ?>
-                            <option value="<?php echo $region[0] ?>"> <?php echo $region[0] ?></option>
+                                 <option value="<?php echo $region[0] ?>"> <?php echo $region[0] ?></option>
                         <?php endif ?>
                     <?php $oldregion= $region[0]; endforeach ?>
                 </select>
-                <select name="city_select" id="city_select">
-                </select><br/>
+                <select name="city_select" id="city_select"></select><br/>
                 <input class="button" type="submit" value="Save">
             </form>
         </div>
-        
 
         <div>
             <h4>Edit Password</h4>
@@ -83,7 +82,7 @@
         var userName = document.getElementById("user_name").value;
 
         $(function(){
-            $.post("sql_common.php", {userName: userName, password: current_pass.value}, function(data,status){
+            $.post("jq_ajax.php", {userName: userName, password: current_pass.value}, function(data,status){
                verified = data;
                style(data);
             });
@@ -126,7 +125,7 @@
         var region = obj.value;
 
          $(function(){
-            $.post("sql_common.php", {timeZoneRegion: region}, function(data,status){
+            $.post("jq_ajax.php", {timeZoneRegion: region}, function(data,status){
                  document.getElementById("city_select").innerHTML = data;
             });
         });
