@@ -75,7 +75,6 @@
             <input type="submit" value="Add" class="button">
         </form>
     </div>
-    
 </body>
 </html>
 
@@ -83,11 +82,11 @@
 <script>
      function updateRole(obj){
         var role = obj.value;
-        var rowindex = obj.parentNode.parentNode.rowIndex;
-        var username = document.getElementById("table").rows[rowindex].cells[0].innerHTML;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var newUserName = document.getElementById("table").rows[rowIndex].cells[0].innerHTML;
         
         $(function(){
-            $.post("sql_common.php", {newRole: role, UserName: username});
+            $.post("jq_ajax.php", {newRole: role, newUserName: newUserName});
         });
     }
 </script>

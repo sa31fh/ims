@@ -77,11 +77,11 @@
 <script>
     function quantityChange(obj){
         var quantity = obj.value;
-        var rowindex = obj.parentNode.parentNode.rowIndex;
-        var item_id = document.getElementById("table").rows[rowindex].children[4].value;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
 
         $(function(){
-            $.post("sql_common.php", {item_id: item_id, quantity: quantity});
+            $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
         });
     }
 </script>

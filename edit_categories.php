@@ -75,7 +75,7 @@
         document.getElementById("category_name").value = obj.value;
 
         $(function(){
-            $.post("sql_common.php", {categoryName: categoryName}, function(data,status){
+            $.post("jq_ajax.php", {showCategorizedItems: categoryName}, function(data,status){
                  document.getElementById("div").innerHTML = data;
             });
         });
@@ -83,10 +83,10 @@
 
     $(function(){
         $("#categorize_button").click(function(){
-            var UncategorizeValue = document.getElementById("uncategorized_list").value;
+            var unCategorizeValue = document.getElementById("uncategorized_list").value;
             var categoryName = document.getElementById("category_select").value;
 
-            $.post("sql_common.php", {items: UncategorizeValue, CategoryName: categoryName}, function(data,status){
+            $.post("sql_common.php", {items: unCategorizeValue, categoryName: categoryName}, function(data,status){
             });
         
             $("#uncategorized_list > option:selected").each(function(){
@@ -95,9 +95,9 @@
         });
         
         $("#uncategorize_button").click(function(){
-            var CategorizeValue = document.getElementById("categorized_list").value;
+            var categorizeValue = document.getElementById("categorized_list").value;
 
-            $.post("sql_common.php", {items: CategorizeValue, CategoryName: null}, function(data,status){
+            $.post("sql_common.php", {items: categorizeValue, categoryName: null}, function(data,status){
             });
 
             $("#categorized_list > option:selected").each(function(){

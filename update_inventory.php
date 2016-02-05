@@ -44,13 +44,13 @@
 <script>
     function updateInventory(obj){
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var date = document.getElementById("date").value;
-        var item_id = document.getElementById("table").rows[rowIndex].children[4].value;
-        var item_quantity = document.getElementById("table").rows[rowIndex].cells[2].children[0].value;
-        var item_notes = document.getElementById("table").rows[rowIndex].cells[3].children[0].value;
+        var itemDate = document.getElementById("date").value;
+        var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
+        var itemQuantity = document.getElementById("table").rows[rowIndex].cells[2].children[0].value;
+        var itemNote = document.getElementById("table").rows[rowIndex].cells[3].children[0].value;
 
         $(function(){
-            $.post("sql_common.php", {itId: item_id, itDate: date, itQuan: item_quantity, itNote: item_notes});
+            $.post("sql_common.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
         });
     }
 </script>
