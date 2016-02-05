@@ -77,14 +77,22 @@ DROP TABLE IF EXISTS `Conversation`;
 CREATE TABLE `Conversation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `timestamp` datetime NOT NULL,
-  `sender` varchar(45) NOT NULL,
-  `receiver` varchar(45) NOT NULL,
+  `sender` varchar(45) DEFAULT NULL,
+  `receiver` varchar(45) DEFAULT NULL,
   `title` text,
-  `sender_delete` tinyint(4) DEFAULT NULL,
-  `receiver_delete` tinyint(4) DEFAULT NULL,
+  `sender_conversationStatusId` int(11) DEFAULT NULL,
+  `receiver_conversationStatusId` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `FK_sender_idx` (`sender`),
+  KEY `FK_receiver_idx` (`receiver`),
+  KEY `FK_senderConversationId_idx` (`sender_conversationStatusId`),
+  KEY `FK_receiverConversationId_idx` (`receiver_conversationStatusId`),
+  CONSTRAINT `FK_receiverConversationId` FOREIGN KEY (`receiver_conversationStatusId`) REFERENCES `conversationstatus` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `FK_receiver` FOREIGN KEY (`receiver`) REFERENCES `user` (`username`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_sender` FOREIGN KEY (`sender`) REFERENCES `user` (`username`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_senderConversationId` FOREIGN KEY (`sender_conversationStatusId`) REFERENCES `conversationstatus` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,6 +102,30 @@ CREATE TABLE `Conversation` (
 LOCK TABLES `Conversation` WRITE;
 /*!40000 ALTER TABLE `Conversation` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Conversation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ConversationStatus`
+--
+
+DROP TABLE IF EXISTS `ConversationStatus`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ConversationStatus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ConversationStatus`
+--
+
+LOCK TABLES `ConversationStatus` WRITE;
+/*!40000 ALTER TABLE `ConversationStatus` DISABLE KEYS */;
+INSERT INTO `ConversationStatus` VALUES (1,'read'),(2,'unread'),(3,'deleted');
+/*!40000 ALTER TABLE `ConversationStatus` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -160,13 +192,19 @@ DROP TABLE IF EXISTS `Message`;
 CREATE TABLE `Message` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `timestamp` datetime DEFAULT NULL,
-  `sender` varchar(45) NOT NULL,
-  `receiver` varchar(45) NOT NULL,
+  `sender` varchar(45) DEFAULT NULL,
+  `receiver` varchar(45) DEFAULT NULL,
   `message` text NOT NULL,
   `attachment` text,
   `conversation_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`id`),
+  KEY `FK_conversation_id_idx` (`conversation_id`),
+  KEY `FK_message_sender_idx` (`sender`),
+  KEY `FK_message_receiver_idx` (`receiver`),
+  CONSTRAINT `FK_conversationId` FOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_messageReceiver` FOREIGN KEY (`receiver`) REFERENCES `conversation` (`receiver`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_messageSender` FOREIGN KEY (`sender`) REFERENCES `conversation` (`sender`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,7 +241,7 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES ('atif','','','$2y$10$1LUdtTDPWYeDZ3ualQpnCuBDd44cAsB7V75rBtbJz.QiB.W1I4L.S',1,'America/Toronto'),('test',NULL,NULL,'$2y$10$/ZiP3ihoSrxgesWt5qpIw.3uSXHX3/8sf.eD663NtHZqoy.hVa7TK',1,NULL),('user','','','$2y$10$ryVmYsHgbObf5GRqE6Ubneca1rXQouHDNehdtMJ0/kMekSYYyCmWi',2,'America/New_York'),('wasif','','','$2y$10$c1Tq4P62IYcHpkGGQfz8NukYpezMwCs6p/4GNv8LJnHDdfqNSd1CK',1,'Asia/Karachi');
+INSERT INTO `User` VALUES ('atif','atif','hussain','$2y$10$okObY3TZpUmlHGMlOP8uX.618JISHnpsf/up8Xn9h3tsztlZvkGjS',1,NULL),('test','test','1','$2y$10$tjaNFUINXjcKtkruBiyeYeZkaTaEWTbDG5v/w9bRy4DYNWyVzvztm',1,NULL),('user','user','3','$2y$10$Ou/slOrcgQiIUA7JlJslpu5giIXa0Fq8TL8QPWqDgrMgb8HL5hZNK',1,NULL),('wasif','wasif','hussain','$2y$10$c1Tq4P62IYcHpkGGQfz8NukYpezMwCs6p/4GNv8LJnHDdfqNSd1CK',1,'');
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -266,4 +304,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-02-04 13:14:42
+-- Dump completed on 2016-02-05 21:55:57
