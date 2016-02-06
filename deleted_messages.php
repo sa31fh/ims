@@ -6,7 +6,7 @@
         exit();
     }
     if (isset($_POST["conversation_id"])) {
-        change_conversation_status($_POST["conversation_id"], "read");
+        change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
     }
 ?>
 

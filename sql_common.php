@@ -747,7 +747,7 @@ function create_new_conversation($sender_name, $receiver_name, $title, $message,
     }
 }
 
-function change_conversation_status($conversation_id, $status){
+function change_conversation_status($user, $conversation_id, $status){
     global $conn;
     connect_to_db();
 
@@ -756,23 +756,23 @@ function change_conversation_status($conversation_id, $status){
 
     if($result = $conn->query($sql)){
         $row = $result->fetch_assoc();
-        if ($row["sender"] == $_SESSION["username"]) {
-            $deletefrom = "sender_conversationStatusId";
+        if ($row["sender"] == $user) {
+            $status_of = "sender_conversationStatusId";
         } else {
-            $deletefrom = "receiver_conversationStatusId";
+            $status_of = "receiver_conversationStatusId";
         }
 
         $sql = "UPDATE Conversation 
-                SET " .$deletefrom. " = (SELECT id FROM ConversationStatus WHERE status = '$status')
+                SET " .$status_of. " = (SELECT id FROM ConversationStatus WHERE status = '$status')
                 WHERE id = '$conversation_id'";
 
         if($result = $conn->query($sql)){
             return true;
         } else {
-            echo "delete_conversation query failed";
+            echo "change_conversation_status query failed";
         }
     } else {
-            echo "delete_conversation query failed";
+            echo "change_conversation_status query failed";
     }
 }
 
@@ -783,7 +783,8 @@ function get_messages($conversation_id) {
     $sql = "SELECT * FROM Message
             INNER JOIN (SELECT first_name, last_name, username FROM User) as nameTable
             ON nameTable.username = Message.sender
-            WHERE conversation_id = '$conversation_id'";
+            WHERE conversation_id = '$conversation_id'
+            ORDER BY `timestamp` ASC";
 
     if ($result = $conn->query($sql)) {
         return $result; 
@@ -808,11 +809,11 @@ function create_new_message($sender, $receiver, $message, $conversation_id, $dat
         if($result = $conn->query($sql)){
             return true;
         } else {
-            echo "set_new_message query failed";
+            echo "create_message query failed at updating conversation";
             return false;
         }
     } else {
-        echo "<br> set_new_message query failed <br>";
+        echo "<br> create_message query failed <br>";
         return false;
     }
 
