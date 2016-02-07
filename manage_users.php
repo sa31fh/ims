@@ -83,10 +83,10 @@
      function updateRole(obj){
         var role = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var newUserName = document.getElementById("table").rows[rowIndex].cells[0].innerHTML;
+        var roleUserName = document.getElementById("table").rows[rowIndex].cells[0].innerHTML;
         
         $(function(){
-            $.post("jq_ajax.php", {newRole: role, newUserName: newUserName});
+            $.post("jq_ajax.php", {newRole: role, roleUserName: roleUserName});
         });
     }
 </script>

@@ -50,7 +50,7 @@
         var itemNote = document.getElementById("table").rows[rowIndex].cells[3].children[0].value;
 
         $(function(){
-            $.post("sql_common.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
+            $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
         });
     }
 </script>

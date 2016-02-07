@@ -443,27 +443,21 @@ function get_inventory($category_id, $date) {
     }
 }
 
-function update_inventory($category_id, $date, $items, $values, $notes) {
+function update_inventory($date, $item_id, $quantity, $item_note) {
     global $conn;
     connect_to_db();
 
-    for ($i = 0; $i < count($items); $i++) {
-        if ($values[$i] == null) {
-            continue;
-        }
+    $sql = "INSERT INTO Inventory (`date`, item_id, quantity, notes)
+            VALUES ('$date', '$item_id', '$quantity', '$item_note')
+            ON DUPLICATE KEY UPDATE 
+            `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
 
-        $sql = "INSERT INTO Inventory (`date`, `item_id`, `quantity`, `notes`)
-                VALUES ('" .$date. "', '" .$items[$i]. "', '" .$values[$i]. "', '" .$notes[$i]. "')
-                ON DUPLICATE KEY UPDATE 
-                date=VALUES(date), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
-
-        if ($result = $conn->query($sql)) {
-            return $result; 
-        } else {
-            echo "<br> update_inventory query failed <br>";
-            return false;
-        }   
-    }
+    if ($result = $conn->query($sql)) {
+        return $result; 
+    } else {
+        echo "<br> update_inventory query failed <br>";
+        return false;
+    }   
 }
 
 function get_expected_sales() {
@@ -595,23 +589,22 @@ function get_uncategorized_items(){
 function update_items_category($category_name, $items) {
     global $conn;
     connect_to_db();
-
     $category_id = null;
 
     if ($category_name != null) {
         $sql = "SELECT Category.id FROM Category 
-                WHERE Category.name = '$category_name.' AND deletion_date IS NULL";
+                WHERE Category.name = '$category_name' AND deletion_date IS NULL";
 
-        $result = $conn->query($sql); 
-        if ($result == False) {
-            echo "<br> Query failed <br>";
+        if ($result = $conn->query($sql)) {
+            $category_id = $result->fetch_assoc()['id'];
         }
-        $category_id = $result->fetch_assoc()['id'];
     }
-    $sql = 'UPDATE Item SET category_id = ' .($category_id == null ? "null":$category_id). ' WHERE name = "' .$items. '"';
-    $result = $conn->query($sql); 
-    if ($result == False) {
-        echo "<br> Query failed <br>";
+    $sql = "UPDATE Item SET category_id =" .($category_id == null ? "null":$category_id). " WHERE name = '$items'";
+    if ($result = $conn->query($sql)) {
+        return $result; 
+    } else {
+        echo "<br> update_items_category query failed <br>";
+        return false;
     }
 }
 
@@ -676,15 +669,15 @@ function get_received_conversations($user) {
     global $conn;
     connect_to_db();
 
-    $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, senderStatus, receiverStatus, title FROM Conversation
+    $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, sender_status, receiver_status, title FROM Conversation
             INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
             ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
-            INNER JOIN (SELECT id as sstId, status AS senderStatus FROM ConversationStatus) as senderStatusTable
+            INNER JOIN (SELECT id as sstId, status AS sender_status FROM ConversationStatus) as senderStatusTable
             ON senderStatusTable.sstId = sender_conversationStatusId
-            INNER JOIN (SELECT id as rstId, `status` AS receiverStatus FROM ConversationStatus) as receiverStatusTable
+            INNER JOIN (SELECT id as rstId, `status` AS receiver_status FROM ConversationStatus) as receiverStatusTable
             ON receiverStatusTable.rstId = receiver_conversationStatusId 
-            WHERE (sender = '$user' AND senderStatus != 'deleted')
-            OR (receiver = '$user'AND receiverStatus != 'deleted')
+            WHERE (sender = '$user' AND (sender_status != 'deleted' AND sender_status != 'destroy'))
+            OR (receiver = '$user'AND (receiver_status != 'deleted' AND receiver_status != 'destroy'))
             ORDER BY `timestamp` DESC";
 
     if ($result = $conn->query($sql)) {
@@ -699,15 +692,15 @@ function get_deleted_conversations($user) {
     global $conn;
     connect_to_db();
 
-    $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, senderStatus, receiverStatus, title FROM Conversation
+    $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, sender_status, receiver_status, title FROM Conversation
             INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
             ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
-            INNER JOIN (SELECT id as sstId, status AS senderStatus FROM ConversationStatus) as senderStatusTable
+            INNER JOIN (SELECT id as sstId, status AS sender_status FROM ConversationStatus) as senderStatusTable
             ON senderStatusTable.sstId = sender_conversationStatusId
-            INNER JOIN (SELECT id as rstId, `status` AS receiverStatus FROM ConversationStatus) as receiverStatusTable
+            INNER JOIN (SELECT id as rstId, `status` AS receiver_status FROM ConversationStatus) as receiverStatusTable
             ON receiverStatusTable.rstId = receiver_conversationStatusId 
-            WHERE (sender = '$user' AND senderStatus = 'deleted' )
-            OR (receiver = '$user' AND receiverStatus = 'deleted')
+            WHERE (sender = '$user' AND sender_status = 'deleted' )
+            OR (receiver = '$user' AND receiver_status = 'deleted')
             ORDER BY `timestamp` DESC";
 
     if ($result = $conn->query($sql)) {
