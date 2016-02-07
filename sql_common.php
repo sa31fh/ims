@@ -809,7 +809,21 @@ function create_new_message($sender, $receiver, $message, $conversation_id, $dat
         echo "<br> create_message query failed <br>";
         return false;
     }
+}
 
+function count_unread_conversations($user, $status){
+    global $conn;
+    connect_to_db();
+
+    $sql = "SELECT COUNT(id) AS unreadConversations FROM Conversation 
+            WHERE (sender = '$user' AND sender_conversationStatusId = (SELECT id FROM ConversationStatus WHERE status = '$status'))
+            OR (receiver = '$user' AND receiver_conversationStatusId = (SELECT id FROM ConversationStatus WHERE status = '$status'))";
+
+    if($result = $conn->query($sql)){
+        return $result->fetch_assoc()['unreadConversations'];
+    } else {
+        echo "count_unread_conversations query failed";
+    }
 }
 
 function convert_date_timezone($date) {

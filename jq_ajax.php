@@ -88,4 +88,8 @@ if (isset($_POST["timeZoneRegion"])) {
    }       
 }
 
+if (isset($_POST["sessionName"])) {
+    echo count_unread_conversations($_POST["sessionName"], $_POST["status"]);
+}
+
 ?>

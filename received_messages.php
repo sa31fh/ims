@@ -22,7 +22,8 @@
         <table class="message_table" id="table">
             <?php $result = get_received_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
-                <tr onclick=openMessage(this)>
+                <tr <?php if($row["sender"] == $_SESSION["username"] AND $row["sender_status"] == "unread" OR $row["receiver"] == $_SESSION["username"] AND $row["receiver_status"] == "unread" ) {
+                              echo 'class="unread"';} ?> onclick=openMessage(this)>
                     <td class="name"> 
                         <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?> 
@@ -39,6 +40,7 @@
         <form action="message_view.php" id="view_message" method="post">
             <input type="hidden" id="conversation_id" name="conversation_id">
             <input type="hidden" id="receiver_name" name="receiver_name">
+            <input type="hidden" name="status_to_read">
         </form>
    </div> 
 </body>
