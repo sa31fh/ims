@@ -42,11 +42,13 @@
         </div>
 
         <div class="inline"><iframe src="" id="new_iframe" name="ifram" scrolling="no" frameborder="0" onload=adjustHeight(id)></iframe></div>
-            
-        <div>
-            <span ><strong>Expected Sales ($):</strong></span>
-            <input type="number" value="<?php echo get_expected_sales() ?>" onchange=updateSales(this)>
-        </div>
+        
+        <?php if ($_SESSION["userrole"] == "admin"): ?>
+            <div>
+                <span ><strong>Expected Sales ($):</strong></span>
+                <input type="number" value="<?php echo get_expected_sales() ?>" onchange=updateSales(this)>
+            </div>
+        <?php endif ?>   
     </div>
 </body>
 </html>
