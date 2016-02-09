@@ -29,20 +29,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Account</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <?php include_once "new_nav.php" ?>
     <div class="main">
         <div>
-            <h4>Edit Credentials</h4>
+            <h4>Edit Credentials<hr></h4>
             <?php $result = get_user_details($_SESSION["username"]);
                   $row = $result->fetch_assoc(); ?>
             <form action="user_account.php" method="post">
-                <input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"><br/>
-                <input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name"><br/>
-                <input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name"><br/>
-                <select name="region_select" id="region_select" onchange=onTimeZoneSelect(this)>
+                <label>User Name<input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"></label><br/>
+                <label>First Name<input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name"></label><br/>
+                <label>Last Name<input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name"></label><br/>
+                <label>Time zone<input class="userinput" type="text" value="<?php echo $_SESSION['timezone'] ?>" readonly></label><br/>
+                <select class="user_select" name="region_select" id="region_select" onchange=onTimeZoneSelect(this)>
                     <?php $oldregion = ""; ?>
                     <?php foreach (timezone_identifiers_list() as $tz): ?>
                         <?php $region = explode("/", $tz); ?>
@@ -52,7 +54,7 @@
                         <?php endif ?>
                     <?php $oldregion= $region[0]; endforeach ?>
                 </select>
-                <select name="city_select" id="city_select"></select><br/>
+                <select class="user_select" name="city_select" id="city_select"></select><br/>
                 <input class="button" type="submit" value="Save">
             </form>
         </div>
@@ -60,9 +62,9 @@
         <div>
             <h4>Edit Password</h4>
             <form action="user_account.php" method="post">
-                <input class="userinput password_view" type="password" id="current_password" name="current_password" placeholder="Current Password" oninput= verifyCurrentPassword() required ><br/>
-                <input class="userinput password_view" type="password" id="new_password" name="new_password" placeholder="New Password" oninput= verifyNewPassword() required><br/> 
-                <input class="userinput password_view" type="password" id="retype_password" name="retype_password" placeholder="Retype Password" oninput= verifyNewPassword() required><br/>
+                <label>Current Password<input class="userinput password_view" type="password" id="current_password" name="current_password" oninput= verifyCurrentPassword() required ></label><br/>
+                <label>New Password<input class="userinput password_view" type="password" id="new_password" name="new_password" oninput= verifyNewPassword() required></label><br/>
+                <label>Retype Password<input class="userinput password_view" type="password" id="retype_password" name="retype_password" oninput= verifyNewPassword() required></label><br/>
                 <input class="button" type="submit" id="submit_password" name="submit_password" value="Submit" disabled>
                 <input type="hidden" id="user_name" name="user_name" value="<?php echo $_SESSION['username']; ?>">
             </form>
