@@ -12,6 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Print Preview</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,9 +21,9 @@
         <input type="button" onclick=sendPrint() value="Send Table" class="button">
     </div>
 
-    <div id="table">
-        <table class="user_table">
-            <tr>
+    <div>
+        <table class="user_table" id="print">
+            <tr id="print_date">
                 <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
             </tr>
             <?php $current_category = null;
@@ -30,8 +31,8 @@
             <?php while ($row =$result->fetch_assoc()): ?>
                 <?php if ($row["category_name"] != $current_category): ?>
                     <?php $current_category = $row["category_name"] ?>
-                    <tr><th colspan="5"><?php echo $current_category ?></th></tr>
-                    <tr>
+                    <tr id="category"><th colspan="5"><?php echo $current_category ?></th></tr>
+                    <tr id="category_columns">
                         <th>Item</th>
                         <th>Unit</th>
                         <th>Quantity Present</th>

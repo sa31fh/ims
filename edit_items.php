@@ -28,6 +28,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -65,8 +66,8 @@
     <div class="user_add_div">
         <h4>Add New Item</h4>
         <form action="edit_items.php" method="post">
-            <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required><br/>
-            <input class="userinput" type="text" name="new_item_unit" placeholder="Item Unit" required><br/>
+            <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required>
+            <input class="userinput" type="text" name="new_item_unit" placeholder="Item Unit" required>
             <input type="submit" value="Add Item" class="button">
         </form>
     </div>

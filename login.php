@@ -27,8 +27,8 @@
 <body>
     <div>
         <form action="login.php" method="post">
-            <input class="userinput" type="text" name="username" placeholder="Username" required><br/>
-            <input class="userinput" type="password" name="password" placeholder="Password" required><br/>
+            <input class="userinput" type="text" name="username" placeholder="Username" required>
+            <input class="userinput" type="password" name="password" placeholder="Password" required>
             <input type="submit" value="login" class="button">
         </form>
     </div>

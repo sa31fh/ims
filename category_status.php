@@ -15,6 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>

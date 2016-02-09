@@ -62,10 +62,10 @@
     <div class="user_add_div">
         <h4>Add New User</h4>
         <form action="manage_users.php" method="post">
-            <input class="userinput" type="text" name="new_username" placeholder="Username" required><br/>
-            <input class="userinput" type="text" name="new_firstname" placeholder="First Name" required><br/>
-            <input class="userinput" type="text" name="new_lastname" placeholder="Last Name" required><br/>
-            <input class="userinput" type="password" name="new_password" placeholder="Password" required><br/>
+            <input class="userinput" type="text" name="new_username" placeholder="Username" required>
+            <input class="userinput" type="text" name="new_firstname" placeholder="First Name" required>
+            <input class="userinput" type="text" name="new_lastname" placeholder="Last Name" required>
+            <input class="userinput" type="password" name="new_password" placeholder="Password" required>
             <label for="userrole">User Role:</label><select name="userrole" class="none role_select">
                 <?php $result = get_role(); ?>
                 <?php while ($row = $result->fetch_assoc()): ?>

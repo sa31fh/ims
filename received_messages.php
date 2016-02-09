@@ -15,6 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Inbox</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -30,7 +31,7 @@
                     <td class="title"> <?php echo $row["title"] ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
                     <td class="delete"><form action="received_messages.php" method="post">
-                        <input class="button" type="submit" value="delete">
+                        <input type="image" src="images/delete.png" alt="delete" width="30" height="30">
                         <input type="hidden" name="conversation_id" value="<?php echo $row["id"] ?>"></form>
                     </td>
                 </tr>

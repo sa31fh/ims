@@ -13,6 +13,7 @@
     <meta charset="UTF-8">
     <title>Messages</title>
     <link rel="stylesheet" href="styles.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 </head>
 <body>
     <ul class="sidenav" id="sideNav">

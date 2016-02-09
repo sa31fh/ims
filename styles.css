@@ -4,8 +4,10 @@
 }
 
 body{
-    font-family: sans-serif;
+    font-family: 'Roboto', sans-serif;
     font-size: 18px;
+    font-weight: 200;
+    color: #222;
 }
 
 div{
@@ -20,7 +22,6 @@ caption{
 span{
     text-align: center;
 }
-
 
 textarea{
     font-family: sans-serif;
@@ -39,16 +40,33 @@ iframe{
 }
 
 label{
+    display: inline-block;
     font-size: 15px;
+    color: #333;
     font-weight: bold;
 }
 
 h4{
-    color: #222;
+    margin-bottom: 15px;
+}
+
+input{
+    margin: 5px 0px;
+    padding: 5px 0px 5px 5px;
+    font-size: 16px;
+}
+
+select{
+    text-align: center;
+    min-width: 130px;
+    height: 30px;
+    font-size: 16px;
+    margin: 5px 0px;
+    padding: 0px 10px;
 }
 
 .main{
-    margin-top: 55px;
+    margin-top: 50px;
     padding-top: 1px
 }
 
@@ -90,7 +108,7 @@ h4{
 }
 
 .button{
-    background: #4CAF50;
+    background: #65b891;
     border: 0 none;
     color: white;
     font-size: 16px;
@@ -103,7 +121,7 @@ h4{
     height: 30px;
 }
 .buttonBack{
-    background: #4CAF50;
+    background: #65b891;
     border: 0 none;
     color: white;
     font-size: 16px;
@@ -115,7 +133,7 @@ h4{
     text-decoration: none;
 }
 .button:hover, .buttonBack:hover{
-    background-color: #46C84B;
+    background-color: #93e5ab;
     box-shadow: 0px 0px 10px #6EF573;
 }
 
@@ -123,7 +141,6 @@ h4{
     background-color: #3e8e41;
     box-shadow: 0px 0px 5px -1px black;
 }
-
 
 .button:disabled{
     background : gray;
@@ -139,42 +156,9 @@ h4{
     width: 100%;
 }
 
-/* table{
-    margin-top: 20px;
-    border:1px solid lightgrey;
-    border-collapse:collapse;
-    }
-
-th,td{
-    border: 1px solid #777;
-    padding: 15px;
-    text-align: center;
-}
-
-table tr:nth-child(even){
-    background-color: #eee;
-}
-
-table tr:nth-child(odd){
-    background-color: #fff;
- */
-input{
-    margin: 5px 0px;
-    padding: 5px 0px 5px 5px;
-    font-size: 16px;
-}
-
 .align_center{
     text-align: center;
 }
-
-select{
-    text-align: center;
-    width: 175px;
-    height: 30px;
-    font-size: 18px;
-}
-
 .category_div{
     float: left;
     text-align: center;
@@ -182,6 +166,7 @@ select{
 }
 .category_select{
     padding: 10px;
+    min-width: 175px;
     height: 200px;
     font-size: 18px
 }
@@ -195,17 +180,17 @@ select{
     display: block;
 }
 
-.user_table{
+.user_table {
     border:0;
     width: 100%;
-    margin: 0px;
-    border: 1px solid #00A140;
+    margin: auto;
     border-collapse:collapse;
+    border: 1px solid #75a4a4;
 }
 
 .user_table td{
     text-align: center;
-    background-color: white;
+    color: #444;
     border: 0;
     height: 20px;
     padding: 10px;
@@ -213,7 +198,7 @@ select{
 
 .user_table th{
     text-align: center;
-    background-color: #4CAF50;
+    background-color: #517b7b;
     color: white;
     border: 0;
     padding: 5px 10px;
@@ -232,14 +217,39 @@ select{
     width: 10%;
 }
 
+#print{
+    border:0;
+    width: 80%;
+    margin: auto;
+    border-collapse:collapse;
+    border: 0 !important;
+}
+
+#print tr#print_date th{
+    background-color: white;
+    color: inherit;
+}
+
+#print tr#category th{
+    background-color: #517b7b ;
+}
+
+#print tr#category_columns th{
+    background-color: #75a4a4;
+    border: 1px solid white;
+}
+
 .user_add_div{
     margin:30px;
     display: block;
-    border: 1px solid #00A140;
+    border: 1px solid #75a4a4;
+}
+.user_add_div input[type="text"], .user_add_div input[type="password"]{
+    margin: 15px 5px;
 }
 .user_add_div h4{
     padding: 5px;
-    background-color: #4CAF50;
+    background-color: #517b7b;
     color: white;
 }
 .user_add_div label{
@@ -247,13 +257,13 @@ select{
 }
 
 .userinput{
+    display: block;
+    color: #444;
     width: 300px;
-    margin: 10px 5px;
-    border: 1px solid #00A140;
+    margin: 5px 0px;
+    border: 1px solid #93e5ab;
     border-radius: 3px;
 }
-
-
 
 
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
@@ -263,10 +273,15 @@ select{
 .message_table, .message_table th, .message_table td{
     border: 0;
     border-collapse: collapse;
+    font-size: 16px;
     text-align: left;
-    padding: 10px;
+    padding: 2px 0px 2px 10px;
+}
+.message_table tr{
+    border-bottom: 1px solid grey;
 }
 .message_table td{
+    color: #555;
     transition:background-color .25s;
 }
 
@@ -281,17 +296,26 @@ select{
 .message_table tr:hover td:not(.delete){
     background-color: rgba(234, 234, 234, 0.76);
 }
-.unread{
+.unread td{
+    color: #222 !important;
     font-weight: bold;
 }
-.unread td:not(.delete){
-    background-color: #CFFFBE;
+.unread {
+    /* background-color: #CFFFBE; */
+    border-left: 6px solid #65b891;
+    border-bottom: 1px solid #65b891 !important;
 }
 
 /* ---------------------MESSAGE STYLE--------------------- */
+.main_message_div{
+    display: table;
+    width: 600px;
+    background-color: #F2F2F2;
+    border-radius: 3px;
+}
 .message{
     display: block;
-    margin: 23px;
+    margin: 15px;
 }
 .message span{
     display: inline-block;
@@ -300,18 +324,22 @@ select{
     font-weight: bold;
     font-size: 17px;
     color: #717171;
+    margin-bottom: 2px
 }
 .message #message{
-    width: 50%;
+    width: 77%;
     min-width: 200px;
-    margin: 10px 20px;
+    margin: 10px 10px 10px 20px;
     text-align: left;
     word-wrap: break-word;
+    vertical-align: top;
 }
 .message #time{
     width: 10%;
+    margin-top: 10px;
     font-size: 16px;
     text-align: left;
+    vertical-align: bottom;
 }
 
 .reply_div{
@@ -354,7 +382,7 @@ nav ul li{
     transition: background-color .25s;
 }
 nav ul li:hover:not(#logout):not(#userrole_li):not(#timezone_li){
-    background-color: rgba(57, 204, 63, 0.67);
+    background-color: rgba(218, 218, 218, 0.26);
 }
 
 nav ul li a{
@@ -450,6 +478,10 @@ nav ul ul li a{
     margin: 0px 10px 0px 2px;
 }
 
+nav .active{
+    color: #4CAF50 !important;
+    border-bottom: 3px solid #65b891;
+}
 
 
 /* ----------------------SIDE NAVIGATION BAR STYLE------------------- */
@@ -459,29 +491,37 @@ nav ul ul li a{
     margin: 0;
     padding:0;
     width: 150px;
-    background-color: #e6e6e6;
+    /* background-color: #e6e6e6; */
     position: fixed;
     top: 50px;
     height: 100%;
-    padding-top: 20px
+    padding-top: 20px;
+    box-shadow: 0px -10px 10px -2px #777;
 }
 
 .sidenav li{
+    text-align: left;
+}
+
+.sidenav li#heading{
     text-align: center;
+    border-bottom: 2px solid #75a4a4;
+    padding-bottom:5px;
+    font-size:20px;
 }
 
 .sidenav li a {
     display: block;
-    padding: 10px 0px;
+    padding: 10px 0px 10px 30px;
     margin: 5px 0px;
     text-decoration: none;
-    color: #000;
-    transition:all .25s;
+    color: #222;
+    transition: color .2s, font-weight .2s;
 }
 
 .sidenav li:hover a{
-    color: white;
-    background-color: #65D269;
+/*     background-color: #65D269;*/
+    background-color: #e6e6e6;
 }
 
 .composeButton{
@@ -491,9 +531,10 @@ nav ul ul li a{
     text-align: center;
 }
 
-.active{
-    color: white !important;
-    background-color: #4CAF50;
+.sidenav .active{
+    color: #65b891 !important;
+    border-left: 5px solid #65b891;
+    font-weight: bold;
 }
 
 

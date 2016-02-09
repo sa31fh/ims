@@ -16,11 +16,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Tasks</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <ul class="sidenav" id="sideNav">
-        <li style="border-bottom:2px solid #00A140;padding-bottom:5px;font-size:21px;">Admin Tasks</li>
+        <li id="heading"><span>Admin Tasks</span></li>
         <li><a class="active" href="edit_categories.php" target="task_frame" >Categories</a></li>
         <li><a href="edit_items.php" target="task_frame" >Items</a></li>
         <li><a href="manage_users.php" target="task_frame">Users</a></li>
