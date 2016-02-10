@@ -284,6 +284,9 @@ select{
     color: #555;
     transition:background-color .25s;
 }
+.message_table input:focus{
+    outline: none;
+}
 
 .title{
     width: 65%;

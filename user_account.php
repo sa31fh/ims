@@ -13,7 +13,7 @@
         }
     } 
     if (isset($_POST["update_user"])) {
-        $tz = null;
+        $tz = $_SESSION["timezone"];
         if (!empty($_POST["city_select"])) {
             $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
             $_SESSION["timezone"] = $tz;
