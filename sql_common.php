@@ -740,32 +740,50 @@ function create_new_conversation($sender_name, $receiver_name, $title, $message,
     }
 }
 
-function change_conversation_status($user, $conversation_id, $status){
+function change_conversation_status($user, $conversation_id, $status) {
     global $conn;
     connect_to_db();
 
-    $sql = "SELECT sender FROM Conversation
+    $sql = "UPDATE Conversation 
+            SET sender_conversationStatusId = IF(sender = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), sender_conversationStatusId),
+                receiver_conversationStatusId = IF(receiver = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), receiver_conversationStatusId)
             WHERE id = '$conversation_id'";
 
-    if($result = $conn->query($sql)){
-        $row = $result->fetch_assoc();
-        if ($row["sender"] == $user) {
-            $status_of = "sender_conversationStatusId";
-        } else {
-            $status_of = "receiver_conversationStatusId";
-        }
-
-        $sql = "UPDATE Conversation 
-                SET " .$status_of. " = (SELECT id FROM ConversationStatus WHERE status = '$status')
-                WHERE id = '$conversation_id'";
-
-        if($result = $conn->query($sql)){
-            return true;
-        } else {
-            echo "change_conversation_status query failed";
-        }
+    if($result = $conn->query($sql)) {
+        return true;
     } else {
-            echo "change_conversation_status query failed";
+        echo "change_conversation_status query failed";
+    }
+}
+
+function set_destroy_date($user, $conversation_id, $date) {
+    global $conn;
+    connect_to_db();
+
+    $sql = "UPDATE Conversation 
+            SET sender_destroyDate = IF(sender = '$user', ".$date.", sender_destroyDate),
+                receiver_destroyDate = IF(receiver = '$user', ".$date.", receiver_destroyDate)
+            WHERE id = '$conversation_id'";
+
+    if($result = $conn->query($sql)) {
+        return true;
+    } else {
+        echo "set_destroy_date query failed";
+    }
+}
+
+function set_destroy_status($user, $date){
+    global $conn;
+    connect_to_db();
+
+    $sql = "UPDATE Conversation 
+            SET sender_conversationStatusId = IF((sender = '$user' AND sender_destroyDate = '$date'), (SELECT id FROM ConversationStatus WHERE status = 'destroy') , sender_conversationStatusId),
+                receiver_conversationStatusId = IF((receiver = '$user' AND receiver_destroyDate = '$date'), (SELECT id FROM ConversationStatus WHERE status = 'destroy') , receiver_conversationStatusId)";
+
+    if ($result = $conn->query($sql)) {
+        return true;
+    } else {
+        echo "set_destroy_status query failed";
     }
 }
 

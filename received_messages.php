@@ -6,7 +6,10 @@
         exit();
     } 
     if (isset($_POST["conversation_id"])) {
-        change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted");
+        if(change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted")) {
+            $date = date_format((date_add(date_create(gmdate("Y-m-d")), date_interval_create_from_date_string("1 week"))), "Y-m-d");
+            set_destroy_date($_SESSION["username"], $_POST["conversation_id"], "'$date'");
+        }
     }
 ?>
 
@@ -30,7 +33,8 @@
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?> 
                     <td class="title"> <?php echo $row["title"] ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
-                    <td class="delete"><form action="received_messages.php" method="post">
+                    <td class="delete">
+                        <form action="received_messages.php" method="post">
                         <input type="image" src="images/delete.png" alt="delete" width="30" height="30">
                         <input type="hidden" name="conversation_id" value="<?php echo $row["id"] ?>"></form>
                     </td>

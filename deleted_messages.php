@@ -6,7 +6,9 @@
         exit();
     }
     if (isset($_POST["conversation_id"])) {
-        change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
+        if(change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
+            set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
+        }
     }
 ?>
 

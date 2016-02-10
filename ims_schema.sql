@@ -27,7 +27,7 @@ CREATE TABLE `BaseQuantity` (
   `quantity` decimal(11,2) DEFAULT NULL,
   PRIMARY KEY (`item_id`),
   UNIQUE KEY `item_id_UNIQUE` (`item_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -36,7 +36,7 @@ CREATE TABLE `BaseQuantity` (
 
 LOCK TABLES `BaseQuantity` WRITE;
 /*!40000 ALTER TABLE `BaseQuantity` DISABLE KEYS */;
-INSERT INTO `BaseQuantity` VALUES (1,12.00),(2,129.00),(3,14.00),(4,20.00),(5,12.00),(6,15.00),(7,203.00),(9,4.00);
+INSERT INTO `BaseQuantity` VALUES (1,12.00),(2,131.00),(3,14.00),(4,20.00),(5,12.00),(6,15.00),(7,200.00),(9,4.00),(130,0.00),(131,0.00),(132,0.00);
 /*!40000 ALTER TABLE `BaseQuantity` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -54,7 +54,7 @@ CREATE TABLE `Category` (
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,17 +82,15 @@ CREATE TABLE `Conversation` (
   `title` text,
   `sender_conversationStatusId` int(11) DEFAULT NULL,
   `receiver_conversationStatusId` int(11) NOT NULL,
+  `sender_destroyDate` date DEFAULT NULL,
+  `receiver_destroyDate` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `FK_sender_idx` (`sender`),
   KEY `FK_receiver_idx` (`receiver`),
   KEY `FK_senderConversationId_idx` (`sender_conversationStatusId`),
-  KEY `FK_receiverConversationId_idx` (`receiver_conversationStatusId`),
-  CONSTRAINT `FK_receiverConversationId` FOREIGN KEY (`receiver_conversationStatusId`) REFERENCES `conversationstatus` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `FK_receiver` FOREIGN KEY (`receiver`) REFERENCES `user` (`username`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_sender` FOREIGN KEY (`sender`) REFERENCES `user` (`username`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_senderConversationId` FOREIGN KEY (`sender_conversationStatusId`) REFERENCES `conversationstatus` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+  KEY `FK_receiverConversationId_idx` (`receiver_conversationStatusId`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +113,7 @@ CREATE TABLE `ConversationStatus` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `status` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,7 +122,7 @@ CREATE TABLE `ConversationStatus` (
 
 LOCK TABLES `ConversationStatus` WRITE;
 /*!40000 ALTER TABLE `ConversationStatus` DISABLE KEYS */;
-INSERT INTO `ConversationStatus` VALUES (1,'read'),(2,'unread'),(3,'deleted');
+INSERT INTO `ConversationStatus` VALUES (1,'read'),(2,'unread'),(3,'deleted'),(4,'destroy');
 /*!40000 ALTER TABLE `ConversationStatus` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,7 +139,7 @@ CREATE TABLE `Inventory` (
   `quantity` decimal(11,2) DEFAULT NULL,
   `notes` text,
   PRIMARY KEY (`item_id`,`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,7 +148,7 @@ CREATE TABLE `Inventory` (
 
 LOCK TABLES `Inventory` WRITE;
 /*!40000 ALTER TABLE `Inventory` DISABLE KEYS */;
-INSERT INTO `Inventory` VALUES ('2016-01-18',1,4.00,''),('2016-01-20',1,10.00,''),('2016-01-16',2,1.00,''),('2016-01-16',3,0.00,''),('2016-01-12',4,2.00,''),('2016-01-19',4,4.00,''),('2016-01-15',5,2006.00,''),('2016-01-17',5,20.00,''),('2016-01-18',5,20.00,''),('2016-01-19',5,3.00,''),('2016-01-20',5,10.00,''),('2016-01-22',5,12.00,''),('2016-01-25',5,12.00,''),('2016-01-26',6,0.00,''),('2016-01-16',7,4.00,'');
+INSERT INTO `Inventory` VALUES ('2016-01-18',1,4.00,''),('2016-01-20',1,10.00,''),('2016-01-16',2,1.00,''),('2016-02-08',2,3.00,''),('2016-01-16',3,0.00,''),('2016-01-12',4,2.00,''),('2016-01-19',4,4.00,''),('2016-02-07',4,1.00,''),('2016-01-15',5,2006.00,''),('2016-01-17',5,20.00,''),('2016-01-18',5,20.00,''),('2016-01-19',5,3.00,''),('2016-01-20',5,10.00,''),('2016-01-22',5,12.00,''),('2016-01-25',5,12.00,''),('2016-01-26',6,0.00,''),('2016-01-16',7,4.00,'');
 /*!40000 ALTER TABLE `Inventory` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -169,7 +167,7 @@ CREATE TABLE `Item` (
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,14 +195,8 @@ CREATE TABLE `Message` (
   `message` text NOT NULL,
   `attachment` text,
   `conversation_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_conversation_id_idx` (`conversation_id`),
-  KEY `FK_message_sender_idx` (`sender`),
-  KEY `FK_message_receiver_idx` (`receiver`),
-  CONSTRAINT `FK_conversationId` FOREIGN KEY (`conversation_id`) REFERENCES `conversation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_messageReceiver` FOREIGN KEY (`receiver`) REFERENCES `conversation` (`receiver`) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `FK_messageSender` FOREIGN KEY (`sender`) REFERENCES `conversation` (`sender`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -232,7 +224,7 @@ CREATE TABLE `User` (
   `time_zone` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`username`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,9 +233,30 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES ('atif','atif','hussain','$2y$10$okObY3TZpUmlHGMlOP8uX.618JISHnpsf/up8Xn9h3tsztlZvkGjS',1,NULL),('test','test','1','$2y$10$tjaNFUINXjcKtkruBiyeYeZkaTaEWTbDG5v/w9bRy4DYNWyVzvztm',1,NULL),('user','user','3','$2y$10$Ou/slOrcgQiIUA7JlJslpu5giIXa0Fq8TL8QPWqDgrMgb8HL5hZNK',1,NULL),('wasif','wasif','hussain','$2y$10$c1Tq4P62IYcHpkGGQfz8NukYpezMwCs6p/4GNv8LJnHDdfqNSd1CK',1,'');
+INSERT INTO `User` VALUES ('atif','Atif','Hussain','$2y$10$okObY3TZpUmlHGMlOP8uX.618JISHnpsf/up8Xn9h3tsztlZvkGjS',1,'America/Toronto'),('test','test','1','$2y$10$tjaNFUINXjcKtkruBiyeYeZkaTaEWTbDG5v/w9bRy4DYNWyVzvztm',1,NULL),('user','user','3','$2y$10$Ou/slOrcgQiIUA7JlJslpu5giIXa0Fq8TL8QPWqDgrMgb8HL5hZNK',1,NULL),('wasif','Wasif','Hussain','$2y$10$c1Tq4P62IYcHpkGGQfz8NukYpezMwCs6p/4GNv8LJnHDdfqNSd1CK',1,'Asia/Karachi');
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `new_inventory`.`User_AFTER_UPDATE` AFTER UPDATE ON `User` FOR EACH ROW
+BEGIN
+	UPDATE Conversation SET sender = IF(sender = OLD.username, NEW.username, sender),
+							receiver = IF(receiver = OLD.username, NEW.username, receiver);
+    UPDATE Message SET sender = IF(sender = OLD.username, NEW.username, sender),
+					   receiver = IF(receiver = OLD.username, NEW.username, receiver);
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `UserRole`
@@ -258,7 +271,7 @@ CREATE TABLE `UserRole` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `role_UNIQUE` (`role`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -282,7 +295,7 @@ CREATE TABLE `Variables` (
   `name` varchar(45) NOT NULL,
   `value` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -291,7 +304,7 @@ CREATE TABLE `Variables` (
 
 LOCK TABLES `Variables` WRITE;
 /*!40000 ALTER TABLE `Variables` DISABLE KEYS */;
-INSERT INTO `Variables` VALUES ('BaseSales','2005'),('ExpectedSales','2000');
+INSERT INTO `Variables` VALUES ('BaseSales','2005'),('ExpectedSales','2013');
 /*!40000 ALTER TABLE `Variables` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -304,4 +317,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-02-05 21:55:57
+-- Dump completed on 2016-02-10 19:13:37

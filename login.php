@@ -9,6 +9,7 @@
 
         if (verify_credentials($_POST["username"], $_POST["password"])) {
             set_session_variables($_POST["username"]);
+            set_destroy_status($_SESSION["username"], gmdate("Y-m-d"));
             header("Location: category_status.php");
             exit();
         } else{

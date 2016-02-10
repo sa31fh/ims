@@ -11,6 +11,7 @@
     if (isset($_POST["reply"])) {
         if(create_new_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
             change_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
+            set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
         }
     }
 ?>
