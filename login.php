@@ -1,85 +1,37 @@
-<?php
-session_start();
-
-include_once 'sql_common.php';
-include_once "category_status.php";
-
-function request_credentials() {
-    if (isset($_SESSION['username'])) {
-        return;
+<?php 
+    include "sql_common.php";
+    session_start();
+     if (isset($_SESSION["username"])) {
+        header("Location: category_status.php");
+        exit();
     }
+    if(isset($_POST["username"])){
 
-    echo '
-    <!DOCTYPE html>
-    <html>
-    <body>
-
-    <head>
-    <title>Inventory System Login</title>
-    </head>
-
-    <form action="login.php" method="post">
-    <pre>
-    Username: <input type="text" name="username" required>
-    Password: <input type="password" name="password" required>
-
-    <input type="submit" value="Login">
-    </pre>
-    </form>
-
-    </body>
-    </html>
-    ';
-}
-
-function verify_credentials($username, $password) {
-    global $conn;
-    connect_to_db();
-
-    $sql = "SELECT * FROM User
-            INNER JOIN UserRole ON User.userrole_id = UserRole.id
-            WHERE username='" .$username. "'";
-    $result = $conn->query($sql);
-    if ($result == False) {
-        echo '<br> Query failed <br>';
+        if (verify_credentials($_POST["username"], $_POST["password"])) {
+            set_session_variables($_POST["username"]);
+            set_destroy_status($_SESSION["username"], gmdate("Y-m-d"));
+            header("Location: category_status.php");
+            exit();
+        } else{
+            echo '<div class="error">Invalid Username or Password</div>';
+        }
     }
-
-    $row = $result->fetch_assoc();
-
-    if ($row == null) {
-        echo "Error: Invalid username";
-        return False;
-    }
-
-    if (!password_verify($password, $row['password_hash'])) {
-        echo "Error: Invalid password";
-        return False;
-    }
-
-    $_SESSION['username'] = $username;
-    $_SESSION['userrole'] = $row['role'];
-    return True;
-}
-
-function logout() {
-    session_unset();
-    session_destroy();
-}
-
-
-// Separate 'if' blocks used instead of if/else to maintain fall-through logic.
-if (strcmp($_POST['func_name'], 'logout') == 0) {
-    logout();
-}
-
-if (isset($_POST['username'])) {
-    verify_credentials($_POST['username'], $_POST['password']);
-} 
-
-if (!isset($_SESSION['username'])) {
-    request_credentials();
-} else {
-    get_categories();
-}
-
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div>
+        <form action="login.php" method="post">
+            <input class="userinput" type="text" name="username" placeholder="Username" required>
+            <input class="userinput" type="password" name="password" placeholder="Password" required>
+            <input type="submit" value="login" class="button">
+        </form>
+    </div>
+</body>
+</html>
