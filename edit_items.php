@@ -1,79 +1,89 @@
 <?php
-include_once 'sql_common.php';
-
-
-function display_items() {
-    global $conn;
-    connect_to_db();
-
-    echo '<a href="index.php">Back</a><br><br><br/>';
-
-    $sql = 'SELECT name, unit, quantity FROM Item 
-            LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
-            WHERE Item.deletion_date IS NULL 
-            ORDER BY name ASC';
-    
-    $result = $conn->query($sql);
-    if ($result == False) {
-        echo '<br>Query Failed<br>';
+    include "sql_common.php";
+    session_start(); 
+    if (!isset($_SESSION["username"])) {
+        header("Location: login.php");
+        exit();
     }
-
-    echo '<head><style>
-                td {text-align:center}
-                input {text-align:center}
-          </style></head>';
-
-
-    echo '<table border="1px solid black">';
-    echo '<th>Item</th>
-          <th>Unit</th>
-          <th>Quantity for sales ($)<br>
-              <form action="edit_items.php" method="post" style="display:inline">
-              <input type="number" value="' .get_base_sales(). '" name="base_sales" onchange="this.form.submit()" required>
-          </form></th>';
-
-    $item_names = array();
-
-    while ($row = $result->fetch_assoc()) {
-        array_push($item_names, $row['name']);
-        echo '<form action="edit_items.php" method="post">';
-        echo '<tr><td><input type="text" value="' .$row['name']. '" name="item_name" onchange="this.form.submit()" required></td>
-                  <td><input type="text" value="' .$row['unit']. '" name="item_unit" onchange="this.form.submit()" required></td>
-                  <td><input type="number" step="0.01" value="' .$row['quantity']. '" name="base_quantity" onchange="this.form.submit()" required></td></tr>';
-        echo '<input type="hidden" name="original_item_name" value="' .$row['name']. '"></form>';
+    if ($_SESSION["userrole"] != "admin") {
+        header("Location: login.php");
+        exit();
     }
+    if (isset($_POST["new_item_name"])) {
+        add_new_item($_POST["new_item_name"], $_POST["new_item_unit"]);
+    }
+    if (isset($_POST["delete_item"])) {
+        delete_item($_POST["delete_item"]);
+    }
+    if (isset($_POST["item_name"]) OR isset($_POST["item_unit"])) {
+        update_item_details($_POST["item_id"], $_POST["item_name"], $_POST["item_unit"]);
+    }
+    if (isset($_POST["base_sales"])) {
+        update_base_sales($_POST["base_sales"]);
+    }
+ ?>
 
-    echo '</table>';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div>
+        <table class="user_table" id="table" border="1px" >
+            <tr>
+                <th>Item</th>
+                <th>Unit</th>
+                <th>Quantity for sales ($)<br/>
+                    <form action="edit_items.php" method="post" >
+                        <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
+                </th>
+                <th></th>
+            </tr>
+            <?php $result = get_items(); ?>
+            <?php while($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <form action="edit_items.php" method="post">
+                    <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()" class="align_center"></td>
+                    <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()" class="align_center"></td>
+                    <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this) class="align_center"></td>
+                    <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
+                    </form>
+                    <td>
+                        <form action="edit_items.php" method="post">
+                            <input type="hidden" name="delete_item" value="<?php echo $row["name"] ?>">
+                            <input type="submit" value="delete" class="button">
+                        </form>
+                    </td>
+                </tr>
+            <?php  endwhile ?>
+        </table>
+    </div>
 
-    echo '<br/><br/><form action="edit_items.php" method="post">
-    <b>Add New Item</b><br>
-    <pre>';
-    echo 'Name: <input type="textarea" name="item_name" required><br>';
-    echo 'Unit: <input type="textarea" name="item_unit" required></pre>';
-    echo '
-    <input type="hidden" name="func_name" value="add_new_item">
-    <input type="submit" value="Submit">
-    </form>';
+    <div class="user_add_div">
+        <h4>Add New Item</h4>
+        <form action="edit_items.php" method="post">
+            <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required>
+            <input class="userinput" type="text" name="new_item_unit" placeholder="Item Unit" required>
+            <input type="submit" value="Add Item" class="button">
+        </form>
+    </div>
+</body>
+</html>
 
-    echo '<br><form action="edit_items.php" method="post" style="display:inline">
-      <select name="delete_item">';
-      foreach ($item_names as $item_name) {
-            echo '<option value="' .$item_name. '">' .$item_name. '</option>';
-      }
+<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    function quantityChange(obj){
+        var quantity = obj.value;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
 
-    echo '</select> <input type="submit" value="Delete Item"></form>';
-}
+        $(function(){
+            $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
+        });
+    }
+</script>
 
-if(strcmp($_POST['func_name'], 'add_new_item') == 0) {
-    add_new_item($_POST['item_name'], $_POST['item_unit']);
-} else if(array_key_exists('original_item_name', $_POST)) {
-    update_item_details($_POST['original_item_name'], $_POST['item_name'], $_POST['item_unit']);
-    update_base_quantity($_POST['original_item_name'], $_POST['base_quantity']);
-} else if(array_key_exists('base_sales', $_POST)) {
-    update_base_sales($_POST['base_sales']);
-} else if(array_key_exists('delete_item', $_POST)) {
-    delete_item($_POST['delete_item']);
-}
-
-display_items();
-?>
