@@ -49,7 +49,7 @@
                         </select>
                     </td>
                     <td id="delete">
-                        <form action="manage_users.php" method="post">
+                        <form action="manage_users.php" method="post" onsubmit="return confirm('delete this user?');">
                             <input type="hidden" name="delete_username" value="<?php echo $userdata["username"] ?>">
                             <input type="submit" value="delete" class="button" <?php if ($userdata["username"] == $_SESSION["username"]) { echo "disabled";} ?>>
                         </form>

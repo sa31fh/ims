@@ -53,9 +53,9 @@
                     <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
                     </form>
                     <td>
-                        <form action="edit_items.php" method="post">
+                        <form action="edit_items.php" method="post" onsubmit="return confirm('delete this item?');">
                             <input type="hidden" name="delete_item" value="<?php echo $row["name"] ?>">
-                            <input type="submit" value="delete" class="button">
+                            <input type="submit" value="delete" class="button" >
                         </form>
                     </td>
                 </tr>

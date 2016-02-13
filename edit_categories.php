@@ -27,10 +27,10 @@
 </head>
 <body>
     <div>
-        <form action="edit_categories.php" method="post">
+        <form action="edit_categories.php" method="post" onsubmit="return confirm('delete this category?');">
             <input class="userinput" type="text" name="category" id="category_name" placeholder="Category">
             <input type="submit" name="add_button" value="Add" class="button">
-            <input type="submit" name="delete_button" id="delete_button" value="Delete" class="button">
+            <input type="submit" name="delete_button" id="delete_button" value="Delete" class="button" >
         </form>
     </div>
 
