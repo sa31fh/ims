@@ -1,10 +1,12 @@
 <?php
-    include "sql_common.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
+require_once "database/category_table.php";
+require_once "database/variables_table.php";
+require_once "database/base_quantity_table.php";
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -27,7 +29,7 @@
                 <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
             </tr>
             <?php $current_category = null;
-                  $result = get_print_preview($_SESSION["date"]); ?>
+                  $result = CategoryTable::get_print_preview($_SESSION["date"]); ?>
             <?php while ($row =$result->fetch_assoc()): ?>
                 <?php if ($row["category_name"] != $current_category): ?>
                     <?php $current_category = $row["category_name"] ?>
@@ -41,11 +43,11 @@
                     </tr>
                 <?php endif ?>
                 <tr>
-                    <?php $sales_factor = get_expected_sales() / get_base_sales(); ?>
+                    <?php $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales(); ?>
                     <td><?php echo $row["item_name"] ?></td>
                     <td><?php echo $row["unit"] ?></td>
                     <td><?php echo $row["quantity"] ?></td>
-                    <td><?php echo (is_numeric($row["quantity"]) ? get_estimated_quantity($sales_factor, $row["item_name"]) - (int)$row["quantity"] : "-") ?></td>
+                    <td><?php echo (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - (int)$row["quantity"] : "-") ?></td>
                     <td><?php echo $row["notes"] ?></td>
                 </tr>
             <?php endwhile ?>

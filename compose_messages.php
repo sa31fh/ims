@@ -1,12 +1,13 @@
 <?php
-    include "sql_common.php";
+    require_once "database/user_table.php";
+    require_once "database/conversation_table.php";
     session_start();
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
         exit();
     }
     if (isset($_POST["message"])) {
-        create_new_conversation($_SESSION["username"], $_POST["recipient"], $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), $_POST["attached"], "read", "unread");
+        ConversationTable::create_conversation($_SESSION["username"], $_POST["recipient"], $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), $_POST["attached"], "read", "unread");
         header("Location: received_messages.php" );
         exit();
     }
@@ -24,7 +25,7 @@
     <div>
         <form action="compose_messages.php" method="post">
             <select class="select_user" name="recipient" id="recipient">
-                <?php $result = get_users(); ?>
+                <?php $result = UserTable::get_users(); ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <?php if ($row["username"] != $_SESSION["username"]): ?>
                         <option value="<?php echo $row["username"] ?>"><?php echo $row["first_name"]." ".$row["last_name"]." (".$row["username"].")"; ?></option>

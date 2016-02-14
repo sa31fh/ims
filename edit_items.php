@@ -1,5 +1,6 @@
 <?php
-    include "sql_common.php";
+    require_once "database/item_table.php";
+    require_once "database/variables_table.php";
     session_start(); 
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
@@ -10,16 +11,16 @@
         exit();
     }
     if (isset($_POST["new_item_name"])) {
-        add_new_item($_POST["new_item_name"], $_POST["new_item_unit"]);
+        ItemTable::add_new_item($_POST["new_item_name"], $_POST["new_item_unit"]);
     }
     if (isset($_POST["delete_item"])) {
-        delete_item($_POST["delete_item"]);
+        ItemTable::delete_item($_POST["delete_item"]);
     }
     if (isset($_POST["item_name"]) OR isset($_POST["item_unit"])) {
-        update_item_details($_POST["item_id"], $_POST["item_name"], $_POST["item_unit"]);
+        ItemTable::update_item_details($_POST["item_id"], $_POST["item_name"], $_POST["item_unit"]);
     }
     if (isset($_POST["base_sales"])) {
-        update_base_sales($_POST["base_sales"]);
+        ItemTable::update_base_sales($_POST["base_sales"]);
     }
  ?>
 
@@ -39,11 +40,11 @@
                 <th>Unit</th>
                 <th>Quantity for sales ($)<br/>
                     <form action="edit_items.php" method="post" >
-                        <input type="number" name="base_sales" value="<?php echo get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
+                        <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
                 </th>
                 <th></th>
             </tr>
-            <?php $result = get_items(); ?>
+            <?php $result = ItemTable::get_items(); ?>
             <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
                     <form action="edit_items.php" method="post">

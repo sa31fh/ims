@@ -1,17 +1,19 @@
 <?php
-    include "sql_common.php";
+    include "functions.php";
+    require_once "database/conversation_table.php";
+    require_once "database/message_table.php";
     session_start();
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
         exit();
     }
     if (isset($_POST["status_to_read"])) {
-        change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
+        ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
     }
     if (isset($_POST["reply"])) {
-        if(create_new_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
-            change_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
-            set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
+        if(MessageTable::create_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
+            ConversationTable::change_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
+            ConversationTable::set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
         }
     }
 ?>
@@ -25,7 +27,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <?php $result = get_messages($_POST["conversation_id"]); ?>
+    <?php $result = MessageTable::get_messages($_POST["conversation_id"]); ?>
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="main_message_div">
             <div class="message"><?php echo $row["attachment"] ?></div>

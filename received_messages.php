@@ -1,16 +1,17 @@
 <?php 
-    include "sql_common.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    } 
-    if (isset($_POST["conversation_id"])) {
-        if(change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted")) {
-            $date = date_format((date_add(date_create(gmdate("Y-m-d")), date_interval_create_from_date_string("1 week"))), "Y-m-d");
-            set_destroy_date($_SESSION["username"], $_POST["conversation_id"], "'$date'");
-        }
+include_once "functions.php";
+require_once "database/conversation_table.php";
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+} 
+if (isset($_POST["conversation_id"])) {
+    if(ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted")) {
+        $date = date_format((date_add(date_create(gmdate("Y-m-d")), date_interval_create_from_date_string("1 week"))), "Y-m-d");
+        ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], "'$date'");
     }
+}
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +25,7 @@
 <body>
     <div>
         <table class="message_table" id="table">
-            <?php $result = get_received_conversations($_SESSION["username"]) ?>
+            <?php $result = ConversationTable::get_received_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr <?php if($row["sender"] == $_SESSION["username"] AND $row["sender_status"] == "unread" OR $row["receiver"] == $_SESSION["username"] AND $row["receiver_status"] == "unread" ) {
                               echo 'class="unread"';} ?> onclick=openMessage(this)>

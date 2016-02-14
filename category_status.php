@@ -1,5 +1,7 @@
 <?php
-    include "sql_common.php";
+    require_once "database/category_table.php";
+    require_once "database/item_table.php";
+    require_once "database/variables_table.php";
     session_start();
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
@@ -29,14 +31,14 @@
                 <th>Category</th>
                 <th>Status</th>
             </tr>
-            <?php $result = get_categories($_SESSION["date"]);
+            <?php $result = CategoryTable::get_categories($_SESSION["date"]);
                  while ($row = $result->fetch_assoc()): ?>
                     <tr>
                         <td><form action="update_inventory.php" method="post" target="ifram">
                             <input type="submit" name="category_name" value="<?php echo $row["name"]; ?>" class="button">
                             <input type="hidden" name="category_id" value="<?php echo $row["id"] ?>">
                             </form></td>
-                        <td><?php echo get_updated_items_count($row['id'], $_SESSION["date"]). '/' .get_total_items($row['id'], $_SESSION["date"]) ?></td>
+                        <td><?php echo ItemTable::get_updated_items_count($row['id'], $_SESSION["date"]). '/' .ItemTable::get_total_items($row['id'], $_SESSION["date"]) ?></td>
                     </tr>
             <?php  endwhile ?>
             </table>
@@ -47,7 +49,7 @@
         <?php if ($_SESSION["userrole"] == "admin"): ?>
             <div>
                 <span ><strong>Expected Sales ($):</strong></span>
-                <input type="number" value="<?php echo get_expected_sales() ?>" onchange=updateSales(this)>
+                <input type="number" value="<?php echo VariablesTable::get_expected_sales() ?>" onchange=updateSales(this)>
             </div>
         <?php endif ?>   
     </div>

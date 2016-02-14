@@ -1,10 +1,10 @@
 <?php
-    include "sql_common.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
+require_once "database/inventory_table.php";
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +25,7 @@
                 <th>Quantity Present</th>
                 <th>Notes</th>
             </tr>
-            <?php $result = get_inventory($_POST["category_id"], $_SESSION["date"]) ?>
+            <?php $result = InventoryTable::get_inventory($_POST["category_id"], $_SESSION["date"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
                     <td><span value="<?php echo $row["name"] ?>"><?php echo $row["name"] ?></span></td>

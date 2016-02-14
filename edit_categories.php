@@ -1,5 +1,6 @@
 <?php
-    include "sql_common.php";
+    require_once "database/category_table.php";
+    require_once "database/item_table.php";
     session_start(); 
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
@@ -10,10 +11,10 @@
         exit();
     }
     if(isset($_POST["add_button"]) AND !empty($_POST["category"])){
-        add_category($_POST["category"]);
+        CategoryTable::add_category($_POST["category"]);
     }
     if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
-        remove_category($_POST["category"]);
+        CategoryTable::remove_category($_POST["category"]);
     }
 ?>
 
@@ -27,7 +28,7 @@
 </head>
 <body>
     <div>
-        <form action="edit_categories.php" method="post" onsubmit="return confirm('delete this category?');">
+        <form action="edit_categories.php" method="post" >
             <input class="userinput" type="text" name="category" id="category_name" placeholder="Category">
             <input type="submit" name="add_button" value="Add" class="button">
             <input type="submit" name="delete_button" id="delete_button" value="Delete" class="button" >
@@ -38,7 +39,7 @@
         <h5>Categories</h5>
         <form action="edit_categories.php" method="get">
             <select class="category_select" name="options" id="category_select" size="10" onchange=categorySelect(this);>
-                <?php $result = get_categories($date = date('Y-m-d')) ?>
+                <?php $result = CategoryTable::get_categories($date = date('Y-m-d')) ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <option value="<?php echo $row['name']; ?>" > <?php echo $row["name"] ?> </option>
                 <?php endwhile ?>
@@ -50,7 +51,7 @@
         <h5>Uncategorized Items</h5>
         <form action="edit_categories.php" method="get">
             <select class="category_select" name="select_uncat" id="uncategorized_list" size="10" >
-                <?php $result = get_uncategorized_items(); ?>
+                <?php $result = ItemTable::get_uncategorized_items(); ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <option value="<?php echo $row['name']; ?>"> <?php echo $row["name"]; ?></option>
                 <?php endwhile ?>

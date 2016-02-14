@@ -1,13 +1,14 @@
 <?php 
-    include "sql_common.php";
+    include "functions.php";
+    require_once "database/conversation_table.php";
     session_start();
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
         exit();
     }
     if (isset($_POST["conversation_id"])) {
-        if(change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
-            set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
+        if(ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
+            ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
         }
     }
 ?>
@@ -23,7 +24,7 @@
 <body>
     <div>
         <table class="message_table" id="table">
-            <?php $result = get_deleted_conversations($_SESSION["username"]) ?>
+            <?php $result = ConversationTable::get_deleted_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr onclick=openMessage(this)>
                     <td class="name">

@@ -1,12 +1,12 @@
 <?php
-    include "sql_common.php";
+    require_once "database/user_table.php";
     session_start();
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
         exit();
     }
     if (isset($_POST["new_password"])) {
-        if (update_user_password($_POST["user_name"], $_POST["new_password"])) {
+        if (UserTable::update_user_password($_POST["user_name"], $_POST["new_password"])) {
             echo 'Password update successful!<br>';
         } else {
             echo 'Password update failed!<br>';
@@ -18,7 +18,7 @@
             $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
             $_SESSION["timezone"] = $tz;
         }
-        if(update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
+        if(UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
             $_SESSION["username"] = $_POST["update_user"];
         }
     }
@@ -37,7 +37,7 @@
     <div class="main">
         <div>
             <h4>Edit Credentials<hr></h4>
-            <?php $result = get_user_details($_SESSION["username"]);
+            <?php $result = UserTable::get_user_details($_SESSION["username"]);
                   $row = $result->fetch_assoc(); ?>
             <form action="user_account.php" method="post">
                 <label>User Name<input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"></label><br/>

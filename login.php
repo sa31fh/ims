@@ -1,5 +1,6 @@
 <?php 
-    include "sql_common.php";
+    require_once "database/user_table.php";
+    require_once "database/conversation_table.php";
     session_start();
      if (isset($_SESSION["username"])) {
         header("Location: category_status.php");
@@ -7,9 +8,9 @@
     }
     if(isset($_POST["username"])){
 
-        if (verify_credentials($_POST["username"], $_POST["password"])) {
-            set_session_variables($_POST["username"]);
-            set_destroy_status($_SESSION["username"], gmdate("Y-m-d"));
+        if (UserTable::verify_credentials($_POST["username"], $_POST["password"])) {
+            UserTable::set_session_variables($_POST["username"]);
+            ConversationTable::set_destroy_status($_SESSION["username"], gmdate("Y-m-d"));
             header("Location: category_status.php");
             exit();
         } else{

@@ -1,5 +1,6 @@
 <?php
-    include "sql_common.php";
+    require_once "database/user_table.php";
+    require_once "database/user_role_table.php";
     session_start(); 
     if (!isset($_SESSION["username"])) {
         header("Location: login.php");
@@ -10,10 +11,10 @@
         exit();
     }
     if (isset($_POST["new_username"])) {
-        add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole']);
+        UserTable::add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole']);
     } 
     if(isset($_POST["delete_username"])){
-        delete_user($_POST["delete_username"]);
+        UserTable::delete_user($_POST["delete_username"]);
     }
 ?>
 
@@ -34,7 +35,7 @@
                 <th>Role</th>
                 <th></th>
             </tr>
-            <?php $result = get_users(); ?>
+            <?php $result = UserTable::get_users(); ?>
             <?php while ($userdata = $result->fetch_assoc()): ?>
                 <tr>
                     <td id="name"><?php echo $userdata["username"]; ?></td>
@@ -42,7 +43,7 @@
                     <td> <?php echo $userdata["last_name"]; ?></td>
                     <td id="role">
                         <select onchange=updateRole(this) id=""class="none" <?php if ($userdata["username"] == $_SESSION["username"]) {echo "disabled";} ?>>
-                            <?php $result2 = get_role(); ?>
+                            <?php $result2 = UserRoleTable::get_roles(); ?>
                             <?php while ($row = $result2->fetch_assoc()): ?>
                                 <option  value="<?php echo $row["role"]?>" <?php if ($userdata["role"] == $row["role"]) {echo "selected";}?> > <?php echo $row["role"] ?> </option>
                             <?php endwhile ?>
@@ -67,7 +68,7 @@
             <input class="userinput" type="text" name="new_lastname" placeholder="Last Name" required>
             <input class="userinput" type="password" name="new_password" placeholder="Password" required>
             <label for="userrole">User Role:</label><select name="userrole" class="none role_select">
-                <?php $result = get_role(); ?>
+                <?php $result = UserRoleTable::get_roles(); ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <option   value="<?php echo $row["role"]?>" > <?php echo $row["role"] ?> </option>
                 <?php endwhile ?>
