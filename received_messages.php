@@ -1,7 +1,8 @@
 <?php 
+session_start();
 include_once "functions.php";
 require_once "database/conversation_table.php";
-session_start();
+
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
@@ -28,11 +29,12 @@ if (isset($_POST["conversation_id"])) {
             <?php $result = ConversationTable::get_received_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr <?php if($row["sender"] == $_SESSION["username"] AND $row["sender_status"] == "unread" OR $row["receiver"] == $_SESSION["username"] AND $row["receiver_status"] == "unread" ) {
-                              echo 'class="unread"';} ?> onclick=openMessage(this)>
-                    <td class="name"> 
+                              echo 'class="unread"';} ?> >
+                    <td><input type="checkbox"></td>
+                    <td class="name" onclick=openMessage(this)> 
                         <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?> 
-                    <td class="title"> <?php echo $row["title"] ?></td>
+                    <td class="title" onclick=openMessage(this)> <?php echo $row["title"] ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
                     <td class="delete">
                         <form action="received_messages.php" method="post">
@@ -55,8 +57,8 @@ if (isset($_POST["conversation_id"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
 <script>
     function openMessage(obj){
-        var id = document.getElementById("table").rows[obj.rowIndex].cells[3].children[0].children[1].value;
-        var receiver = document.getElementById("table").rows[obj.rowIndex].cells[0].children[0].value;
+        var id = document.getElementById("table").rows[obj.parentNode.rowIndex].cells[4].children[0].children[1].value;
+        var receiver = document.getElementById("table").rows[obj.parentNode.rowIndex].cells[1].children[0].value;
         document.getElementById("conversation_id").value = id;
         document.getElementById("receiver_name").value = receiver;
         document.getElementById("view_message").submit();

@@ -1,9 +1,9 @@
 <?php
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -16,15 +16,15 @@
 </head>
 <body>
     <ul class="sidenav" id="sideNav">
-        <li><a href="compose_messages.php" target="message_frame" >Compose</a></li>
-        <li><a class="active" href="received_messages.php" target="message_frame" >Inbox <span id="status_view"></span></a></li>
-        <li><a href="deleted_messages.php" target="message_frame">Deleted</a></li>
+        <li><a id="compose" href="compose_messages.php" target="message_frame" >Compose</a></li>
+        <li><a id="inbox" class="active" href="received_messages.php" target="message_frame" >Inbox <span id="status_view"></span></a></li>
+        <li><a id="deleted" href="deleted_messages.php" target="message_frame">Deleted</a></li>
     </ul>
     <?php $page = "messages";
           include_once "new_nav.php" ?>
 
     <div class="main_messages">
-        <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload="adjustHeight(id); onclick=showUnreadCount();" ></iframe>
+        <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload="adjustHeight(this); showUnreadCount(); changeActiveClass(this);" ></iframe>
     </div>
 
     <form action="compose_messages.php" method="post" id="print_form" target="message_frame">
@@ -36,19 +36,27 @@
 
 <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
 <script>
-    function adjustHeight(iframeID){
-        var iframe = document.getElementById(iframeID);
+    function adjustHeight(iframe) {
         iframe.height = 0 + "px";
         var nHeight = iframe.contentWindow.document .body.scrollHeight;
         iframe.height = (nHeight + 60) + "px";
     }
 
-    $(function() {
-        $('#sideNav li a').click(function() {
-           $('#sideNav li a').removeClass();
-           $(this).addClass('active');
-        });
-     });
+    function changeActiveClass(iframe) {
+        if (iframe.contentDocument.title == "Compose") {
+            document.getElementById("inbox").className = "";
+            document.getElementById("deleted").className = "";
+            document.getElementById("compose").className = "active";
+        } else if(iframe.contentDocument.title == "Inbox") {
+            document.getElementById("deleted").className = "";
+            document.getElementById("compose").className = "";
+            document.getElementById("inbox").className = "active";
+        } else if (iframe.contentDocument.title == "Deleted") {
+            document.getElementById("inbox").className = "";
+            document.getElementById("compose").className = "";
+            document.getElementById("deleted").className = "active";
+        }
+    }
 
     function showUnreadCount(){
         var sessionName  = document.getElementById("session_name").value;
@@ -56,9 +64,12 @@
         $(function(){
             $.post("jq_ajax.php", {sessionName: sessionName, status: "unread"}, function(data,status){
                 if (data > 0) {
-                    document.getElementById("status_view").innerHTML = "(" + data + ")";
+                    document.getElementById("status_view").innerHTML =  data;
+                    document.getElementById("status_view").style.visibility = "visible";
+                    document.getElementById("status_view").style.transform = "scale(1)";
                 } else {
-                    document.getElementById("status_view").innerHTML =  "";
+                    document.getElementById("status_view").style.transform = "scale(0.1)";
+                    document.getElementById("status_view").style.visibility = "hidden";
                 };
             });
         });

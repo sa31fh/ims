@@ -1,23 +1,24 @@
 <?php 
-    include "functions.php";
-    require_once "database/conversation_table.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
+session_start();
+include "functions.php";
+require_once "database/conversation_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_POST["conversation_id"])) {
+    if(ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
+       ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
     }
-    if (isset($_POST["conversation_id"])) {
-        if(ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
-            ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
-        }
-    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Deleted Messages</title>
+    <title>Deleted</title>
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>

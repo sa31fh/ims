@@ -1,23 +1,24 @@
 <?php
-    require_once "database/user_table.php";
-    require_once "database/conversation_table.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
-    if (isset($_POST["message"])) {
-        ConversationTable::create_conversation($_SESSION["username"], $_POST["recipient"], $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), $_POST["attached"], "read", "unread");
-        header("Location: received_messages.php" );
-        exit();
-    }
+session_start();
+require_once "database/user_table.php";
+require_once "database/conversation_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_POST["message"])) {
+    ConversationTable::create_conversation($_SESSION["username"], $_POST["recipient"], $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), isset($_POST["attached"]) ? $_POST["attached"] : null, "read", "unread");
+    header("Location: received_messages.php" );
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document</title>
+    <title>Compose</title>
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
