@@ -1,8 +1,9 @@
 <?php
+session_start();
 require_once "database/category_table.php";
 require_once "database/variables_table.php";
 require_once "database/base_quantity_table.php";
-session_start();
+
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
@@ -23,7 +24,7 @@ if (!isset($_SESSION["username"])) {
         <input type="button" onclick=sendPrint() value="Send Table" class="button">
     </div>
 
-    <div>
+    <div id="table">
         <table class="user_table" id="print">
             <tr id="print_date">
                 <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>

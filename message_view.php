@@ -1,21 +1,22 @@
 <?php
-    include "functions.php";
-    require_once "database/conversation_table.php";
-    require_once "database/message_table.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
+session_start();
+include "utilities.php";
+require_once "database/conversation_table.php";
+require_once "database/message_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_POST["status_to_read"])) {
+    ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
+}
+if (isset($_POST["reply"])) {
+    if(MessageTable::create_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
+        ConversationTable::change_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
+        ConversationTable::set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
     }
-    if (isset($_POST["status_to_read"])) {
-        ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
-    }
-    if (isset($_POST["reply"])) {
-        if(MessageTable::create_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
-            ConversationTable::change_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
-            ConversationTable::set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
-        }
-    }
+}
 ?>
 
 <!DOCTYPE html>

@@ -1,6 +1,7 @@
 <?php
-require_once "database/inventory_table.php";
 session_start();
+require_once "database/inventory_table.php";
+
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();

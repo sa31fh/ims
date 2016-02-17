@@ -1,21 +1,22 @@
 <?php
-    require_once "database/user_table.php";
-    require_once "database/user_role_table.php";
-    session_start(); 
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
-    if ($_SESSION["userrole"] != "admin") {
-        header("Location: login.php");
-        exit();
-    }
-    if (isset($_POST["new_username"])) {
-        UserTable::add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole']);
-    } 
-    if(isset($_POST["delete_username"])){
-        UserTable::delete_user($_POST["delete_username"]);
-    }
+session_start(); 
+require_once "database/user_table.php";
+require_once "database/user_role_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if ($_SESSION["userrole"] != "admin") {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_POST["new_username"])) {
+    UserTable::add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole']);
+} 
+if(isset($_POST["delete_username"])){
+    UserTable::delete_user($_POST["delete_username"]);
+}
 ?>
 
 <!DOCTYPE html>

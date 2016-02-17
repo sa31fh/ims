@@ -1,21 +1,26 @@
 <?php
-    require_once "database/category_table.php";
-    require_once "database/item_table.php";
-    session_start(); 
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
-    if ($_SESSION["userrole"] != "admin") {
-        header("Location: login.php");
-        exit();
-    }
+session_start(); 
+require_once "database/category_table.php";
+require_once "database/item_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if ($_SESSION["userrole"] != "admin") {
+    header("Location: login.php");
+    exit();
+}
+try {
     if(isset($_POST["add_button"]) AND !empty($_POST["category"])){
         CategoryTable::add_category($_POST["category"]);
     }
-    if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
-        CategoryTable::remove_category($_POST["category"]);
-    }
+} catch (Exception $e) {
+    echo '<div class="error">'.$e->getMessage().'</div>';
+} 
+if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
+    CategoryTable::remove_category($_POST["category"]);
+}
 ?>
 
 <!DOCTYPE html>

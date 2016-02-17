@@ -1,15 +1,16 @@
 <?php
-    require_once "database/category_table.php";
-    require_once "database/item_table.php";
-    require_once "database/variables_table.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
-    }
-    if (!isset($_SESSION["date"])) {
-        $_SESSION["date"] = date("Y-m-d");
-    }
+session_start();
+require_once "database/category_table.php";
+require_once "database/item_table.php";
+require_once "database/variables_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if (!isset($_SESSION["date"])) {
+    $_SESSION["date"] = date("Y-m-d");
+}
 ?>
 
 <!DOCTYPE html>

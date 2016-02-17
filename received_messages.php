@@ -1,6 +1,6 @@
 <?php 
 session_start();
-include_once "functions.php";
+include_once "utilities.php";
 require_once "database/conversation_table.php";
 
 if (!isset($_SESSION["username"])) {

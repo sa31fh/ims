@@ -1,27 +1,24 @@
 <?php
-    require_once "database/user_table.php";
-    session_start();
-    if (!isset($_SESSION["username"])) {
-        header("Location: login.php");
-        exit();
+session_start();
+require_once "database/user_table.php";
+
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_POST["new_password"])) {
+    UserTable::update_user_password($_POST["user_name"], $_POST["new_password"]);
+} 
+if (isset($_POST["update_user"])) {
+    $tz = $_SESSION["timezone"];
+    if (!empty($_POST["city_select"])) {
+        $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
+        $_SESSION["timezone"] = $tz;
     }
-    if (isset($_POST["new_password"])) {
-        if (UserTable::update_user_password($_POST["user_name"], $_POST["new_password"])) {
-            echo 'Password update successful!<br>';
-        } else {
-            echo 'Password update failed!<br>';
-        }
-    } 
-    if (isset($_POST["update_user"])) {
-        $tz = $_SESSION["timezone"];
-        if (!empty($_POST["city_select"])) {
-            $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
-            $_SESSION["timezone"] = $tz;
-        }
-        if(UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
-            $_SESSION["username"] = $_POST["update_user"];
-        }
+    if(UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
+        $_SESSION["username"] = $_POST["update_user"];
     }
+}
 ?>
 
 <!DOCTYPE html>

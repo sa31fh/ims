@@ -67,8 +67,10 @@ if (isset($_POST["timeZoneRegion"])) {
    }       
 }
 
+/*--------------------------messages.php----------------------------*/
 if (isset($_POST["sessionName"])) {
-    echo ConversationTable::count_unread_conversations($_POST["sessionName"], $_POST["status"]);
+    echo ConversationTable::count_unread_conversations($_POST["sessionName"]);
+
 }
 
 ?>
