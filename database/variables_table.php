@@ -8,6 +8,8 @@ class VariablesTable extends DatabaseTable {
 
         if ($result = parent::query($sql)) {
             return (int) $result->fetch_assoc()['value'];
+        } else {
+            return false;
         }
     }
 
@@ -16,9 +18,7 @@ class VariablesTable extends DatabaseTable {
                 VALUES ('ExpectedSales', '$expected_sales') 
                 ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function get_base_sales() {
@@ -26,6 +26,8 @@ class VariablesTable extends DatabaseTable {
 
         if ($result = parent::query($sql)) {
             return (int) $result->fetch_assoc()['value'];
+        } else {
+            return false;
         }
     }
 
@@ -34,9 +36,7 @@ class VariablesTable extends DatabaseTable {
                 VALUES ('BaseSales', '$base_sales') 
                 ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 }
 ?>

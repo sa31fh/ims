@@ -15,9 +15,7 @@ class InventoryTable extends DatabaseTable {
                     AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))) AS T2 ON T2.item_id = T1.item_id 
                 ORDER BY T2.item_name";
        
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function update_inventory($date, $item_id, $quantity, $item_note) {
@@ -26,9 +24,7 @@ class InventoryTable extends DatabaseTable {
                 ON DUPLICATE KEY UPDATE 
                 `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
 
-         if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 }
 ?>

@@ -17,9 +17,7 @@ class ConversationTable extends DatabaseTable {
                 $sql = "INSERT INTO Message (`timestamp`, sender, receiver, message, attachment, conversation_id)
                         VALUES ('$date', '$sender_name', '$receiver_name', '$message', '$attachment', '$id')";
 
-                if ($result = parent::query($sql)) {
-                    return $result;
-                }
+                return parent::query($sql);
             }
         }
     }
@@ -28,17 +26,14 @@ class ConversationTable extends DatabaseTable {
         $sql = "SELECT id, `timestamp`, sender, receiver, first_name, last_name, sender_status, receiver_status, title FROM Conversation
                 INNER JOIN (SELECT first_name, last_name, username FROM User) AS nameTable
                 ON (nameTable.username = sender OR nameTable.username = receiver) AND (nameTable.username != '$user')
-                INNER JOIN (SELECT id as sstId, status AS sender_status FROM ConversationStatus) as senderStatusTable
+                INNER JOIN (SELECT id AS sstId, status AS sender_status FROM ConversationStatus) AS senderStatusTable
                 ON senderStatusTable.sstId = sender_conversationStatusId
-                INNER JOIN (SELECT id as rstId, `status` AS receiver_status FROM ConversationStatus) as receiverStatusTable
-                ON receiverStatusTable.rstId = receiver_conversationStatusId 
+                INNER JOIN (SELECT id AS rstId, `status` AS receiver_status FROM ConversationStatus) AS receiverStatusTable
                 WHERE (sender = '$user' AND (sender_status != 'deleted' AND sender_status != 'destroy'))
                 OR (receiver = '$user'AND (receiver_status != 'deleted' AND receiver_status != 'destroy'))
-                ORDER BY `timestamp` DESC";
+                ORDER BY `timestamp` DESC ";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function get_deleted_conversations($user) {
@@ -48,14 +43,12 @@ class ConversationTable extends DatabaseTable {
                 INNER JOIN (SELECT id as sstId, status AS sender_status FROM ConversationStatus) as senderStatusTable
                 ON senderStatusTable.sstId = sender_conversationStatusId
                 INNER JOIN (SELECT id as rstId, `status` AS receiver_status FROM ConversationStatus) as receiverStatusTable
-                ON receiverStatusTable.rstId = receiver_conversationStatusId 
+                ON receiverStatusTable.rstId = receiver_conversationStatusId
                 WHERE (sender = '$user' AND sender_status = 'deleted' )
                 OR (receiver = '$user' AND receiver_status = 'deleted')
                 ORDER BY `timestamp` DESC";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-       }
+        return parent::query($sql);
     }
 
     public static function change_conversation_status($user, $conversation_id, $status) {
@@ -64,9 +57,7 @@ class ConversationTable extends DatabaseTable {
                     receiver_conversationStatusId = IF(receiver = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), receiver_conversationStatusId)
                 WHERE id = '$conversation_id'";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function set_destroy_date($user, $conversation_id, $date) {
@@ -75,9 +66,7 @@ class ConversationTable extends DatabaseTable {
                 receiver_destroyDate = IF(receiver = '$user', ".$date.", receiver_destroyDate)
                 WHERE id = '$conversation_id'";
        
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function set_destroy_status($user, $date) {
@@ -85,9 +74,7 @@ class ConversationTable extends DatabaseTable {
                 SET sender_conversationStatusId = IF((sender = '$user' AND sender_destroyDate = '$date'), (SELECT id FROM ConversationStatus WHERE status = 'destroy') , sender_conversationStatusId),
                 receiver_conversationStatusId = IF((receiver = '$user' AND receiver_destroyDate = '$date'), (SELECT id FROM ConversationStatus WHERE status = 'destroy') , receiver_conversationStatusId)";
        
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function count_unread_conversations($user) {
@@ -97,8 +84,9 @@ class ConversationTable extends DatabaseTable {
         
         if ($result = parent::query($sql)){
             return $result->fetch_assoc()['unreadConversations'];
+        } else {
+            return false;
         }
     }
 }
-
 ?>

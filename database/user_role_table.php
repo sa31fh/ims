@@ -6,9 +6,7 @@ class UserRoleTable extends DatabaseTable {
     public static function get_roles() {
         $sql = "SELECT * FROM UserRole";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function update_user_role($user_name, $role) {
@@ -16,11 +14,8 @@ class UserRoleTable extends DatabaseTable {
                 SET userrole_id= (SELECT id FROM UserRole WHERE role='$role') 
                 WHERE username='$user_name'";
                 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return $result = parent::query($sql);
     }
 
 }
-
- ?>
+?>

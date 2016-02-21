@@ -7,26 +7,23 @@ class CategoryTable extends DatabaseTable {
         $sql = "SELECT * FROM Category 
                 WHERE name = '{$category_name}' AND deletion_date IS NULL";
         if ($result = parent::query($sql)) {
-            if ($result->num_rows == 0) {
-                $date = date('Y-m-d');
-                $sql = "SELECT * FROM Category 
-                        WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
-                $result = parent::query($sql); 
-                if ($result->num_rows == 0) {
-                    $sql = "INSERT INTO Category (name, creation_date) 
-                            VALUES ('{$category_name}', '{$date}')";
-                } else {
-                    $sql = "UPDATE Category SET deletion_date = NULL 
-                            WHERE name = '{$category_name}' and deletion_date = '{$date}'";
-                }
-                if ($result = parent::query($sql)) {
-                    return $result;
-                }
-            } else {
+            if ($result->num_rows != 0) {
                 throw new Exception("Category already exists!");
             }
+            $date = date('Y-m-d');
+            $sql = "SELECT * FROM Category 
+                    WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
+            $result = parent::query($sql); 
+            if ($result->num_rows == 0) {
+                $sql = "INSERT INTO Category (name, creation_date) 
+                        VALUES ('{$category_name}', '{$date}')";
+            } else {
+                $sql = "UPDATE Category SET deletion_date = NULL 
+                        WHERE name = '{$category_name}' and deletion_date = '{$date}'";
+            }
+            return parent::query($sql);
         }      
-    }
+    }  
 
     public static function remove_category($category_name) {
         $sql = "UPDATE Category SET deletion_date = '" .date('Y-m-d'). "' 
@@ -35,10 +32,8 @@ class CategoryTable extends DatabaseTable {
             $sql = "UPDATE Item SET category_id = NULL  
                     WHERE deletion_date IS NULL AND category_id = (SELECT id FROM Category WHERE name='{$category_name}')";
                     
-            if ($result = parent::query($sql)) {
-                return $result;
-            }
-        } 
+            return parent::query($sql);
+        }
     }
 
     public static function get_categories($date) {
@@ -46,9 +41,7 @@ class CategoryTable extends DatabaseTable {
                 WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' OR deletion_date IS NULL) 
                 ORDER BY name ASC";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-         } 
+        return parent::query($sql);
     }
 
     public static function get_print_preview($date) {
@@ -61,10 +54,7 @@ class CategoryTable extends DatabaseTable {
                 AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)) 
                 ORDER BY Category.name, Item.name";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 }
-
 ?>

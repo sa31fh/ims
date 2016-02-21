@@ -16,9 +16,7 @@ class UserTable extends DatabaseTable{
                 VALUES('$user_name', '$first_name', '$last_name', '" .password_hash($password, PASSWORD_DEFAULT). "', 
                       (SELECT id FROM UserRole WHERE role='{$user_role}'))";
                       
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function get_users() {
@@ -26,9 +24,7 @@ class UserTable extends DatabaseTable{
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
                 ORDER BY username ASC";
 
-        if ($result = parent::query($sql)){
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function get_user_details($user) {
@@ -36,9 +32,7 @@ class UserTable extends DatabaseTable{
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
                 WHERE username = '$user'";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function update_user_details($current_username, $new_username, $first_name, $last_name, $time_zone) {
@@ -49,17 +43,13 @@ class UserTable extends DatabaseTable{
                     time_zone = '$time_zone'
                 WHERE username ='$current_username'";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function delete_user($user_name) {
         $sql = "DELETE FROM User WHERE username = '$user_name'";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function verify_credentials($user_name, $password) {
@@ -82,9 +72,7 @@ class UserTable extends DatabaseTable{
                 SET password_hash='" .password_hash($new_password, PASSWORD_DEFAULT). "' 
                 WHERE username='$user_name'";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 
     public static function set_session_variables($user_name) {
@@ -101,6 +89,8 @@ class UserTable extends DatabaseTable{
             } else {
                 $_SESSION["timezone"] = date_default_timezone_get();
             }
+        } else {
+            return false;
         }
     }
 }

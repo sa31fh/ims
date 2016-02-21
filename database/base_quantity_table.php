@@ -9,6 +9,8 @@ class BaseQuantityTable extends DatabaseTable {
 
         if($result = parent::query($sql)) {
             return (int) $result->fetch_assoc()['quantity'];
+        } else {
+            return false;
         }
     }
 
@@ -17,14 +19,11 @@ class BaseQuantityTable extends DatabaseTable {
                 VALUES ('$item_id', '$quantity') 
                 ON DUPLICATE KEY UPDATE item_id = VALUES(item_id), quantity = VALUES(quantity)";
                 
-        if($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
    
     public static function get_estimated_quantity($factor, $item_name) {
         return round(self::get_base_quantity($item_name) * $factor, 2);
     }
 }
-
 ?>

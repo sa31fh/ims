@@ -12,7 +12,7 @@ class MessageTable extends DatabaseTable {
                     SET `timestamp`='$date'
                     WHERE id = '$conversation_id'";
 
-            $result = parent::query($sql);
+            return parent::query($sql);
         }
     }
 
@@ -23,11 +23,7 @@ class MessageTable extends DatabaseTable {
                 WHERE conversation_id = '$conversation_id'
                 ORDER BY `timestamp` ASC";
 
-        if ($result = parent::query($sql)) {
-            return $result;
-        }
+        return parent::query($sql);
     }
 }
-
-
 ?>
