@@ -31,9 +31,11 @@ if (isset($_POST["reply"])) {
     <?php $result = MessageTable::get_messages($_POST["conversation_id"]); ?>
     <?php while ($row = $result->fetch_assoc()): ?>
         <div class="main_message_div">
-            <div class="message"><?php echo $row["attachment"] ?></div>
+            <div ><?php echo $row["attachment"] ?></div>
+            <div class="message_name" <?php if($row["username"] == $_SESSION["username"]) {echo "style='float:right;'";} ?>>
+                <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span>
+            </div>
             <div class="message">
-                <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span><hr>
                 <span id="message"><?php echo $row["message"] ?></span>
                 <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
             </div>

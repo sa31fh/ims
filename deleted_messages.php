@@ -12,6 +12,10 @@ if (isset($_POST["conversation_id"])) {
        ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
     }
 }
+if (isset($_POST["checkbox"])) {
+    ConversationTable::change_multiple_conversation_status($_SESSION["username"], $_POST["checkbox"], "read");
+    ConversationTable::set_destroy_date($_SESSION["username"], $_POST["checkbox"], 'NULL');
+}
 ?>
 
 <!DOCTYPE html>
@@ -24,14 +28,27 @@ if (isset($_POST["conversation_id"])) {
 </head>
 <body>
     <div>
+        <div class="toolbar_main">
+            <div class="toolbar_div">
+                <input title="Select All" id="select_all" type="checkbox">
+            </div>
+            <div class="toolbar_div" id="button_div">
+            <form action="deleted_messages.php" id="multi_delete_form" method="post">
+                <span id="checked_count"></span>
+                <input class="option" type="submit" id="multi_delete" name="multi_delete" value="Move to Inbox">
+            </form>
+            </div>
+        </div>
         <table class="message_table" id="table">
             <?php $result = ConversationTable::get_deleted_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
-                <tr onclick=openMessage(this)>
-                    <td class="name">
+                <tr >
+                    <td class="checkbox"><input type="checkbox" name="checkbox[]" form="multi_delete_form" value="<?php echo $row["id"] ?>"></td>
+                    <td class="name" onclick=openMessage(this)>
                         <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>"> 
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?> </td>
-                    <td class="title"> <?php echo $row["title"] ?></td>
+                    <td class="title" onclick=openMessage(this)> <?php echo $row["title"] ?></td>
+                    <td class="conversation" onclick=openMessage(this)> <?php echo $row["mSender"].": ".$row["message"]; ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
                     <td class="delete"><form action="deleted_messages.php" method="post">
                         <input class="button" type="submit" value="undelete">
@@ -49,13 +66,46 @@ if (isset($_POST["conversation_id"])) {
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function openMessage(obj){
-        var id = document.getElementById("table").rows[obj.rowIndex].cells[3].children[0].children[1].value;
-        var receiver = document.getElementById("table").rows[obj.rowIndex].children[0].value;
+        var id = document.getElementById("table").rows[obj.parentNode.rowIndex].cells[5].children[0].children[1].value;
+        var receiver = document.getElementById("table").rows[obj.parentNode.rowIndex].cells[1].children[0].value;
         document.getElementById("conversation_id").value = id;
         document.getElementById("receiver_name").value = receiver;
         document.getElementById("view_message").submit();
     }
+    $(document).ready(function(){
+        $("table tr").change(function() {
+            if($("input[type='checkbox']", this).prop('checked') == true){
+                $("#button_div").fadeIn(200, "linear");
+                $("#button_div").css("display", "inline-block");
+                count_checked();
+            } else if($("input[type='checkbox']").filter(':checked').length == 0) {
+                $("#button_div").fadeOut(200, "linear");
+            }
+        });
+
+        $("#select_all").change(function(){
+            $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
+            if ($("#select_all").prop("checked") == true) {
+                $("#button_div").fadeIn(200, "linear");
+                $("#button_div").css("display", "inline-block");
+                count_checked();
+            } else {
+                $("#button_div").fadeOut(200, "linear");
+            }
+        });
+
+        function count_checked(){
+            var count = $("input[type='checkbox']:checked").length;
+            if(count == 0) {
+                $("#checked_count").text("");
+            } else if (count > 1) {
+                $("#checked_count").text(count + " items select");
+            } else {
+                $("#checked_count").text(count + " item select");
+            }
+        }
+    });
 </script>

@@ -69,11 +69,29 @@ class ConversationTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function change_multiple_conversation_status($user, $conversation_id, $status) {
+        $sql = "UPDATE Conversation 
+                SET sender_conversationStatusId = IF(sender = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), sender_conversationStatusId),
+                    receiver_conversationStatusId = IF(receiver = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), receiver_conversationStatusId)
+                WHERE id IN ('".implode("','", $conversation_id)."')";
+
+        return parent::query($sql);
+    }
+
     public static function set_destroy_date($user, $conversation_id, $date) {
         $sql = "UPDATE Conversation 
                 SET sender_destroyDate = IF(sender = '$user', ".$date.", sender_destroyDate),
                 receiver_destroyDate = IF(receiver = '$user', ".$date.", receiver_destroyDate)
                 WHERE id = '$conversation_id'";
+       
+        return parent::query($sql);
+    }
+
+    public static function set_multiple_destroy_date($user, $conversation_id, $date) {
+        $sql = "UPDATE Conversation 
+                SET sender_destroyDate = IF(sender = '$user', ".$date.", sender_destroyDate),
+                receiver_destroyDate = IF(receiver = '$user', ".$date.", receiver_destroyDate)
+                WHERE id IN ('".implode("','", $conversation_id)."')";
        
         return parent::query($sql);
     }

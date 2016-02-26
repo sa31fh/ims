@@ -24,7 +24,7 @@ if (!isset($_SESSION["username"])) {
           include_once "new_nav.php" ?>
 
     <div class="main_messages">
-        <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload="adjustHeight(this); showUnreadCount(); changeActiveClass(this);" ></iframe>
+        <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload="adjustHeight(this); showUnreadCount(this); changeActiveClass(this);" ></iframe>
     </div>
 
     <form action="compose_messages.php" method="post" id="print_form" target="message_frame">
@@ -34,7 +34,7 @@ if (!isset($_SESSION["username"])) {
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function adjustHeight(iframe) {
         iframe.height = 0 + "px";
@@ -58,21 +58,18 @@ if (!isset($_SESSION["username"])) {
         }
     }
 
-    function showUnreadCount(){
-        var sessionName  = document.getElementById("session_name").value;
-
-        $(function(){
-            $.post("jq_ajax.php", {sessionName: sessionName, status: "unread"}, function(data,status){
-                if (data > 0) {
-                    document.getElementById("status_view").innerHTML =  data;
-                    document.getElementById("status_view").style.visibility = "visible";
-                    document.getElementById("status_view").style.transform = "scale(1)";
-                } else {
-                    document.getElementById("status_view").style.transform = "scale(0.1)";
-                    document.getElementById("status_view").style.visibility = "hidden";
-                };
-            });
-        });
+    function showUnreadCount(iframe){
+        if (iframe.contentDocument.title == "Inbox") {
+            var unreadCount = $("#message_frame").contents().find(".unread").length;
+            if (unreadCount > 0) {
+                document.getElementById("status_view").innerHTML =  unreadCount;
+                document.getElementById("status_view").style.visibility = "visible";
+                document.getElementById("status_view").style.transform = "scale(1)";
+            } else {
+                document.getElementById("status_view").style.transform = "scale(0.1)";
+                document.getElementById("status_view").style.visibility = "hidden";
+            }
+        }
     }
 </script>
 

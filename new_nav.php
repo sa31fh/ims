@@ -41,3 +41,14 @@ if(isset($_POST["dateview"])) {
         </li>
     </ul>
 </nav>
+
+<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+    $(document).ready(function(){
+        $("nav ul li").hover(function(){
+            $("ul", this).slideDown(150, "linear");
+        }, function(){
+            $("ul", this).slideUp(150, "linear");
+        });
+    });
+</script>

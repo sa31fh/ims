@@ -1,4 +1,5 @@
 <?php 
+session_start();
 require_once "database/user_table.php";
 require_once "database/user_role_table.php";
 require_once "database/category_table.php";
@@ -70,7 +71,11 @@ if (isset($_POST["timeZoneRegion"])) {
 /*--------------------------messages.php----------------------------*/
 if (isset($_POST["sessionName"])) {
     echo ConversationTable::count_unread_conversations($_POST["sessionName"]);
+}
 
+/*--------------------------------received_messages.php----------------*/
+if (isset($_POST["checkedId"])) {
+    echo ConversationTable::change_multiple_conversation_status($_SESSION["username"], $_POST["checkedId"], $_POST["newStatus"]);
 }
 
 ?>

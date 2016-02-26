@@ -32,7 +32,7 @@ if (isset($_POST["update_user"])) {
 <body>
     <?php include_once "new_nav.php" ?>
     <div class="main">
-        <div>
+        <div class="inline  div_card">
             <h4>Edit Credentials<hr></h4>
             <?php $result = UserTable::get_user_details($_SESSION["username"]);
                   $row = $result->fetch_assoc(); ?>
@@ -56,8 +56,8 @@ if (isset($_POST["update_user"])) {
             </form>
         </div>
 
-        <div>
-            <h4>Edit Password</h4>
+        <div class="inline div_card">
+            <h4>Edit Password<hr></h4>
             <form action="user_account.php" method="post">
                 <label>Current Password<input class="userinput password_view" type="password" id="current_password" name="current_password" oninput= verifyCurrentPassword() required ></label><br/>
                 <label>New Password<input class="userinput password_view" type="password" id="new_password" name="new_password" oninput= verifyNewPassword() required></label><br/>
