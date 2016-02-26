@@ -14,6 +14,8 @@ if(isset($_POST["username"])){
             ConversationTable::set_destroy_status($_SESSION["username"], gmdate("Y-m-d"));
             header("Location: category_status.php");
             exit();
+        } else {
+            echo '<div class="error">Incorrect username or password</div>';
         }
     } catch (Exception $e) {
             echo '<div class="error">'.$e->getMessage().'</div>';

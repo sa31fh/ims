@@ -9,7 +9,7 @@ class VariablesTable extends DatabaseTable {
         if ($result = parent::query($sql)) {
             return (int) $result->fetch_assoc()['value'];
         } else {
-            return false;
+            throw new Exception("get_expected_sales query failed");
         }
     }
 
@@ -27,7 +27,7 @@ class VariablesTable extends DatabaseTable {
         if ($result = parent::query($sql)) {
             return (int) $result->fetch_assoc()['value'];
         } else {
-            return false;
+            throw new Exception("get_base_sales query failed");
         }
     }
 

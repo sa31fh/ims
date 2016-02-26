@@ -7,7 +7,7 @@ class MessageTable extends DatabaseTable {
         $sql = "INSERT INTO Message (`timestamp`, sender, receiver, message, conversation_id)
                 VALUES ('$date', '$sender', '$receiver', '$message', '$conversation_id')";
 
-        if ($result = parent::query($sql)) {
+        if (parent::query($sql)) {
             $sql = "UPDATE Conversation 
                     SET `timestamp`='$date'
                     WHERE id = '$conversation_id'";

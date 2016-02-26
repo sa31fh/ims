@@ -11,13 +11,15 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
-try {
-    if (isset($_POST["new_item_name"])) {
-        ItemTable::add_new_item($_POST["new_item_name"], $_POST["new_item_unit"]);
-    }
- } catch (Exception $e) {
+if (isset($_POST["new_item_name"])) {
+    try {
+        if(!ItemTable::add_new_item($_POST["new_item_name"], $_POST["new_item_unit"])) {
+            echo '<div class="error">Item already exists!</div>';
+        }
+    } catch (Exception $e) {
         echo '<div class="error">'.$e->getMessage().'</div>';
- } 
+    }
+}
 if (isset($_POST["delete_item"])) {
     ItemTable::delete_item($_POST["delete_item"]);
 }
@@ -25,7 +27,7 @@ if (isset($_POST["item_name"]) OR isset($_POST["item_unit"])) {
     ItemTable::update_item_details($_POST["item_id"], $_POST["item_name"], $_POST["item_unit"]);
 }
 if (isset($_POST["base_sales"])) {
-    ItemTable::update_base_sales($_POST["base_sales"]);
+    VariablesTable::update_base_sales($_POST["base_sales"]);
 }
  ?>
 

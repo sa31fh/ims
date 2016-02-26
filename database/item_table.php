@@ -7,25 +7,28 @@ class ItemTable extends DatabaseTable {
         $date = date('Y-m-d');
 
         $sql = "SELECT * FROM Item
-                WHERE name = '{$item_name}' 
+                WHERE name = '{$item_name}'
                 AND deletion_date IS NULL";
 
-        if(!$result = parent::query($sql)) {
-            if ($result->num_rows == 0) {
-                 throw new Exception("Item already exists!");
-            }
-            $sql = "SELECT * FROM Item 
+        $result = parent::query($sql);
+        if ($result->num_rows != 0) {
+            return false; // Item already exists
+        }
+        $sql = "SELECT * FROM Item
+                WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
+        $result = parent::query($sql);
+        if ($result->num_rows == 0) {
+            $sql = "INSERT INTO Item (name, unit, creation_date)
+                    VALUES('{$item_name}', '{$item_unit}', '{$date}')";
+        } else {
+            $sql = "UPDATE Item 
+                    SET deletion_date = null, unit = '{$item_unit}'
                     WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
-            $result = parent::query($sql);
-            if ($result->num_rows == 0) {
-                $sql = "INSERT INTO Item (name, unit, creation_date) 
-                        VALUES('{$item_name}', '{$item_unit}', '{$date}')";
-            } else {
-                $sql = "UPDATE Item 
-                        SET deletion_date = null, unit = '{$item_unit}' 
-                        WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
-            }
-            return parent::query($sql);
+        }
+        if (parent::query($sql)) {
+            return true; // Item added sucessfully
+        } else {
+            throw new Exception("add_new_item query failed!");
         }
     }
 
@@ -67,7 +70,7 @@ class ItemTable extends DatabaseTable {
         if ($result = parent::query($sql)) {
             return $result->fetch_assoc()['num'];
         } else {
-            return false;
+            throw new Exception("get_total_items query failed");
         }
     }
 
@@ -82,7 +85,7 @@ class ItemTable extends DatabaseTable {
         if ($result = parent::query($sql)) {
             return $result->fetch_assoc()['num'];
         } else {
-            return false;
+            throw new Exception("get_updated_items_count query failed");
         }
     }
 

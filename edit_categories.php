@@ -11,12 +11,14 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
-try {
-    if(isset($_POST["add_button"]) AND !empty($_POST["category"])){
-        CategoryTable::add_category($_POST["category"]);
+if (isset($_POST["add_button"]) AND !empty($_POST["category"])) {
+    try {
+        if (!CategoryTable::add_category($_POST["category"])) {
+            echo '<div class="error">Category already exists</div>'; 
+        }
+    } catch (Exception $e) {
+        echo '<div class="error">'.$e->getMessage().'</div>';
     }
-} catch (Exception $e) {
-    echo '<div class="error">'.$e->getMessage().'</div>';
 } 
 if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
     CategoryTable::remove_category($_POST["category"]);

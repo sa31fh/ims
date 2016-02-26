@@ -12,8 +12,15 @@ if ($_SESSION["userrole"] != "admin") {
     exit();
 }
 if (isset($_POST["new_username"])) {
-    UserTable::add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole']);
-} 
+    try {
+        if (!UserTable::add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole'])) {
+            echo '<div class="error">Username already exists</div>';
+        }
+    } catch (Exception $e) {
+        echo '<div class="error">'.$e->getMessage().'</div>';
+    }
+}
+
 if(isset($_POST["delete_username"])){
     UserTable::delete_user($_POST["delete_username"]);
 }

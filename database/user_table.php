@@ -10,13 +10,17 @@ class UserTable extends DatabaseTable{
         $result = parent::query($sql);
         $row = $result->fetch_assoc();
         if ($row["username"] == $user_name) {
-            throw new Exception('Username already exists!');
+            return false;
         }
         $sql = "INSERT INTO User (username, first_name, last_name, password_hash, userrole_id) 
                 VALUES('$user_name', '$first_name', '$last_name', '" .password_hash($password, PASSWORD_DEFAULT). "', 
                       (SELECT id FROM UserRole WHERE role='{$user_role}'))";
                       
-        return parent::query($sql);
+        if (parent::query($sql)) {
+            return true;
+        } else {
+            throw new Exception("add_new_user query failed");
+        }
     }
 
     public static function get_users() {
@@ -57,14 +61,15 @@ class UserTable extends DatabaseTable{
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
                 WHERE username='$user_name'";
 
-        if ($result = parent::query($sql)) {
-            $row = $result->fetch_assoc();
-            if ($row == null OR !password_verify($password, $row['password_hash'])) {
-               throw new Exception("Incorrect username or password!");
-            } else {
-                return true;
-            }             
+        if (!$result = parent::query($sql)) {
+            throw new Exception("verify_credentials query failed");
         }
+        $row = $result->fetch_assoc();
+        if ($row == null OR !password_verify($password, $row['password_hash'])) {
+            return false;
+        } else {
+            return true;
+        }             
     }
 
     public static function update_user_password($user_name, $new_password) {
@@ -80,18 +85,18 @@ class UserTable extends DatabaseTable{
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
                 WHERE username='$user_name'";
 
-        if ($result = parent::query($sql)) {
-            $row = $result->fetch_assoc();
-            $_SESSION["username"] = $user_name;
-            $_SESSION["userrole"] = $row["role"];
-            if (!empty($row["time_zone"])) {
-                $_SESSION["timezone"] = $row["time_zone"];
-            } else {
-                $_SESSION["timezone"] = date_default_timezone_get();
-            }
-        } else {
+        if (!$result = parent::query($sql)) {
             return false;
         }
+        $row = $result->fetch_assoc();
+        $_SESSION["username"] = $user_name;
+        $_SESSION["userrole"] = $row["role"];
+        if (!empty($row["time_zone"])) {
+            $_SESSION["timezone"] = $row["time_zone"];
+        } else {
+            $_SESSION["timezone"] = date_default_timezone_get();
+        }
+        return true;
     }
 }
 ?>

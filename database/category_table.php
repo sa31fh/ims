@@ -4,13 +4,12 @@ require_once "database_table.php";
 class CategoryTable extends DatabaseTable {
 
     public static function add_category($category_name) {
+        $date = date('Y-m-d');
+        
         $sql = "SELECT * FROM Category 
                 WHERE name = '{$category_name}' AND deletion_date IS NULL";
-        if ($result = parent::query($sql)) {
-            if ($result->num_rows != 0) {
-                throw new Exception("Category already exists!");
-            }
-            $date = date('Y-m-d');
+        $result = parent::query($sql);
+        if ($result->num_rows == 0) {
             $sql = "SELECT * FROM Category 
                     WHERE name = '{$category_name}' AND deletion_date = '{$date}'";
             $result = parent::query($sql); 
@@ -21,9 +20,16 @@ class CategoryTable extends DatabaseTable {
                 $sql = "UPDATE Category SET deletion_date = NULL 
                         WHERE name = '{$category_name}' and deletion_date = '{$date}'";
             }
-            return parent::query($sql);
-        }      
-    }  
+            if (parent::query($sql)) {
+                return true;
+            } else {
+                throw new Exception("add_category query failed");
+            }
+        } else {
+            return false;
+        }
+    }
+
 
     public static function remove_category($category_name) {
         $sql = "UPDATE Category SET deletion_date = '" .date('Y-m-d'). "' 

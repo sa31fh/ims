@@ -14,7 +14,7 @@ class UserRoleTable extends DatabaseTable {
                 SET userrole_id= (SELECT id FROM UserRole WHERE role='$role') 
                 WHERE username='$user_name'";
                 
-        return $result = parent::query($sql);
+        return parent::query($sql);
     }
 
 }
