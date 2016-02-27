@@ -8,6 +8,9 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
+if (isset($_POST["expected_sales"])) {
+    VariablesTable::update_expected_sales($_POST["expected_sales"]);
+}
 ?>
 
 <!DOCTYPE html>
@@ -20,10 +23,19 @@ if (!isset($_SESSION["username"])) {
 </head>
 <body>
     <div>
-        <a href="category_status.php" class="buttonBack">Back</a>
-        <input type="button" onclick=sendPrint() value="Send Table" class="button">
+        <div class="inline">
+            <a href="category_status.php" class="buttonBack">Back</a>
+            <input type="button" onclick=sendPrint() value="Send Table" class="button">
+        </div>
+        <?php if ($_SESSION["userrole"] == "admin"): ?>
+        <div class="inline">
+            <form action="print_preview.php" method="post">
+            <span ><strong>Expected Sales ($):</strong></span>
+            <input type="number" name="expected_sales" value="<?php echo VariablesTable::get_expected_sales() ?>" onchange="this.form.submit()">
+            </form>
+        </div>
+        <?php endif ?>
     </div>
-
     <div id="table">
         <table class="user_table" id="print">
             <tr id="print_date">
@@ -60,7 +72,7 @@ if (!isset($_SESSION["username"])) {
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function sendPrint(){
         var dat = document.getElementById("table").innerHTML;

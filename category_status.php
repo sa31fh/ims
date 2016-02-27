@@ -46,18 +46,11 @@ if (!isset($_SESSION["date"])) {
         </div>
 
         <div class="inline"><iframe src="" id="new_iframe" name="ifram" scrolling="no" frameborder="0" onload=adjustHeight(id)></iframe></div>
-        
-        <?php if ($_SESSION["userrole"] == "admin"): ?>
-            <div>
-                <span ><strong>Expected Sales ($):</strong></span>
-                <input type="number" value="<?php echo VariablesTable::get_expected_sales() ?>" onchange=updateSales(this)>
-            </div>
-        <?php endif ?>   
     </div>
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function adjustHeight(iframeID){
         var iframe = document.getElementById(iframeID);
@@ -65,13 +58,4 @@ if (!isset($_SESSION["date"])) {
         var nHeight = iframe.contentWindow.document .body.scrollHeight;
         iframe.height = (nHeight + 60) + "px";
     }
-
-    function updateSales(obj){
-        var sales = obj.value;
-
-        $(function(){
-            $.post("jq_ajax.php", {sales: sales});
-        });
-    }
 </script>
-
