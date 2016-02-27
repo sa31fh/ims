@@ -65,11 +65,7 @@ class UserTable extends DatabaseTable{
             throw new Exception("verify_credentials query failed");
         }
         $row = $result->fetch_assoc();
-        if ($row == null OR !password_verify($password, $row['password_hash'])) {
-            return false;
-        } else {
-            return true;
-        }             
+        return $row != null && password_verify($password, $row['password_hash']);
     }
 
     public static function update_user_password($user_name, $new_password) {
