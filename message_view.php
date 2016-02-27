@@ -9,11 +9,11 @@ if (!isset($_SESSION["username"])) {
     exit();
 }
 if (isset($_POST["status_to_read"])) {
-    ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
+    ConversationTable::update_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
 }
 if (isset($_POST["reply"])) {
     if(MessageTable::create_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
-        ConversationTable::change_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
+        ConversationTable::update_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
         ConversationTable::set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
     }
 }

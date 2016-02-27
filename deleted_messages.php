@@ -8,12 +8,12 @@ if (!isset($_SESSION["username"])) {
     exit();
 }
 if (isset($_POST["conversation_id"])) {
-    if(ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
+    if(ConversationTable::update_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
        ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
     }
 }
 if (isset($_POST["checkbox"])) {
-    ConversationTable::change_multiple_conversation_status($_SESSION["username"], $_POST["checkbox"], "read");
+    ConversationTable::update_multiple_conversation_status($_SESSION["username"], $_POST["checkbox"], "read");
     ConversationTable::set_destroy_date($_SESSION["username"], $_POST["checkbox"], 'NULL');
 }
 ?>

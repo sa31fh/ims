@@ -8,13 +8,13 @@ if (!isset($_SESSION["username"])) {
     exit();
 } 
 if (isset($_POST["conversation_id"])) {
-    if(ConversationTable::change_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted")) {
+    if(ConversationTable::update_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted")) {
         $date = date_format((date_add(date_create(gmdate("Y-m-d")), date_interval_create_from_date_string("1 week"))), "Y-m-d");
         ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], "'$date'");
     }
 }
 if (isset($_POST["checkbox"])) {
-    ConversationTable::change_multiple_conversation_status($_SESSION["username"], $_POST["checkbox"], "deleted");
+    ConversationTable::update_multiple_conversation_status($_SESSION["username"], $_POST["checkbox"], "deleted");
     $date = date_format((date_add(date_create(gmdate("Y-m-d")), date_interval_create_from_date_string("1 week"))), "Y-m-d");
     ConversationTable::set_multiple_destroy_date($_SESSION["username"], $_POST["checkbox"], "'$date'");
 }

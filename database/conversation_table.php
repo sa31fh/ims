@@ -60,7 +60,7 @@ class ConversationTable extends DatabaseTable {
         return parent::query($sql);
     }
 
-    public static function change_conversation_status($user, $conversation_id, $status) {
+    public static function update_conversation_status($user, $conversation_id, $status) {
         $sql = "UPDATE Conversation 
                 SET sender_conversationStatusId = IF(sender = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), sender_conversationStatusId),
                     receiver_conversationStatusId = IF(receiver = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), receiver_conversationStatusId)
@@ -69,7 +69,7 @@ class ConversationTable extends DatabaseTable {
         return parent::query($sql);
     }
 
-    public static function change_multiple_conversation_status($user, $conversation_id, $status) {
+    public static function update_multiple_conversation_status($user, $conversation_id, $status) {
         $sql = "UPDATE Conversation 
                 SET sender_conversationStatusId = IF(sender = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), sender_conversationStatusId),
                     receiver_conversationStatusId = IF(receiver = '$user', (SELECT id FROM ConversationStatus WHERE status = '$status'), receiver_conversationStatusId)
