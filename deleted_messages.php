@@ -98,7 +98,7 @@ if (isset($_POST["checkbox"])) {
         });
 
         function count_checked(){
-            var count = $("input[type='checkbox']:checked").length;
+            var count = $("table input[type='checkbox']:checked").length;
             if(count == 0) {
                 $("#checked_count").text("");
             } else if (count > 1) {
