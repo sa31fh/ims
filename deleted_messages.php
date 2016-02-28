@@ -14,7 +14,7 @@ if (isset($_POST["conversation_id"])) {
 }
 if (isset($_POST["checkbox"])) {
     ConversationTable::update_multiple_conversation_status($_SESSION["username"], $_POST["checkbox"], "read");
-    ConversationTable::set_destroy_date($_SESSION["username"], $_POST["checkbox"], 'NULL');
+    ConversationTable::set_multiple_destroy_date($_SESSION["username"], $_POST["checkbox"], 'NULL');
 }
 ?>
 
