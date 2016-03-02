@@ -40,6 +40,16 @@ if (isset($_POST["base_sales"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="user_add_div">
+        <h4 class="none" id="add_header">Add New Item <div id="arrow_div" class="arrow_up"></div></h4>
+        <div class="div_collapsable none">
+            <form action="edit_items.php" method="post">
+                <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required>
+                <input class="userinput" type="text" name="new_item_unit" placeholder="Item Unit" required>
+                <input type="submit" value="Add Item" class="button">
+            </form>
+        </div>
+    </div>
     <div>
         <table class="user_table" id="table" border="1px" >
             <tr>
@@ -70,15 +80,6 @@ if (isset($_POST["base_sales"])) {
             <?php  endwhile ?>
         </table>
     </div>
-
-    <div class="user_add_div">
-        <h4>Add New Item</h4>
-        <form action="edit_items.php" method="post">
-            <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required>
-            <input class="userinput" type="text" name="new_item_unit" placeholder="Item Unit" required>
-            <input type="submit" value="Add Item" class="button">
-        </form>
-    </div>
 </body>
 </html>
 
@@ -89,9 +90,14 @@ if (isset($_POST["base_sales"])) {
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
 
-        $(function(){
-            $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
-        });
+        $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
     }
+
+    $(document).ready(function(){
+        $("#add_header").click(function(){
+            $(".div_collapsable").slideToggle(150, "linear");
+            $("#arrow_div").toggleClass("arrow_up arrow_down");
+        });
+    });
 </script>
 
