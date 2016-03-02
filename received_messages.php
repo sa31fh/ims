@@ -30,13 +30,15 @@ if (isset($_POST["checkbox"])) {
 </head>
 <body>
     <div>
-        <div  class="toolbar_main">
+        <div class="toolbar_main">
             <div class="toolbar_div">
+                <span id="checked_count">0</span>
+                <img class="toolbar_image" src="images/mail.png" width="30px" height="30px">
                 <input title="Select All" id="select_all" type="checkbox">
             </div>
+            <div class="divider"></div>
             <div class="toolbar_div" id="button_div">
                 <form action="received_messages.php" id="multi_delete_form" method="post">
-                    <span id="checked_count"></span>
                     <input class="option" type="submit" id="multi_delete" name="multi_delete" value="Delete">
                 </form>
                 <div class="dropdown_main">
@@ -99,12 +101,10 @@ if (isset($_POST["checkbox"])) {
             if($("input[type='checkbox']", this).prop('checked') == true){
                 $("#button_div").fadeIn(200, "linear");
                 $("#button_div").css("display", "inline-block");
-                count_checked();
             } else if($("input[type='checkbox']").filter(':checked').length == 0) {
                 $("#button_div").fadeOut(200, "linear");
-            } else {
-                count_checked();
             }
+            countChecked();
         });
 
         $("#select_all").change(function(){
@@ -112,10 +112,11 @@ if (isset($_POST["checkbox"])) {
             if ($("#select_all").prop("checked") == true) {
                 $("#button_div").fadeIn(200, "linear");
                 $("#button_div").css("display", "inline-block");
-                count_checked();
             } else {
                 $("#button_div").fadeOut(200, "linear");
             }
+            countChecked();
+
         });
 
         $(".dropdown_div #read").click(function(){
@@ -154,14 +155,14 @@ if (isset($_POST["checkbox"])) {
         }
     }
 
-    function count_checked(){
+    function countChecked(){
         var count = $("table input[type='checkbox']:checked").length;
         if(count == 0) {
-            $("#checked_count").text("");
+            $("#checked_count").text("0");
         } else if (count > 1) {
-            $("#checked_count").text(count + " items selected");
+            $("#checked_count").text(count);
         } else {
-            $("#checked_count").text(count + " item selected");
+            $("#checked_count").text(count);
         }
     }
 </script>
