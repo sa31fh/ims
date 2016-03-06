@@ -32,9 +32,9 @@ if (isset($_POST["checkbox"])) {
     <div>
         <div class="toolbar_main">
             <div class="toolbar_div">
+                <input title="Select All" id="select_all" type="checkbox">
                 <span id="checked_count">0</span>
                 <img class="toolbar_image" src="images/mail.png" width="30px" height="30px">
-                <input title="Select All" id="select_all" type="checkbox">
             </div>
             <div class="divider"></div>
             <div class="toolbar_div" id="button_div">
@@ -103,13 +103,13 @@ if (isset($_POST["checkbox"])) {
                 $("#button_div").css("display", "inline-block");
             } else if($("input[type='checkbox']").filter(':checked').length == 0) {
                 $("#button_div").fadeOut(200, "linear");
-            }
+            } 
             countChecked();
         });
 
         $("#select_all").change(function(){
             $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
-            if ($("#select_all").prop("checked") == true) {
+            if ($("#select_all").prop("checked")) {
                 $("#button_div").fadeIn(200, "linear");
                 $("#button_div").css("display", "inline-block");
             } else {
@@ -160,9 +160,9 @@ if (isset($_POST["checkbox"])) {
         if(count == 0) {
             $("#checked_count").text("0");
         } else if (count > 1) {
-            $("#checked_count").text(count);
+            $("#checked_count").text(count );
         } else {
-            $("#checked_count").text(count);
+            $("#checked_count").text(count );
         }
     }
 </script>

@@ -30,9 +30,9 @@ if (isset($_POST["checkbox"])) {
     <div>
         <div class="toolbar_main">
             <div class="toolbar_div">
+                <input title="Select All" id="select_all" type="checkbox">
                 <span id="checked_count">0</span>
                 <img class="toolbar_image" src="images/mail.png" width="30px" height="30px">
-                <input title="Select All" id="select_all" type="checkbox">
             </div>
             <div class="divider"></div>
             <div class="toolbar_div" id="button_div">
@@ -90,7 +90,7 @@ if (isset($_POST["checkbox"])) {
 
         $("#select_all").change(function(){
             $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
-            if ($("#select_all").prop("checked") == true) {
+            if ($("#select_all").prop("checked")) {
                 $("#button_div").fadeIn(200, "linear");
                 $("#button_div").css("display", "inline-block");
             } else {
