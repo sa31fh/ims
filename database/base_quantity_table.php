@@ -8,7 +8,7 @@ class BaseQuantityTable extends DatabaseTable {
                 WHERE item_id = (SELECT id FROM Item WHERE name='$item_name')";
 
         if($result = parent::query($sql)) {
-            return (int) $result->fetch_assoc()['quantity'];
+            return $result->fetch_assoc()['quantity'];
         } else {
             throw new Exception("get_base_quantity query failed");
         }

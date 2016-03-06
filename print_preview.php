@@ -60,7 +60,7 @@ if (isset($_POST["expected_sales"])) {
                     <td><?php echo $row["item_name"] ?></td>
                     <td><?php echo $row["unit"] ?></td>
                     <td><?php echo $row["quantity"] ?></td>
-                    <td><?php echo (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - (int)$row["quantity"] : "-") ?></td>
+                    <td><?php echo (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-") ?></td>
                     <td><?php echo $row["notes"] ?></td>
                 </tr>
             <?php endwhile ?>
