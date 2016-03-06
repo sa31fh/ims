@@ -27,13 +27,13 @@ if ($_SESSION["userrole"] != "admin") {
     </ul>
     <?php include_once "new_nav.php" ?>
 
-    <div class="main_messages">
+    <div class="main_top_side">
         <iframe src="edit_categories.php" frameborder="0" name="task_frame" id="task_frame" scrolling="no" onload=adjustHeight(id) ></iframe>
     </div>
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function adjustHeight(iframeID){
         var iframe = document.getElementById(iframeID);

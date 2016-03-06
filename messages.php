@@ -23,7 +23,7 @@ if (!isset($_SESSION["username"])) {
     <?php $page = "messages";
           include_once "new_nav.php" ?>
 
-    <div class="main_messages">
+    <div class="main_top_side">
         <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload="adjustHeight(this); showUnreadCount(this); changeActiveClass(this);" ></iframe>
     </div>
 

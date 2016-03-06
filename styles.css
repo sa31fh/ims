@@ -10,7 +10,7 @@ body{
 }
 
 div{
-    margin: 30px;
+    margin: 10px;
 }
 
 caption{
@@ -35,7 +35,7 @@ textarea{
 }
 
 iframe{
-    width: 800px;
+    width: 100%;
 }
 
 label{
@@ -63,7 +63,6 @@ select{
     margin: 5px 0px;
     padding: 0px 10px;
 }
-
 .div_login{
     text-align: center;
     margin: 100px 0px;
@@ -76,22 +75,27 @@ select{
 .div_collapsable{
     display: none;
 }
-
-.main{
-    margin-top: 50px;
-    padding-top: 1px;
+.div_iframe{
+    width: 75% !important;
 }
 
-.main_messages{
+.main{
+    margin: 0px;
+    margin-top: 43px;
+}
+
+.main_top_side{
+    margin: 0px;
     margin-left: 150px;
-    margin-top: 55px;
-    padding-top: 1px;
+    margin-top: 43px;
 }
 
 .inline{
     display: inline-block;
-    margin: 15px;
     vertical-align: top;
+}
+.block{
+    display: block;
 }
 
 .top{
@@ -212,9 +216,11 @@ select{
 }
 
 .role_select{
-    width: 130px;
+    display: block;
+    text-align: center;
+    width: 200px;
     height: 30px;
-    margin: 10px 10px 10px 5px;
+    margin: 5px 0px;
 }
 
 #message_frame{
@@ -241,14 +247,14 @@ select{
 }
 
 .user_table_div{
-    margin: 30px;
+    margin: 50px 30px 30px 30px;
     display: block;
 }
 
 .user_table {
     border:0;
     width: 100%;
-    margin: auto;
+    margin: 0;
     border-collapse:collapse;
     border: 1px solid #75a4a4;
 }
@@ -270,12 +276,11 @@ select{
 }
 
 .user_table td#name{
-    text-align: left;
-    padding-left: 50px;
-    width: 60%;
+    text-align: center;
+    width: 20%;
 }
 .user_table td#role{
-    width: 30%;
+    width: 20%;
 }
 
 .user_table td#delete{
@@ -360,7 +365,54 @@ select{
     display: inline-block;
     padding: 25px 15px;
 }
-
+#add_div_main{
+    position: fixed;
+    width: 100%;
+    top: 0;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    z-index: 100;
+}
+.div_fade{
+    display: none;
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+}
+.add_div{
+    display: none;
+    border: none;
+    background-color: whitesmoke;
+    text-align: left;
+    box-shadow: 0px 0px 15px -2px #444;
+    margin: 0px;
+    padding: 0px 5px;
+    overflow: hidden;
+}
+.drawer_tag{
+    width: 300px;
+    border: none;
+    padding: 2px 13px;
+    font-size: 18px;
+    color: white;
+    background-color: #79BC4D;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    outline: none;
+    transition: background .2s;
+}
+.drawer_tag_open{
+    background-color: #808080;
+}
+.button_add_drawer{
+    margin-top: 25px;
+    margin-left: 50px;
+    min-width: 200px;
+}
 
 
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
@@ -430,7 +482,7 @@ select{
 .toolbar_div {
     display: inline-block;
     vertical-align: middle;
-    padding: 0px 5px;
+    padding: 0px 10px;
     margin: 0;
     height: 100%;
     color: #555;
@@ -497,6 +549,7 @@ select{
 .dropdown_content:hover{
     background-color: #ccc;
 }
+
 
 /* ---------------------MESSAGE STYLE--------------------- */
 .main_message_div{
