@@ -2,6 +2,7 @@
 session_start();
 require_once "database/item_table.php";
 require_once "database/variables_table.php";
+require_once "database/base_quantity_table.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -15,6 +16,10 @@ if (isset($_POST["new_item_name"])) {
     try {
         if(!ItemTable::add_new_item($_POST["new_item_name"], $_POST["new_item_unit"])) {
             echo '<div class="error">Item already exists!</div>';
+        } else {
+            if (!empty($_POST["new_item_quantity"])) {
+                BaseQuantityTable::set_base_quantity($_POST["new_item_name"], $_POST["new_item_quantity"]);
+            }
         }
     } catch (Exception $e) {
         echo '<div class="error">'.$e->getMessage().'</div>';
@@ -40,17 +45,33 @@ if (isset($_POST["base_sales"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="user_add_div">
-        <h4 class="none" id="add_header">Add New Item <div id="arrow_div" class="arrow_up"></div></h4>
-        <div class="div_collapsable none">
+    <div id="add_div_main" class="none">
+        <div id="add_div" class="add_div">
+        <div>
+            <h4>Add New Item <hr></h4>
             <form action="edit_items.php" method="post">
+            <div class="inline">
+                <label for="new_item_name">Name</label>
                 <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required>
+            </div>
+            <div class="inline">
+                <label for="new_item_unit">Unit</label>
                 <input class="userinput" type="text" name="new_item_unit" placeholder="Item Unit" required>
-                <input type="submit" value="Add Item" class="button">
+            </div>
+            <div class="inline">
+                <label for="new_item_quantity">Quantity</label>
+                <input class="userinput" type="text" name="new_item_quantity" placeholder="Item Quantity">
+            </div>
+            <div class="block" id="item_add_div" >
+                <input type="submit" value="Add Item" class="button button_add_drawer" id="item_add_button">
+            </div>
             </form>
         </div>
+        </div>
+        <button id="drawer_tag" class="drawer_tag">Add</button>
     </div>
-    <div>
+    <div class="div_fade"></div>
+    <div class="user_table_div">
         <table class="user_table" id="table" border="1px" >
             <tr>
                 <th>Item</th>
@@ -83,7 +104,7 @@ if (isset($_POST["base_sales"])) {
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function quantityChange(obj){
         var quantity = obj.value;
@@ -93,10 +114,25 @@ if (isset($_POST["base_sales"])) {
         $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
     }
 
-    $(document).ready(function(){
-        $("#add_header").click(function(){
-            $(".div_collapsable").slideToggle(150, "linear");
-            $("#arrow_div").toggleClass("arrow_up arrow_down");
+    $(document).ready(function() {
+        $("#drawer_tag").click(function() {
+            $("#add_div").slideToggle(180, "linear", function() {
+                if($("#add_div").css("display") == "none") {
+                    $(".div_fade").css("display", "none");
+                    $("#drawer_tag").removeClass("drawer_tag_open");
+                    $("#drawer_tag").text("Add");
+                } else {
+                    $(".div_fade").css("display", "block");
+                    $("#drawer_tag").addClass("drawer_tag_open");
+                    $("#drawer_tag").text("Close");
+                }
+            });
+        });
+        $(".div_fade").click(function() {
+            $("#add_div").slideToggle(180, "linear");
+            $(".div_fade").css("display", "none")
+            $("#drawer_tag").removeClass("drawer_tag_open");
+            $("#drawer_tag").text("Add");
         });
     });
 </script>

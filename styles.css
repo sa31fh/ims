@@ -413,7 +413,12 @@ select{
     margin-left: 50px;
     min-width: 200px;
 }
-
+#item_add_div{
+    text-align: center;
+}
+#item_add_button{
+    margin: 0;
+}
 
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .message_table{
@@ -509,6 +514,7 @@ select{
 #button_div{
     display: none;
 }
+
 .dropdown_main{
     display: inline-block;
     position: relative;
