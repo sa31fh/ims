@@ -28,18 +28,17 @@ if ($_SESSION["userrole"] != "admin") {
     <?php include_once "new_nav.php" ?>
 
     <div class="main_top_side">
-        <iframe src="edit_categories.php" frameborder="0" name="task_frame" id="task_frame" scrolling="no" onload=adjustHeight(id) ></iframe>
+        <iframe class="iframe_top" src="edit_categories.php" frameborder="0" name="task_frame" id="task_frame" onload=adjustHeight(id) ></iframe>
     </div>
 </body>
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
-    function adjustHeight(iframeID){
-        var iframe = document.getElementById(iframeID);
+    function adjustHeight(iframe){
+        var iframe = document.getElementById(iframe);
         iframe.height = 0 + "px";
-        var nHeight = iframe.contentWindow.document .body.scrollHeight;
-        iframe.height = (nHeight + 60) + "px";
+        iframe.height = (document.body.scrollHeight - 48) + "px";
     }
     $(function() {
         $('#sideNav li a').click(function() {

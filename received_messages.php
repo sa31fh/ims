@@ -29,10 +29,11 @@ if (isset($_POST["checkbox"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="main_iframe">
     <div>
         <div class="toolbar_main">
             <div class="toolbar_div">
-                <input title="Select All" id="select_all" type="checkbox">
+                <input class="toolbar_checkbox" title="Select All" id="select_all" type="checkbox">
                 <span id="checked_count">0</span>
                 <img class="toolbar_image" src="images/mail.png" width="30px" height="30px">
             </div>
@@ -77,6 +78,7 @@ if (isset($_POST["checkbox"])) {
             <input type="hidden" name="status_to_read">
         </form>
    </div> 
+   </div>
 </body>
 </html>
 
@@ -160,9 +162,9 @@ if (isset($_POST["checkbox"])) {
         if(count == 0) {
             $("#checked_count").text("0");
         } else if (count > 1) {
-            $("#checked_count").text(count );
+            $("#checked_count").text(count);
         } else {
-            $("#checked_count").text(count );
+            $("#checked_count").text(count);
         }
     }
 </script>

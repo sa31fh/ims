@@ -24,7 +24,7 @@ if (!isset($_SESSION["username"])) {
           include_once "new_nav.php" ?>
 
     <div class="main_top_side">
-        <iframe src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" scrolling="no" onload="adjustHeight(this); showUnreadCount(this); changeActiveClass(this);" ></iframe>
+        <iframe class="iframe_top" src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" onload="adjustHeight(id); showUnreadCount(this); changeActiveClass(this);" ></iframe>
     </div>
 
     <form action="compose_messages.php" method="post" id="print_form" target="message_frame">
@@ -37,9 +37,9 @@ if (!isset($_SESSION["username"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function adjustHeight(iframe) {
+        var iframe = document.getElementById(iframe);
         iframe.height = 0 + "px";
-        var nHeight = iframe.contentWindow.document .body.scrollHeight;
-        iframe.height = (nHeight + 60) + "px";
+        iframe.height = (document.body.scrollHeight - 48) + "px";
     }
 
     function changeActiveClass(iframe) {

@@ -23,6 +23,7 @@ if (isset($_POST["message"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="main_iframe">
     <div>
         <form action="compose_messages.php" method="post">
             <select class="select_user" name="recipient" id="recipient">
@@ -41,6 +42,7 @@ if (isset($_POST["message"])) {
                 <input type="hidden" name="attached" id="attached" value='<?php  echo $_POST["new_print_data"] ?>'>
             <?php endif ?>
         </form>
+    </div>
     </div>
 </body>
 </html>

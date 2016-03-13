@@ -27,10 +27,11 @@ if (isset($_POST["checkbox"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="main_iframe">
     <div>
         <div class="toolbar_main">
             <div class="toolbar_div">
-                <input title="Select All" id="select_all" type="checkbox">
+                <input class="toolbar_checkbox" title="Select All" id="select_all" type="checkbox">
                 <span id="checked_count">0</span>
                 <img class="toolbar_image" src="images/mail.png" width="30px" height="30px">
             </div>
@@ -65,6 +66,7 @@ if (isset($_POST["checkbox"])) {
             <input type="hidden" id="receiver_name" name="receiver_name">
         </form>
    </div> 
+   </div>
 </body>
 </html>
 

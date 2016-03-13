@@ -35,6 +35,7 @@ if(isset($_POST["delete_username"])){
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="main_iframe">
     <div id="add_div_main" class="none">
         <div id="add_div" class="add_div">
         <div>
@@ -100,10 +101,11 @@ if(isset($_POST["delete_username"])){
             <?php endwhile ?>
         </table>
     </div>
+    </div>
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
      function updateRole(obj){
         var role = obj.value;

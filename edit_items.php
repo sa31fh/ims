@@ -45,6 +45,7 @@ if (isset($_POST["base_sales"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="main_iframe">
     <div id="add_div_main" class="none">
         <div id="add_div" class="add_div">
         <div>
@@ -100,6 +101,7 @@ if (isset($_POST["base_sales"])) {
                 </tr>
             <?php  endwhile ?>
         </table>
+    </div>
     </div>
 </body>
 </html>

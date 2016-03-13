@@ -44,8 +44,7 @@ if (!isset($_SESSION["date"])) {
             <?php  endwhile ?>
             </table>
         </div>
-
-        <div class="inline"><iframe src="" id="new_iframe" name="ifram" scrolling="no" frameborder="0" onload=adjustHeight(id)></iframe></div>
+        <div class="inline div_iframe"><iframe src="" id="new_iframe" name="ifram" scrolling="no" frameborder="0" onload=adjustHeight(id)></iframe></div>
     </div>
 </body>
 </html>

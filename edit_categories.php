@@ -34,6 +34,7 @@ if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="main_iframe">
     <div>
         <form action="edit_categories.php" method="post" >
             <input class="userinput" type="text" name="category" id="category_name" placeholder="Category">
@@ -73,6 +74,7 @@ if(isset($_POST["delete_button"]) AND !empty($_POST["category"])){
             <select class="category_select" name="" id="" size=8 ></select>
         </div>
         <input type="button" value="<- Uncategorize" id="uncategorize_button" class="button">
+    </div>
     </div>
 </body>
 </html>
