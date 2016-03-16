@@ -1,4 +1,4 @@
-<?php 
+<?php
 class DatabaseTable {
     private static $servername = "localhost";
     private static $username = "root";
@@ -6,6 +6,13 @@ class DatabaseTable {
     private static $dbname = "new_inventory";
     private static $conn = null;
 
+    /**
+     * Connects to the sql database and runs a sql query.
+     *
+     * @param  sql_query $sql   mysql query to be performed on the database.
+     * @return object|boolean   returns a mysqli_result object if data is retrieved from the database
+     *                          or boolean value if there is no data(true on success/false on failure).
+     */
     final protected static function query($sql) {
         if (self::$conn == null) {
             self::$conn = new mysqli(self::$servername, self::$username,

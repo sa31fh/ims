@@ -7,7 +7,7 @@ class BaseQuantityTable extends DatabaseTable {
      * Get the base quantity value for a given item.
      *
      * @param  string $item_name name of the item.
-     * @return float quantity    value if query is successful.
+     * @return float  $quantity  value if query is successful.
      * @throws Exception         if query fails.
      */
     public static function get_base_quantity($item_name) {

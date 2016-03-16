@@ -80,7 +80,7 @@ class CategoryTable extends DatabaseTable {
      * Get data for print preview table
      *
      * @param  string $date     date till which data should be retrieved.
-     * @return object|false     resturns mysqli_result object if data is retrieved or false if query fails.
+     * @return object|false     returns mysqli_result object if data is retrieved or false if query fails.
      */
     public static function get_print_preview($date) {
         $sql = "SELECT Category.name as category_name, Item.name as item_name,
