@@ -54,7 +54,7 @@ class ItemTable extends DatabaseTable {
         return parent::query($sql);
     }
 
-    public static function get_items_paginate($offset, $limit) {
+    public static function get_items_in_range($offset, $limit) {
         $sql = "SELECT name, unit, quantity, id FROM Item
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.deletion_date IS NULL

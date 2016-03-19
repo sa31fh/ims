@@ -82,8 +82,8 @@ if(isset($_POST["getItemCount"])) {
     echo ItemTable::get_items_count();
 }
 
-if(isset($_POST["getItemsPaginate"])) {
-    $result = ItemTable::get_items_paginate($_POST["offset"], $_POST["limit"]);
+if(isset($_POST["getItemsInRange"])) {
+    $result = ItemTable::get_items_in_range($_POST["offset"], $_POST["limit"]);
     while ($row = $result->fetch_assoc()) {
     echo ' <tr>
             <form action="edit_items.php" method="post">

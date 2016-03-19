@@ -107,7 +107,7 @@ if (isset($_POST["page_number"])) {
                 <th></th>
             </tr>
             <tbody id="item_tbody">
-            <?php $result = ItemTable::get_items_paginate(($page_number*$limit)-$limit, $limit); ?>
+            <?php $result = ItemTable::get_items_in_range(($page_number*$limit)-$limit, $limit); ?>
             <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
                     <form action="edit_items.php" method="post">
@@ -141,21 +141,22 @@ if (isset($_POST["page_number"])) {
 
         $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
     }
+
     function changePage(changeBy) {
         var limit = 10;
         var currentPage = document.getElementById("current_page").value;
         var totalPages = document.getElementById("total_pages").value;
-        if(changeBy == "back" && currentPage > 1){
+        if (changeBy == "back" && currentPage > 1) {
             currentPage--;
             loadPage(currentPage);
-            $(".pagi_page.pp_active").each(function(){
+            $(".pagi_page.pp_active").each(function() {
                 $(this).removeClass("pp_active");
                 $(this).prev().addClass("pp_active");
             });
         } else if (changeBy == "next" && currentPage < totalPages) {
             currentPage++;
             loadPage(currentPage);
-            $(".pagi_page.pp_active").each(function(){
+            $(".pagi_page.pp_active").each(function() {
                 $(this).removeClass("pp_active");
                 $(this).next().addClass("pp_active");
             });
@@ -170,7 +171,7 @@ if (isset($_POST["page_number"])) {
     function loadPage(pageNumber) {
         var limit = 10;
         var offset = (pageNumber*limit)-limit;
-        $.post("jq_ajax.php", {getItemsPaginate: "", offset: offset, limit: limit}, function(data, status){
+        $.post("jq_ajax.php", {getItemsInRange: "", offset: offset, limit: limit}, function(data, status) {
             document.getElementById("item_tbody").innerHTML = data;
         });
         document.getElementById("current_page").value = pageNumber;
