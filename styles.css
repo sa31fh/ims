@@ -78,6 +78,9 @@ select{
 .div_collapsable{
     display: none;
 }
+.div_iframe_width{
+    width: 75% !important;
+}
 .div_iframe{
     padding-top: 20px;
 }
