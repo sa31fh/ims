@@ -19,7 +19,7 @@ if (isset($_POST["itemQuantity"])) {
     InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
 }
 
-/*-----------------------category_status.php---------------*/
+/*-----------------------print_preview.php---------------*/
 if (isset($_POST["sales"])) {
     VariablesTable::update_expected_sales($_POST["sales"]);
 }
@@ -75,7 +75,31 @@ if (isset($_POST["sessionName"])) {
 
 /*--------------------------------received_messages.php----------------*/
 if (isset($_POST["checkedId"])) {
-    echo ConversationTable::change_multiple_conversation_status($_SESSION["username"], $_POST["checkedId"], $_POST["newStatus"]);
+    echo ConversationTable::update_multiple_conversation_status($_SESSION["username"], $_POST["checkedId"], $_POST["newStatus"]);
+}
+
+if(isset($_POST["getItemCount"])) {
+    echo ItemTable::get_items_count();
+}
+
+if(isset($_POST["getItemsPaginate"])) {
+    $result = ItemTable::get_items_paginate($_POST["offset"], $_POST["limit"]);
+    while ($row = $result->fetch_assoc()) {
+    echo ' <tr>
+            <form action="edit_items.php" method="post">
+            <td><input type="text" name="item_name" value="'.$row["name"].'" onchange="this.form.submit()" class="align_center"></td>
+            <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange="this.form.submit()" class="align_center"></td>
+            <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center"></td>
+            <input type="hidden" name="item_id" value="'.$row["id"].'">
+            </form>
+            <td>
+                <form action="edit_items.php" method="post" onsubmit="return confirm(\'delete this item?\');">
+                    <input type="hidden" name="delete_item" value="'.$row["name"].'">
+                    <input type="submit" value="delete" class="button" >
+                </form>
+            </td>
+        </tr>';
+    }
 }
 
 ?>

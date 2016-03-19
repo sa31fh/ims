@@ -34,7 +34,14 @@ if (isset($_POST["item_name"]) OR isset($_POST["item_unit"])) {
 if (isset($_POST["base_sales"])) {
     VariablesTable::update_base_sales($_POST["base_sales"]);
 }
- ?>
+if (isset($_POST["page_number"])) {
+    $page_number = $_POST["page_number"];
+    $limit = 10;
+} else {
+    $page_number = 1;
+    $limit = 10;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -53,7 +60,7 @@ if (isset($_POST["base_sales"])) {
             <form action="edit_items.php" method="post">
             <div class="inline">
                 <label for="new_item_name">Name</label>
-                <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required>
+                <input class="userinput" type="text" name="new_item_name" placeholder="Item Name" required autofocus>
             </div>
             <div class="inline">
                 <label for="new_item_unit">Unit</label>
@@ -72,24 +79,41 @@ if (isset($_POST["base_sales"])) {
         <button id="drawer_tag" class="drawer_tag">Add</button>
     </div>
     <div class="div_fade"></div>
-    <div class="user_table_div">
+    <div class="div_iframe">
+        <div class="pagi_main">
+            <div class="pagi_div">
+            <?php $total_rows = ItemTable::get_items_count();
+                  $total_pages = ceil($total_rows/$limit);?>
+            <input type="hidden" id="total_pages" value="<?php echo $total_pages ?>">
+            <input type="hidden" id="current_page" value="<?php echo $page_number?>">
+            <button class="pagi_button pb_left" onclick=changePage("back")><</button>
+            <?php for ($i=1; $i <= $total_pages ; $i++): ?>
+               <button class="pagi_page <?php echo $i == 1 ?  "pp_active":"" ?>" type="button" value="<?php echo $i ?>" onclick=changePage(this)><?php echo $i ?></button>
+            <?php endfor ?>
+            <button class="pagi_button pb_right" onclick=changePage("next")>></button>
+            </div>
+        </div>
+        <div>
         <table class="user_table" id="table" border="1px" >
             <tr>
                 <th>Item</th>
                 <th>Unit</th>
                 <th>Quantity for sales ($)<br/>
                     <form action="edit_items.php" method="post" >
-                        <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center"></form>
+                        <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center">
+                        <input type="hidden" name="page_number" id="page_number" value="<?php echo $page_number ?>">
+                    </form>
                 </th>
                 <th></th>
             </tr>
-            <?php $result = ItemTable::get_items(); ?>
+            <tbody id="item_tbody">
+            <?php $result = ItemTable::get_items_paginate(($page_number*$limit)-$limit, $limit); ?>
             <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
                     <form action="edit_items.php" method="post">
                     <td><input type="text" name="item_name" value="<?php echo $row["name"] ?>" onchange="this.form.submit()" class="align_center"></td>
                     <td><input type="text" name="item_unit" value="<?php echo $row["unit"] ?>" onchange="this.form.submit()" class="align_center"></td>
-                    <td><input type="number" name="item_quantity" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this) class="align_center"></td>
+                    <td><input type="number" name="item_quantity" step="any" min="0" value="<?php echo $row["quantity"] ?>" onchange=quantityChange(this) class="align_center"></td>
                     <input type="hidden" name="item_id" value="<?php echo $row["id"] ?>">
                     </form>
                     <td>
@@ -100,7 +124,9 @@ if (isset($_POST["base_sales"])) {
                     </td>
                 </tr>
             <?php  endwhile ?>
+            </tbody>
         </table>
+        </div>
     </div>
     </div>
 </body>
@@ -108,12 +134,47 @@ if (isset($_POST["base_sales"])) {
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
-    function quantityChange(obj){
+    function quantityChange(obj) {
         var quantity = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
 
         $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
+    }
+    function changePage(changeBy) {
+        var limit = 10;
+        var currentPage = document.getElementById("current_page").value;
+        var totalPages = document.getElementById("total_pages").value;
+        if(changeBy == "back" && currentPage > 1){
+            currentPage--;
+            loadPage(currentPage);
+            $(".pagi_page.pp_active").each(function(){
+                $(this).removeClass("pp_active");
+                $(this).prev().addClass("pp_active");
+            });
+        } else if (changeBy == "next" && currentPage < totalPages) {
+            currentPage++;
+            loadPage(currentPage);
+            $(".pagi_page.pp_active").each(function(){
+                $(this).removeClass("pp_active");
+                $(this).next().addClass("pp_active");
+            });
+        } else if (changeBy instanceof Object) {
+            currentPage = changeBy.value;
+            loadPage(currentPage);
+            $(".pagi_page.pp_active").removeClass("pp_active");
+            $(changeBy).addClass("pp_active");
+        }
+    }
+
+    function loadPage(pageNumber) {
+        var limit = 10;
+        var offset = (pageNumber*limit)-limit;
+        $.post("jq_ajax.php", {getItemsPaginate: "", offset: offset, limit: limit}, function(data, status){
+            document.getElementById("item_tbody").innerHTML = data;
+        });
+        document.getElementById("current_page").value = pageNumber;
+        document.getElementById("page_number").value = pageNumber;
     }
 
     $(document).ready(function() {

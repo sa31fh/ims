@@ -79,7 +79,7 @@ select{
     display: none;
 }
 .div_iframe{
-    width: 75% !important;
+    padding-top: 20px;
 }
 
 .main{
@@ -461,6 +461,68 @@ select{
     margin: 0;
 }
 
+.pagi_main{
+    display: table;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+.pagi_div{
+    display: table-row;
+    margin: 0;
+    padding: 0;
+}
+.pagi_page{
+    text-align: center;
+    display: table-cell;
+    width: 30px;
+    height: 35px;
+    color: #777;
+    border: 1px solid #cecece;
+    border-right: none;
+    font-size: 16px;
+    outline: none;
+    background: transparent;
+    transition: background .3s, border .3s, font-weight .3s;
+}
+.pagi_page:hover{
+    color: white !important;
+    background:#79bc4d;
+    border: none;
+}
+.pp_active {
+    border: 1px solid #79BC4D;
+    color: #79BC4D;
+    font-weight: bold;
+    font-size: 18px;
+    vertical-align: bottom;
+}
+.pagi_button{
+    display: table-cell;
+    width: 30px;
+    height: 35px;
+    color: #777;
+    border: 1px solid #cecece;
+    font-size: 18px;
+    outline: none;
+    background: transparent;
+    vertical-align: bottom;
+}
+.pb_left{
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+    border-right: none;
+}
+.pb_right{
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.pagi_button:hover{
+    color: white;
+    background: #79bc4d;
+    border: none;
+}
+
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .message_table{
 }
@@ -586,6 +648,7 @@ select{
     color: #555;
     font-size: 16px;
     background-color: transparent;
+    outline: none;
 }
 .option:hover{
     background-color: #ccc;
