@@ -113,15 +113,16 @@ class ItemTable extends DatabaseTable {
     }
 
     public static function get_categorized_items($category_name) {
-        $sql = "SELECT Item.name, Item.unit FROM Item
+        $sql = "SELECT Item.name, Item.unit, Item.id FROM Item
                 INNER JOIN Category ON Item.category_id = Category.id
-                WHERE Category.name = '{$category_name}' AND Item.deletion_date IS NULL";
+                WHERE Category.name = '{$category_name}' AND Item.deletion_date IS NULL
+                ORDER BY Item.order_id ASC";
 
        return parent::query($sql);
     }
 
     public static function get_uncategorized_items() {
-        $sql = "SELECT name, unit FROM Item WHERE category_id IS NULL AND deletion_date IS NULL";
+        $sql = "SELECT name, unit, id FROM Item WHERE category_id IS NULL AND deletion_date IS NULL";
 
         return parent::query($sql);
     }
@@ -138,6 +139,14 @@ class ItemTable extends DatabaseTable {
             }
         }
         $sql = "UPDATE Item SET category_id =" .($category_id == null ? "null":$category_id). " WHERE name = '$item_name'";
+
+        return parent::query($sql);
+    }
+
+    public static function update_item_order($category_id, $order_id) {
+        $sql = "UPDATE Item
+                SET order_id = '$order_id'
+                WHERE id = '$category_id'";
 
         return parent::query($sql);
     }

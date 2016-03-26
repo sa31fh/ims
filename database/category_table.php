@@ -46,15 +46,15 @@ class CategoryTable extends DatabaseTable {
      * Changes the category "deletion_date" to todays date. If successful, updates all items whos "category_id" matches the id
      * of the removed category and changes item "category_id"s to NULL.
      *
-     * @param  string $category_name name of category.
+     * @param  int $category_id      id of the category to remove.
      * @return boolean               return true if query is succesful and false if it fails.
      */
-    public static function remove_category($category_name) {
+    public static function remove_category($category_id) {
         $sql = "UPDATE Category SET deletion_date = '" .date('Y-m-d'). "'
-                WHERE name = '{$category_name}' and deletion_date IS NULL";
-        if ($result = parent::query($sql)) {
+                WHERE id = '$category_id' and deletion_date IS NULL";
+        if (parent::query($sql)) {
             $sql = "UPDATE Item SET category_id = NULL
-                    WHERE deletion_date IS NULL AND category_id = (SELECT id FROM Category WHERE name='{$category_name}')";
+                    WHERE deletion_date IS NULL AND category_id = '$category_id'";
 
             return parent::query($sql);
         }
@@ -71,7 +71,22 @@ class CategoryTable extends DatabaseTable {
     public static function get_categories($date) {
         $sql = "SELECT * FROM Category
                 WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' OR deletion_date IS NULL)
-                ORDER BY name ASC";
+                ORDER BY order_id ASC";
+
+        return parent::query($sql);
+    }
+
+    /**
+     * Update order_id for the given category.
+     *
+     * @param  int  $category_id     id of the category to update.
+     * @param  int  $order_id        new if to set for order_id.
+     * @return boolean               return true if query is succesful and false if it fails.
+     */
+    public static function update_category_order($category_id, $order_id) {
+        $sql = "UPDATE Category
+                SET order_id = '$order_id'
+                WHERE id = '$category_id'";
 
         return parent::query($sql);
     }
@@ -84,13 +99,14 @@ class CategoryTable extends DatabaseTable {
      */
     public static function get_print_preview($date) {
         $sql = "SELECT Category.name as category_name, Item.name as item_name,
-                    IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes
+                    IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes,
+                    Category.order_id as Cat_order, Item.order_id as Item_order
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
                 LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id
                 WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
                 AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))
-                ORDER BY Category.name, Item.name";
+                ORDER BY Cat_order, Item_order";
 
         return parent::query($sql);
     }

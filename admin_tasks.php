@@ -20,7 +20,7 @@ if ($_SESSION["userrole"] != "admin") {
 </head>
 <body>
     <ul class="sidenav" id="sideNav">
-        <li id="heading"><span>Admin Tasks</span></li>
+        <li id="heading"><h4>Admin Tasks</h4><hr></li>
         <li><a class="active" href="edit_categories.php" target="task_frame" >Categories</a></li>
         <li><a href="edit_items.php" target="task_frame" >Items</a></li>
         <li><a href="manage_users.php" target="task_frame">Users</a></li>

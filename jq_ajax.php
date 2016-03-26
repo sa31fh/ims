@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 require_once "database/user_table.php";
 require_once "database/user_role_table.php";
@@ -30,26 +30,42 @@ if (isset($_POST["quantity"])) {
 }
 
 /*-----------------edit_categories.php-------------*/
-if (isset($_POST["showCategorizedItems"])) {
-    
-    $result = ItemTable::get_categorized_items($_POST["showCategorizedItems"]);
+if (isset($_POST["getCategorizedItems"])) {
+
+    $result = ItemTable::get_categorized_items($_POST["getCategorizedItems"]);
     if ($result) {
-        echo '<select class="category_select" id="categorized_list" size=8>';
+        echo '<ul class="category_list" id="categorized_list" >';
         while ($row = $result->fetch_assoc()) {
-            echo '<option value="' .$row["name"]. '">' .$row["name"]. ' </option>';
+            echo '<li class="list_li" id="'.$row["id"].'" item-name="'.$row["name"].'">' .$row["name"]. ' </li>';
         }
-         echo '</select>';
+         echo '</ul>';
+    }
+}
+
+if (isset($_POST["UpdateItemOrder"])) {
+    $order_number = 0;
+    foreach ($_POST["itemIds"] as $value) {
+        ItemTable::update_item_order($value, $order_number);
+        $order_number++;
+    }
+}
+
+if (isset($_POST["UpdateCategoryOrder"])) {
+    $order_number = 0;
+    foreach ($_POST["categoryIds"] as $value) {
+        CategoryTable::update_category_order($value, $order_number);
+        $order_number++;
     }
 }
 
 /*----------------edit_categories.php----------------*/
-if (isset($_POST["items"])) {
-    ItemTable::update_items_category($_POST["categoryName"], $_POST["items"]);
+if (isset($_POST["UpdateItemsCategory"])) {
+    ItemTable::update_items_category($_POST["categoryName"], $_POST["itemName"]);
 }
 
 /*---------user_account.php--------------*/
 if (isset($_POST["userName"])) {
-    
+
     if (UserTable::verify_credentials($_POST["userName"], $_POST['password'])) {
         echo "true";
     }  else {
@@ -57,7 +73,7 @@ if (isset($_POST["userName"])) {
     }
 }
 
-/*-------------------------user_account.php----------------------*/ 
+/*-------------------------user_account.php----------------------*/
 if (isset($_POST["timeZoneRegion"])) {
 
     $timezones = array( "Africa"=>"1", "America"=>"2", "Asia"=>"16", "Australia"=>"64", "Europe"=>"128");
@@ -65,7 +81,7 @@ if (isset($_POST["timeZoneRegion"])) {
     foreach (timezone_identifiers_list($timezones[$_POST["timeZoneRegion"]]) as $tz){
         $tzs = explode("/", $tz, 2);
         echo  '<option value="' .$tzs[1]. '">' .$tzs[1]. '</option>' ;
-   }       
+   }
 }
 
 /*--------------------------messages.php----------------------------*/
