@@ -37,6 +37,7 @@ if(isset($_POST["delete_id"])) {
     <div class="main_iframe">
         <div class="div_category">
             <h4>Categories</h4><hr>
+            <div class="div_list_category">
             <ul class="category_list" id="category_list" >
                 <?php $result = CategoryTable::get_categories($date = date('Y-m-d')) ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
@@ -49,6 +50,7 @@ if(isset($_POST["delete_id"])) {
                     </li>
                 <?php endwhile ?>
             </ul>
+            </div>
             <input type="hidden" id="category_select">
             <div class="category_add" id="category_add">
                 <button class="button" onclick=slideDrawer()>Add</button>
@@ -202,11 +204,13 @@ if(isset($_POST["delete_id"])) {
                 $(this).addClass("category_drag");
                 $(this).zIndex(300);
                 $(".category_delete").slideToggle(180, "linear");
+                $(".div_list_category").css("height", "inherit");
             },
             stop: function(event, ui) {
                 $(this).removeClass("category_drag");
                 $(this).zIndex(0);
                 $(".category_delete").slideToggle(180, "linear");
+                $(".div_list_category").css("height", "85%");
             }
         });
 

@@ -117,6 +117,11 @@ select{
     padding: 0;
     height: inherit;
 }
+.div_list_category{
+    margin: 0;
+    padding: 0;
+    height: 85%;
+}
 
 .main{
     margin: 0px;
@@ -367,6 +372,9 @@ select{
     position: relative;
     height: 35px;
     margin: 5px 0px;
+    border: 1px solid white;
+    border-left: none;
+    border-right: none;
     transition: background .25s, color .25s,
                 font-size .25s, box-shadow .25s;
 }
@@ -376,6 +384,9 @@ select{
 }
 .list_category_li:hover{
     background: rgba(234, 234, 234, 0.76);
+    border: 1px solid #cecece;
+    border-left: none;
+    border-right: none;
     color: inherit;
     font-weight: normal;
     cursor: pointer;
@@ -386,7 +397,7 @@ select{
     font-weight: bold;
 }
 .list_li{
-    margin: 5px 0px;
+    margin: 5px 1px;
     padding: 5px 0px;
     transition: background .25s, border .25s;
     border: 1px solid white;
@@ -426,9 +437,10 @@ select{
 }
 .handle_delete{
     display: none;
+    position: absolute;
+    left: 0;
     margin: 0;
     padding: 2px 0px 0px 0px;
-    float: left;
     width: 30px;
     height: 100%;
 }
