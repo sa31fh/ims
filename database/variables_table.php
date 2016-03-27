@@ -1,8 +1,14 @@
-<?php 
+<?php
 require_once "database_table.php";
 
 class VariablesTable extends DatabaseTable {
 
+    /**
+     * Get the expected sales value.
+     *
+     * @return int          Value of the expected sales.
+     * @throws exception    If query fails.
+     */
     public static function get_expected_sales() {
         $sql = "SELECT value FROM Variables WHERE name='ExpectedSales'";
 
@@ -13,14 +19,25 @@ class VariablesTable extends DatabaseTable {
         }
     }
 
+    /**
+     * Updates the expected sales value.
+     *
+     * @param  int $expected_sales  New value for expected sales.
+     * @return boolean              Returns true on query success and false if it fails.
+     */
     public static function update_expected_sales($expected_sales) {
-        $sql = "INSERT INTO Variables (name, value)  
-                VALUES ('ExpectedSales', '$expected_sales') 
+        $sql = "INSERT INTO Variables (name, value)
+                VALUES ('ExpectedSales', '$expected_sales')
                 ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)";
 
         return parent::query($sql);
     }
 
+    /**
+     * Get the base sales value.
+     * @return int          Value of the base sales.
+     * @throws exception    If query fails.
+     */
     public static function get_base_sales() {
         $sql = "SELECT value FROM Variables WHERE name='BaseSales'";
 
@@ -31,9 +48,15 @@ class VariablesTable extends DatabaseTable {
         }
     }
 
+    /**
+     * Update base sales with given value.
+     *
+     * @param  int $base_sales   New value for base sales.
+     * @return boolean           Return true on query success and false if it fails.
+     */
     public static function update_base_sales($base_sales) {
-        $sql = "INSERT INTO Variables (name, value)  
-                VALUES ('BaseSales', '$base_sales') 
+        $sql = "INSERT INTO Variables (name, value)
+                VALUES ('BaseSales', '$base_sales')
                 ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)";
 
         return parent::query($sql);
