@@ -3,6 +3,15 @@ require_once "database_table.php";
 
 class InventoryTable extends DatabaseTable {
 
+    /**
+     * Get inventory and item data for a given category.
+     *
+     * Gets items and their inventory data for a given category till a given date.
+     *
+     * @param  int      $category_id    Id of the category to get items of.
+     * @param  string   $date           Date till which data will be returned.
+     * @return object|false             Returns mysqli_result object on query success or false if query fails.
+     */
     public static function get_inventory($category_id, $date) {
         $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, \"-\") AS quantity, T1.notes AS notes FROM
                 (SELECT * FROM Inventory
@@ -18,6 +27,15 @@ class InventoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    /**
+     * Update inventory entry if exists or create a new one.
+     *
+     * @param  string   $date        Date value to update or add.
+     * @param  int      $item_id     Id of item to add if id doesn't exist.
+     * @param  int      $quantity    Quantity value to update or add.
+     * @param  string   $item_note   Note value to update or add.
+     * @return boolean               Returns true on query success or false if it fails.
+     */
     public static function update_inventory($date, $item_id, $quantity, $item_note) {
         $sql = "INSERT INTO Inventory (`date`, item_id, quantity, notes)
                 VALUES ('$date', '$item_id', '$quantity', '$item_note')
