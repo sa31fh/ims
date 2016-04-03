@@ -144,6 +144,7 @@ if(isset($_POST["delete_id"])) {
     }
 
     $(function(){
+
         $(".list_category_li:first").each(function(){
            categorySelect($(this)[0]);
            $(this).addClass("active");
@@ -195,22 +196,24 @@ if(isset($_POST["delete_id"])) {
         });
 
         $("#category_list li").draggable({
-            delay: 100,
             scroll: false,
             revert: "invalid",
             handle: ".handle_delete",
-            containment: "#category_list",
+            containment: ".div_list_category",
+            zIndex: 500,
+            helper: function(event, ui){
+                var helper = $(this).clone()
+                helper.addClass("category_drag");
+                $(this).css("opacity", "0");
+                return helper;
+
+            },
             start: function(event, ui) {
-                $(this).addClass("category_drag");
-                $(this).zIndex(300);
                 $(".category_delete").slideToggle(180, "linear");
-                $(".div_list_category").css("height", "inherit");
             },
             stop: function(event, ui) {
-                $(this).removeClass("category_drag");
-                $(this).zIndex(0);
+                $(this).css("opacity", "1");
                 $(".category_delete").slideToggle(180, "linear");
-                $(".div_list_category").css("height", "85%");
             }
         });
 
