@@ -67,7 +67,7 @@ if (isset($_POST["update_user"])) {
             </form>
         </div>
     </div>
-    <span class="version_dark">v1.3.0</span>
+    <span class="version_dark">v1.4.0</span>
 </body>
 </html>
 
