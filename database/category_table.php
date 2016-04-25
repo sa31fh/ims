@@ -110,5 +110,21 @@ class CategoryTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function get_print_preview_timeslots($date, $timeslot_name) {
+        $sql = "SELECT Category.name as category_name, Item.name as item_name,
+                    IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes,
+                    Category.order_id as Cat_order, Item.order_id as Item_order, TimeSlotItem.factor
+                FROM Category
+                INNER JOIN Item ON Item.category_id = Category.id
+                INNER JOIN TimeSlotItem ON Item.id = TimeSlotItem.item_id
+                LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id
+                WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))
+                AND TimeSlotItem.timeslot_id = (SELECT id from TimeSlots WHERE name = '$timeslot_name')
+                ORDER BY Cat_order, Item_order";
+
+        return parent::query($sql);
+    }
 }
 ?>

@@ -1,8 +1,7 @@
 <?php
 session_start();
-require_once "database/category_table.php";
 require_once "database/variables_table.php";
-require_once "database/base_quantity_table.php";
+require_once "database/timeslot_table.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -26,7 +25,7 @@ if (isset($_POST["expected_sales"])) {
         <input class="option" type="button" onClick=goBack() value="Back">
         <div class="divider"></div>
         <div class="toolbar_div">
-            <input class="toolbar_checkbox" type="checkbox" id="hide_checkbox"> <span id="hide_label">All</span>
+            <input class="toolbar_checkbox" type="checkbox" id="hide_checkbox" onclick=checkRequired()> <span id="hide_label">All</span>
         </div> <div class="divider"></div>
         <?php if ($_SESSION["userrole"] == "admin"): ?>
         <div class="toolbar_div">
@@ -41,79 +40,100 @@ if (isset($_POST["expected_sales"])) {
             <a  id="print_share" class="option" onclick=sendPrint()>Share</a>
         </div>
     </div>
-    <div id="table">
-        <table class="user_table" id="print">
-            <tr id="print_date" class="row">
-                <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
-            </tr>
-            <?php $current_category = null;
-                  $result = CategoryTable::get_print_preview($_SESSION["date"]); ?>
-            <?php while ($row =$result->fetch_assoc()): ?>
-                <?php if ($row["category_name"] != $current_category): ?>
-                    <?php $current_category = $row["category_name"] ?>
-                <tbody class="print_tbody">
-                    <tr id="category"><th colspan="5"><?php echo $current_category ?></th></tr>
-                    <tr id="category_columns">
-                        <th>Item</th>
-                        <th>Unit</th>
-                        <th>Quantity Present</th>
-                        <th>Quantity Required</th>
-                        <th>Notes</th>
-                    </tr>
-                <?php endif ?>
-                <tr id="column_data" class="row">
-                    <?php $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales(); ?>
-                    <td><?php echo $row["item_name"] ?></td>
-                    <td><?php echo $row["unit"] ?></td>
-                    <td><?php echo $row["quantity"] ?></td>
-                    <td class="quantity_required"><?php echo (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-") ?></td>
-                    <td><?php echo $row["notes"] ?></td>
-                </tr>
+
+    <div class="div_table" id="div_table">
+        <div class="div_left_tabs">
+            <ul class="tab_ul">
+                <li class="tab_li"><span id="day_tab" onclick=getTab(this)><?php echo "Full Day" ?></span></li>
+            </ul>
+        </div>
+        <div class="div_right_tabs">
+            <ul class="tab_ul inline" id="timeslot_ul">
+            <?php $result = TimeslotTable::get_timeslots(); ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <div class="tab_div" timeslot-name="<?php echo $row['name'] ?>">
+                    <li class="tab_li" ><span onclick=getTab(this)><?php echo $row["name"] ?></span></li>
+                </div>
             <?php endwhile ?>
-            </tbody>
-        </table>
+            </ul>
+        </div>
+        <div class="none" id="div_print_table">
+            <table class="table_view" id="print">
+                <tr id="print_date" class="row">
+                    <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
+                </tr>
+            </table>
+        </div>
     </div>
     <form action="messages.php" id="print_form" method="post">
         <input type="hidden" id="print_data" name="print_data">
     </form>
+    <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
 </body>
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
+    function  getTab(tabName) {
+        var timeSlotName = tabName.innerHTML;
+        var date = document.getElementById("session_date").value;
+        if (timeSlotName == "Full Day") {
+            $.post("jq_ajax.php", {getPrintPreview: "", date: date}, function(data, status) {
+                document.getElementById("print").innerHTML = data;
+                checkRequired();
+            });
+        } else {
+            $.post("jq_ajax.php", {getPrintPreviewTimeslots: "", date: date, timeSlotName: timeSlotName}, function(data, status) {
+                document.getElementById("print").innerHTML = data;
+                checkRequired();
+            });
+        }
+    }
+
     function goBack() {
         location.assign("category_status.php");
     }
-    function sendPrint(){
-        var dat = document.getElementById("table").innerHTML;
+
+    function sendPrint() {
+        var dat = document.getElementById("div_print_table").innerHTML;
         document.getElementById("print_data").value = dat;
         document.getElementById("print_form").submit();
     }
 
-    $(document).ready(function(){
-        $("#hide_checkbox").change(function(){
-            if ($(this).prop("checked")) {
-                $(".print_tbody").each(function(){
-                    var total = $(this).find(".quantity_required").length;
-                    var remove = 0;
-                    $(this).find(".quantity_required").each(function(){
-                      if (this.innerHTML < 0 || this.innerHTML == "-") {
-                        $(this).parent().hide();
-                        remove++;
-                      }
-                    });
-                    if (total - remove == 0) {
-                        $(this).hide();
-                    }
+    function checkRequired() {
+        if ($("#hide_checkbox").prop("checked")) {
+            $(".print_tbody").each(function() {
+                var total = $(this).find(".quantity_required").length;
+                var remove = 0;
+                $(this).find(".quantity_required").each(function() {
+                  if (this.innerHTML <=0 || this.innerHTML == "-") {
+                    $(this).parent().hide();
+                    remove++;
+                  }
                 });
-                $("#hide_label").text("Required");
-            } else {
-                $(".print_tbody").each(function(){
-                    $(this).show();
-                    $(this).find("tr").show();
-                    $("#hide_label").text("All");
-                });
-            }
+                if (total - remove == 0) {
+                    $(this).hide();
+                }
+            });
+            $("#hide_label").text("Required");
+        } else {
+            $(".print_tbody").each(function() {
+                $(this).show();
+                $(this).find("tr").show();
+                $("#hide_label").text("All");
+            });
+        }
+    }
+
+    $(document).ready(function() {
+        $(".tab_li span:first").each(function() {
+           getTab($(this)[0]);
+           $(this).parent().addClass("selected");
+        });
+
+        $(".tab_li").click(function() {
+            $(".tab_li").removeClass("selected");
+            $(this).addClass("selected");
         });
     });
 </script>

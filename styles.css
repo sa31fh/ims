@@ -7,11 +7,13 @@ html{
 }
 body{
     height: 100%;
-    font-family: "Roboto",arial, sans-serif;
+    font-family: "Roboto",arial, sans-serif !important;
     font-size: 18px;
     color: #333;
 }
-
+button{
+    font-family: inherit;
+}
 div{
     margin: 10px;
 }
@@ -66,6 +68,19 @@ select{
     margin: 5px 0px;
     padding: 0px 10px;
 }
+@keyframes notification {
+    to
+    {
+        opacity: 0;
+    }
+}
+.relative{
+    position: relative;
+}
+.blur{
+    -webkit-filter: blur(5px);
+    filter: blur(5px);
+}
 .div_login{
     text-align: center;
     margin: 100px 0px;
@@ -79,7 +94,8 @@ select{
     display: none;
 }
 .div_iframe_width{
-    width: 75% !important;
+    margin: 0;
+    width: 70% !important;
 }
 .div_iframe{
     padding-top: 20px;
@@ -87,44 +103,114 @@ select{
 .div_category{
     position: relative;
     margin: 0;
-    padding: 5px 0px 0px 0px;
+    padding: 0px;
     float: left;
     text-align: center;
     text-decoration: none;
     vertical-align: top;
     width: 30%;
     max-width: 30%;
-    height: 95%;
+    height: 100%;
     border: 1px solid #cecece;
     border-top: none;
     border-left: none;
 }
+.div_cancel{
+    position: absolute;
+    top: -30%;
+    left: 85%;
+    border: 1px solid #cecece;
+    color: #51A918;
+    border-radius: 20px;
+    padding: 0px 4px;
+    margin: 0px;
+    background: white;
+    text-align: center;
+    z-index: 1;
+    outline: none;
+}
+
 .div_item_list{
     margin: 0;
-    padding: 5px 0px 0px 0px;
+    padding: 0px;
     float: left;
     text-align: center;
     text-decoration: none;
     vertical-align: top;
     width: 49.5%;
     max-width: 49.5%;
-    height: 95%;
+    height: 100%;
     border: 1px solid #cecece;
     border-top: none;
 }
 .div_list{
     margin: 0;
     padding: 0;
-    height: inherit;
+    height: 94%;
 }
 .div_list_category{
     margin: 0;
     padding: 0;
     overflow: hidden;
-    height: inherit;
+    height: 94%;
 }
-
+.div_left_tabs{
+    position: absolute;
+    top: -30px;
+    left: 0;
+    padding: 0;
+    margin: 0;
+}
+.div_popup{
+    display: inline-block;
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    width: 300px;
+    height: 5em;
+    padding: 10px;
+}
+.div_popup_back{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(4, 4, 4, 0.65);
+    padding: 0;
+    margin: 0;
+}
+.div_right_tabs{
+    position: absolute;
+    top: -30px;
+    right: 0;
+    padding: 0;
+    margin: 0;
+}
+.div_table{
+    display: inline-block;
+    position: relative;
+    margin-top: 50px;
+    width: 90%;
+    transition: width .25s;
+}
+.disabled{
+    pointer-events: none;
+    opacity: 0.4;
+}
+.float_left{
+    float: left;
+}
+.float_right{
+    float: right;
+}
 .main{
+    height: 93%;
     margin: 0px;
     padding: 0px;
     padding-top: 43px;
@@ -139,7 +225,7 @@ select{
     margin: 0px;
     padding: 1px 0px 0px 0px;
     height: inherit;
-    max-height: 98%;
+    max-height: 99%;
 }
 .iframe_top{
     margin-top: 43px;
@@ -158,8 +244,8 @@ select{
 }
 
 .none{
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .user_view{
@@ -173,17 +259,22 @@ select{
 }
 
 .error{
-    display: block;
+    display: inline-block;
     position: fixed;
     bottom: 0px;
-    left: 50%;
+    left: 0;
+    right: 0;
+    min-width: 200px;
+    max-width: 600px;
+    text-align: center;
     margin: auto;
-    background-color: RGBA(0, 0, 0, 0.68);
-    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.68);
+    padding: 10px 20px;
     border-radius: 2px;
     color: white;
-    font-size: 13px;
+    font-size: 18px;
     font-weight: bold;
+    animation: notification 0.2s linear 3s forwards;
 }
 .version{
     position: fixed;
@@ -199,6 +290,9 @@ select{
     right: 0;
     margin: 20px;
     font-size: 15px;
+}
+.middle{
+    vertical-align: middle;
 }
 .divider{
     display: inline-block;
@@ -243,6 +337,7 @@ select{
     margin: 2px;
     min-width: 80px;
     height: 30px;
+    font-family: inherit;
 }
 .button_cancel{
     background: #808080;
@@ -256,6 +351,7 @@ select{
     margin: 2px;
     min-width: 80px;
     height: 30px;
+    font-family: inherit;
 }
 .buttonBack{
     background: #79bc4d;
@@ -287,7 +383,22 @@ select{
 .button:disabled{
     background : gray;
 }
-
+.button_flat{
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 18px;
+    padding: 4px 6px;
+    margin: 5px;
+    border: 2px solid transparent;
+    border-bottom: 2px solid #9ACC79;
+    transition: border 0.25s;
+    color: #57992b;
+    font-family: inherit;
+}
+.button_flat:hover{
+    border: 2px solid #9ACC79;
+}
 .role_select{
     display: block;
     text-align: center;
@@ -303,6 +414,9 @@ select{
 .align_center{
     text-align: center;
 }
+.align_left{
+    text-align: left!important
+}
 .delete_icon{
     position: absolute;
     left: 10px;
@@ -313,7 +427,7 @@ select{
 
 .category_list{
     padding: 0px;
-    height: 99%;
+    height: 100%;
     font-size: 20px;
     overflow: hidden;
     overflow-y: auto;
@@ -381,7 +495,7 @@ select{
     border-left: none;
     border-right: none;
     transition: background .25s, color .25s,
-                font-size .25s, box-shadow .25s,;
+                font-size .25s, box-shadow .25s;
 }
 .list_category_li span{
     display: inline-block;
@@ -452,10 +566,13 @@ select{
 }
 
 .div_category h4{
-    margin: 5px 0px;
+    margin: 10px 0px 5px 0px;
 }
 .div_item_list h4{
-    margin: 5px 0px;
+    margin: 10px 0px 5px 0px;
+}
+.tr{
+    display: table-row;
 }
 
 .select_user{
@@ -509,6 +626,73 @@ select{
     margin: auto;
     height: 35px;
 }
+.table_view{
+    border:0;
+    width: 100%;
+    margin: 0;
+    border-collapse:collapse;
+    border: 1px solid #cecece;
+    border-radius: 2px;
+}
+.table_view tr{
+    min-width: 400px;
+}
+.tr_confirm{
+    display: none;
+    position: absolute;
+    top: 0;
+    width: 99.8%;
+    margin: 0;
+    padding: 0;
+    background: #E4E4E4;
+    border-top: 1px solid #cecece;
+}
+.tr_confirm td:hover:not(.td_checkbox){
+    background: #BBBBBB;
+}
+.td_checkbox{
+    min-width: 30px !important;
+    width: 30px;
+}
+.item_checkbox{
+    display: none;
+    width: 20px !important;
+}
+.table_view th{
+    text-align: center;
+    padding: 5px 0px;
+    border: none;
+}
+.table_view td{
+    text-align: center;
+    color: #444;
+    border: 0;
+    height: 20px;
+    padding: 15px 0px;
+    min-width: 150px;
+    max-width: 200px;
+    word-wrap: break-word;
+}
+.table_view h4{
+    border: 1px solid #cecece;
+    border-left: none;
+    border-right: none;
+    margin: 0;
+    padding: 5px 0px;
+    background: #F1EFEF;
+}
+.table_view .option_bar{
+    position: relative;
+    border-bottom: 1px solid #cecece;
+}
+.table_view input{
+    border: none;
+    border-bottom: 1px solid #bfbfbf;
+    margin: 5px 0px;
+    padding: 5px;
+    font-size: 16px;
+    width: 130px;
+}
 #hide_label{
     vertical-align: middle;
     padding: 0px 5px;
@@ -517,13 +701,6 @@ select{
     padding: 2px 0pc;
     width: 150px;
     text-align: center;
-}
-#print{
-    border:0;
-    width: 90%;
-    margin: auto;
-    border-collapse:collapse;
-    border: 0 !important;
 }
 .print_option{
     display: inline-block;
@@ -541,20 +718,6 @@ select{
     vertical-align: middle;
     margin: 5px 2px 5px 0px;
 }
-#print tr#print_date th{
-    background-color: white;
-    color: inherit;
-}
-
-#print tr#category th{
-    background-color: #517b7b ;
-}
-
-#print tr#category_columns th{
-    background-color: #75a4a4;
-    border: 1px solid white;
-}
-
 .user_add_div{
     margin: 0;
     margin-left:30px;
@@ -572,7 +735,6 @@ select{
 .user_add_div label{
     margin-left: 5px;
 }
-
 .userinput{
     display: block;
     color: #444;
@@ -628,6 +790,7 @@ select{
     height: 99%;
     width: 100%;
     background-color: transparent;
+    z-index: 1;
 }
 .add_div{
     display: none;
@@ -652,6 +815,15 @@ select{
     transition: background .2s;
 }
 .drawer_tag_open{
+    width: 300px;
+    border: none;
+    padding: 2px 13px;
+    font-size: 18px;
+    color: white;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    outline: none;
+    transition: background .2s;
     background-color: #808080;
 }
 .button_add_drawer{
@@ -665,7 +837,11 @@ select{
 #item_add_button{
     margin: 0;
 }
-
+#item_list_div{
+    width: 0px;
+    transition: width .25s;
+    height: 100%;
+}
 .pagi_main{
     display: table;
     margin: 0;
@@ -727,7 +903,175 @@ select{
     background: #79bc4d;
     border: none;
 }
+.popup_cancel{
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    border: none;
+    background: none;
+    padding: 2px 6px;
+    margin: 2px;
+    outline: none;
+}
+.tab_ul {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+.tab_li {
+    float: left;
+    position: relative;
+    display: block;
+    color: #444;
+    background: white;
+    font-size: 16px;
+    transition: background-color .25s, color .25s;
+    text-align: center;
+    padding: 0;
+    margin : 0;
+    min-width: 120px;
+    height: 29px;
+    border: 1px solid #cecece;
+    border-bottom: none;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    outline: none;
+    z-index: 2;
+}
+.tab_li span{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px;
+    width: 100%;
+    padding: 4px 0px;
+    margin: auto;
+    cursor: pointer;
+}
+#timeslot_ul{
+    padding-left: 40px;
+}
+.tab_button{
+    color: #444;
+    background: white;
+    font-size: 16px;
+    transition: background-color .25s, color .25s;
+    text-align: center;
+    padding: 2px;
+    margin : 0;
+    min-width: 120px;
+    height: 30px;
+    border: 1px solid #cecece;
+    border-bottom: none;
+    border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+    outline: none;
+    box-shadow: none;
+}
+.tab_button:hover, .tab_li:hover{
+    background: rgba(234, 234, 234, 0.76);
 
+}
+.tab_button.selected, .tab_li.selected{
+    background: #79BC4D !important;
+    color: white;
+}
+.tab_add_button{
+    position: relative;
+    float: right;
+    background: white;
+    font-size: 20px;
+    color: #51A918;
+    transition: background-color .25s, color .25s;
+    text-align: center;
+    padding: 2px;
+    margin : 0;
+    min-width: 35px;
+    height: 30px;
+    border: 1px solid #79BC4D;
+    border-bottom: none;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    outline: none;
+    box-shadow: none;
+    z-index: 2;
+}
+.tab_add_button:hover{
+    background: rgba(234, 234, 234, 0.76);
+}
+.tab_delete_button{
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: white;
+    font-size: 20px;
+    color: #51A918;
+    transition: background-color .25s, color .25s;
+    text-align: center;
+    padding: 2px;
+    margin : 0;
+    min-width: 35px;
+    height: 30px;
+    border: none;
+    border-left: none;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    outline: none;
+    box-shadow: none;
+    z-index: 1;
+    transition: transform .25s, border .25s, background .25s, opacity .25s;
+}
+.tab_delete_button:hover{
+    background: rgba(255, 65, 65, 0.75);
+}
+.tab_div{
+    float: left;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+.tab_delete{
+    position: absolute;
+    display: block;
+    top: -10px;
+    right: -5px;
+    font-size: 14px;
+    border: 1px solid #51A918;
+    border-radius: 20px;
+    margin: 0;
+    padding: 0px 4px;
+    background: white;
+    outline: none;
+    color: #51A918;
+    z-index: 5;
+}
+#upinven_table{
+    border-top: none;
+}
+#upinven_table #category_name{
+    padding: 0px 0px 5px 0px;
+}
+#item_counter{
+    float: right;
+    margin-right: 20px;
+}
+#home_list{
+    max-width: 25%;
+}
+#div_table{
+    display: block;
+    margin: auto;
+    margin-top: 50px;
+}
+#items_div_table{
+    display: block;
+    float: right;
+    width: 98%;
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .message_table{
 }
@@ -965,6 +1309,7 @@ nav{
     top: 0px;
     box-shadow: 0px 0px 8px;
     font-size: 17px;
+    z-index: 8000;
 }
 
 nav ul{
@@ -1030,6 +1375,9 @@ nav ul ul li a{
     margin: 0;
     padding: 10px 16px;
     color: white;
+}
+#drawer_tag_item{
+    display: none;
 }
 
 #nav_date input{
@@ -1113,7 +1461,7 @@ nav .active{
 
 .sidenav li:hover a{
 /*     background-color: #65D269;*/
-    background-color: #e6e6e6;
+    background-color: rgba(234, 234, 234, 0.76);
 }
 
 .composeButton{

@@ -18,8 +18,12 @@ if (!isset($_SESSION["username"])) {
 </head>
 <body>
     <div>
-        <table class="user_table" id="table">
-            <caption><?php echo $_POST["category_name"] ?></caption>
+        <table class="table_view" id="upinven_table">
+            <tr>
+                <td colspan="4" id="category_name">
+                    <h4><?php echo $_POST["category_name"] ?></h4>
+                </td>
+            </tr>
             <tr>
                 <th>Item</th>
                 <th>Unit</th>
@@ -31,7 +35,7 @@ if (!isset($_SESSION["username"])) {
                 <tr>
                     <td><span value="<?php echo $row["name"] ?>"><?php echo $row["name"] ?></span></td>
                     <td><span value="<?php echo $row["unit"] ?>"><?php echo $row["unit"] ?></span></td>
-                    <td><input type="number" min="0" value="<?php echo $row["quantity"] ?>" onchange=updateInventory(this)></td>
+                    <td><input type="number" class="align_center" min="0" step="any" value="<?php echo $row["quantity"] ?>" onchange=updateInventory(this)></td>
                     <td><input type="text"  value="<?php echo $row["notes"] ?>" onchange=updateInventory(this)></td>
                     <input type="hidden" value="<?php echo $row["id"] ?>">
                 </tr>
@@ -44,15 +48,13 @@ if (!isset($_SESSION["username"])) {
 
 <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
 <script>
-    function updateInventory(obj){
+    function updateInventory(obj) {
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemDate = document.getElementById("date").value;
-        var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
-        var itemQuantity = document.getElementById("table").rows[rowIndex].cells[2].children[0].value;
-        var itemNote = document.getElementById("table").rows[rowIndex].cells[3].children[0].value;
+        var itemId = document.getElementById("upinven_table").rows[rowIndex].children[4].value;
+        var itemQuantity = document.getElementById("upinven_table").rows[rowIndex].cells[2].children[0].value;
+        var itemNote = document.getElementById("upinven_table").rows[rowIndex].cells[3].children[0].value;
 
-        $(function(){
-            $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
-        });
+        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
     }
 </script>

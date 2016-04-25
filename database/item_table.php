@@ -49,7 +49,7 @@ class ItemTable extends DatabaseTable {
      * @return  int         Returns count on query success.
      * @throws  exception   If query fails.
      */
-    public static function get_items_count(){
+    public static function get_items_count() {
         $sql = "SELECT COUNT(name) AS num FROM Item
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.deletion_date IS NULL
@@ -93,6 +93,25 @@ class ItemTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function get_items_by_timeslot($timeslot_name) {
+        $sql = "SELECT name, unit, Item.id, TimeSlotItem.factor, TimeSlotItem.id AS tsi_id FROM Item
+                INNER JOIN TimeSlotItem ON Item.id = TimeSlotItem.item_id
+                WHERE Item.deletion_date IS NULL AND TimeSlotItem.timeslot_id = (SELECT id from TimeSlots WHERE name = '$timeslot_name')
+                ORDER BY name ASC";
+
+        return parent::query($sql);
+    }
+
+    public static function get_category_items_by_timeslot($timeslot_name) {
+        $sql = "SELECT Item.name, unit, Item.id, TimeSlotItem.factor, TimeSlotItem.id AS tsi_id, Category.name AS cat_name FROM Item
+                LEFT JOIN Category ON Item.category_id = Category.id
+                INNER JOIN TimeSlotItem ON Item.id = TimeSlotItem.item_id
+                WHERE Item.deletion_date IS NULL AND TimeSlotItem.timeslot_id = (SELECT id from TimeSlots WHERE name = '$timeslot_name')
+                ORDER BY cat_name ASC";
+
+        return parent::query($sql);
+    }
+
     /**
      * Delete an item in the database.
      *
@@ -106,6 +125,15 @@ class ItemTable extends DatabaseTable {
 
         $sql = "UPDATE Item SET deletion_date = '{$date}'
                 WHERE name = '{$item_name}'";
+
+        return parent::query($sql);
+    }
+
+    public static function delete_multiple_items($item_ids) {
+        $date = date('Y-m-d');
+
+        $sql = "UPDATE Item SET deletion_date = '$date'
+                WHERE id IN ('".implode("','", $item_ids)."')";
 
         return parent::query($sql);
     }
