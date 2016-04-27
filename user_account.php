@@ -15,7 +15,7 @@ if (isset($_POST["update_user"])) {
         $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
         $_SESSION["timezone"] = $tz;
     }
-    if(UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
+    if (UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
         $_SESSION["username"] = $_POST["update_user"];
     }
 }
@@ -67,7 +67,7 @@ if (isset($_POST["update_user"])) {
             </form>
         </div>
     </div>
-    <span class="version_dark">v1.4.0</span>
+    <span class="version_dark">v2.0.0</span>
 </body>
 </html>
 
@@ -104,7 +104,7 @@ if (isset($_POST["update_user"])) {
         var new_pass = document.getElementById("new_password");
         var retype_pass = document.getElementById("retype_password");
 
-        if (new_pass.value != retype_pass.value && retype_pass.value != "" && new_pass.value != ""){
+        if (new_pass.value != retype_pass.value && retype_pass.value != "" && new_pass.value != "") {
             new_pass.style.backgroundColor = "Tomato ";
             retype_pass.style.backgroundColor = "Tomato ";
             newPass = "false";
