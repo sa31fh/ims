@@ -20,7 +20,7 @@ if (!isset($_SESSION["date"])) {
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="overflow_hidden">
     <?php $page = "home";
           include_once "new_nav.php" ?>
     <div class="main">
@@ -32,28 +32,22 @@ if (!isset($_SESSION["date"])) {
                  <li class="list_category_li">
                     <form action="update_inventory.php" method="post" id="cat_form" target="ifram" class="inline">
                         <span><?php echo $row["name"]; ?></span>
-                        <input type="hidden" name="category_name" value="<?php echo $row["name"] ?>">
-                        <input type="hidden" name="category_id" value="<?php echo $row["id"] ?>">
+                        <input type="hidden" name="category_name" value="<?php echo $row['name'] ?>">
+                        <input type="hidden" name="category_id" value="<?php echo $row['id'] ?>">
                     </form>
-                    <span id="item_counter"><?php echo ItemTable::get_updated_items_count($row['id'], $_SESSION["date"]). '/' .ItemTable::get_total_items($row['id'], $_SESSION["date"]) ?></span>
+                    <span class="item_counter" id="total"><?php echo ItemTable::get_total_items($row['id'], $_SESSION["date"]) ?></span>
+                    <span class="float_right" id="<?php echo $row['name'].'_count' ?>"><?php echo ItemTable::get_updated_items_count($row['id'], $_SESSION["date"]). "/" ?> </span>
                  </li>
             <?php  endwhile?>
             </ul>
         </div>
-        <div class="inline div_iframe_width"><iframe src="" id="new_iframe" name="ifram" scrolling="no" frameborder="0" onload=adjustHeight(id)></iframe></div>
+        <div class="float_left div_iframe_width"><iframe src="" id="new_iframe" name="ifram"  frameborder="0" ></iframe></div>
     </div>
 </body>
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
-    function adjustHeight(iframeID) {
-        var iframe = document.getElementById(iframeID);
-        iframe.height = 0 + "px";
-        var nHeight = iframe.contentWindow.document .body.scrollHeight;
-        iframe.height = (nHeight + 60) + "px";
-    }
-
     $(document).ready(function() {
         $(".list_category_li:first").each(function() {
             $(this).children().submit();

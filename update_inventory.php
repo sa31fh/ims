@@ -17,11 +17,16 @@ if (!isset($_SESSION["username"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div>
+    <div class="none">
         <table class="table_view" id="upinven_table">
             <tr>
                 <td colspan="4" id="category_name">
-                    <h4><?php echo $_POST["category_name"] ?></h4>
+                    <label class="switch float_left">
+                        <input class="switch-input" type="checkbox" onclick=checkEmpty() />
+                        <span class="switch-label" data-on="incomplete" data-off="All"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                    <h4 id="name"><?php echo $_POST["category_name"] ?></h4>
                 </td>
             </tr>
             <tr>
@@ -35,7 +40,7 @@ if (!isset($_SESSION["username"])) {
                 <tr>
                     <td><span value="<?php echo $row["name"] ?>"><?php echo $row["name"] ?></span></td>
                     <td><span value="<?php echo $row["unit"] ?>"><?php echo $row["unit"] ?></span></td>
-                    <td><input type="number" class="align_center" min="0" step="any" value="<?php echo $row["quantity"] ?>" onchange=updateInventory(this)></td>
+                    <td class="td_quantity"><input type="number" class="align_center" min="0" step="any" value="<?php echo $row["quantity"] ?>" onchange=updateInventory(this)></td>
                     <td><input type="text"  value="<?php echo $row["notes"] ?>" onchange=updateInventory(this)></td>
                     <input type="hidden" value="<?php echo $row["id"] ?>">
                 </tr>
@@ -53,8 +58,34 @@ if (!isset($_SESSION["username"])) {
         var itemDate = document.getElementById("date").value;
         var itemId = document.getElementById("upinven_table").rows[rowIndex].children[4].value;
         var itemQuantity = document.getElementById("upinven_table").rows[rowIndex].cells[2].children[0].value;
+        if(itemQuantity == "") {itemQuantity = 'NULL'};
         var itemNote = document.getElementById("upinven_table").rows[rowIndex].cells[3].children[0].value;
 
         $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
+        checkEmpty();
+        updateCount();
+    }
+
+    function checkEmpty() {
+        if ($(".switch-input").prop("checked")) {
+            $(".td_quantity").each(function() {
+                if ($(this).children().val() >= 0 && $(this).children().val() != "") {
+                    $(this).parent().hide();
+                }
+            });
+        } else {
+            $("tr").show();
+        }
+    }
+
+    function updateCount() {
+        var count = 0;
+        $(".td_quantity").each(function() {
+            if ($(this).children().val() >= "0" ) {
+                count++;
+            }
+        var categoryName = document.getElementById("name").innerHTML;
+        window.parent.document.getElementById(categoryName+"_count").innerHTML = count+"/";
+        });
     }
 </script>
