@@ -25,7 +25,11 @@ if (isset($_POST["expected_sales"])) {
         <input class="option" type="button" onClick=goBack() value="Back">
         <div class="divider"></div>
         <div class="toolbar_div">
-            <input class="toolbar_checkbox" type="checkbox" id="hide_checkbox" onclick=checkRequired()> <span id="hide_label">All</span>
+            <label class="switch float_left" id="toolbar_toggle">
+                <input class="switch-input" type="checkbox" onclick=checkRequired() />
+                <span class="switch-label" data-on="Required" data-off="All"></span>
+                <span class="switch-handle"></span>
+            </label>
         </div> <div class="divider"></div>
         <?php if ($_SESSION["userrole"] == "admin"): ?>
         <div class="toolbar_div">
@@ -37,7 +41,7 @@ if (isset($_POST["expected_sales"])) {
         <div class="divider"></div>
         <?php endif ?>
         <div class="toolbar_div">
-            <a  id="print_share" class="option" onclick=sendPrint()>Share</a>
+            <a id="print_share" class="option" onclick=sendPrint()>Share</a>
         </div>
     </div>
 
@@ -60,31 +64,49 @@ if (isset($_POST["expected_sales"])) {
         <div class="none" id="div_print_table">
             <table class="table_view" id="print">
                 <tr id="print_date" class="row">
-                    <th colspan="5"><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></th>
+                    <th colspan="5">
+                        <span><?php echo date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'D, M d Y'); ?></span>
+                        <span class="print_table_date"><?php echo "created on ".date('D, M d Y', strtotime($_SESSION["date"])); ?></span>
+                    </th>
                 </tr>
             </table>
         </div>
     </div>
-    <form action="messages.php" id="print_form" method="post">
-        <input type="hidden" id="print_data" name="print_data">
-    </form>
+
     <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
+    <form action="compose_messages.php" method="post" id="print_form" target="popup_frame">
+        <input type="hidden" id="print_table_date" name="print_table_date">
+        <input type="hidden" id="print_table_name" name="print_table_name">
+        <input type="hidden" id="new_print_data" name="new_print_data">
+    </form>
+
+    <div class="div_popup_back">
+        <div class="div_popup popup_share">
+            <div class="popup_titlebar">New Message
+                <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
+            </div>
+            <iframe id="popup_frame" name="popup_frame" src="" frameborder="0"></iframe>
+        </div>
+    </div>
 </body>
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jspdf/1.2.61/jspdf.min.js"></script>
 <script>
     function  getTab(tabName) {
         var timeSlotName = tabName.innerHTML;
         var date = document.getElementById("session_date").value;
         if (timeSlotName == "Full Day") {
             $.post("jq_ajax.php", {getPrintPreview: "", date: date}, function(data, status) {
-                document.getElementById("print").innerHTML = data;
+                $(".print_tbody").remove();
+                $("#print").append(data);
                 checkRequired();
             });
         } else {
             $.post("jq_ajax.php", {getPrintPreviewTimeslots: "", date: date, timeSlotName: timeSlotName}, function(data, status) {
-                document.getElementById("print").innerHTML = data;
+                $(".print_tbody").remove();
+                $("#print").append(data);
                 checkRequired();
             });
         }
@@ -96,12 +118,15 @@ if (isset($_POST["expected_sales"])) {
 
     function sendPrint() {
         var dat = document.getElementById("div_print_table").innerHTML;
-        document.getElementById("print_data").value = dat;
-        document.getElementById("print_form").submit();
+        document.getElementById("new_print_data").value = dat;
+        document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
+        document.getElementById("print_table_date").value = $("#print_date").children().children().html();
+        $(".div_popup_back").css("display", "block");
+        $("#print_form").submit();
     }
 
     function checkRequired() {
-        if ($("#hide_checkbox").prop("checked")) {
+        if ($(".switch-input").prop("checked")) {
             $(".print_tbody").each(function() {
                 var total = $(this).find(".quantity_required").length;
                 var remove = 0;
@@ -115,12 +140,10 @@ if (isset($_POST["expected_sales"])) {
                     $(this).hide();
                 }
             });
-            $("#hide_label").text("Required");
         } else {
             $(".print_tbody").each(function() {
                 $(this).show();
                 $(this).find("tr").show();
-                $("#hide_label").text("All");
             });
         }
     }
@@ -134,6 +157,11 @@ if (isset($_POST["expected_sales"])) {
         $(".tab_li").click(function() {
             $(".tab_li").removeClass("selected");
             $(this).addClass("selected");
+        });
+
+        $("#popup_cancel").click(function() {
+            $(".main_iframe").removeClass("blur");
+            $(".div_popup_back").fadeOut(190, "linear");
         });
     });
 </script>
