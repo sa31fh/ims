@@ -12,7 +12,7 @@ if (isset($_POST["status_to_read"])) {
     ConversationTable::update_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read");
 }
 if (isset($_POST["reply"])) {
-    if(MessageTable::create_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))){
+    if (MessageTable::create_message($_SESSION["username"], $_POST["receiver_name"], $_POST["message"], $_POST["conversation_id"], gmdate("Y-m-d H:i:s"))) {
         ConversationTable::update_conversation_status($_POST["receiver_name"], $_POST["conversation_id"], "unread");
         ConversationTable::set_destroy_date($_POST["receiver_name"], $_POST["conversation_id"], 'NULL');
     }
@@ -33,13 +33,20 @@ if (isset($_POST["reply"])) {
         <?php $result = MessageTable::get_messages($_POST["conversation_id"]); ?>
         <?php while ($row = $result->fetch_assoc()): ?>
             <div class="main_message_div">
-                <div ><?php echo $row["attachment"] ?></div>
                 <div class="message_name" <?php if($row["username"] == $_SESSION["username"]) {echo "style='float:right;'";} ?>>
                     <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span>
                 </div>
                 <div class="message">
-                    <pre id="message"><?php echo $row["message"] ?></pre>
-                    <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
+                    <div>
+                        <pre id="message"><?php echo $row["message"] ?></pre>
+                        <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
+                    </div>
+                <?php if ($row["attachment"] != null): ?>
+                    <div class="div_attachment">
+                        <span>Attachment</span>
+                        <input type="hidden" value='<?php echo $row["attachment"] ?>'>
+                    </div>
+                <?php endif ?>
                 </div>
             </div>
         <?php endwhile ?>
@@ -55,9 +62,30 @@ if (isset($_POST["reply"])) {
             </form>
         </div>
     </div>
+
+    <div class="div_popup_back">
+        <div class="div_popup popup_print_table">
+        <input type="button" class="popup_cancel" id="popup_cancel" value="x">
+        </div>
+    </div>
 </body>
 </html>
 
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     document.getElementById("messages_div").scrollIntoView(false);
+
+    $(document).ready(function() {
+        $(".div_attachment").click(function() {
+            var data = $(this).children("input").val();
+            $(".div_popup").append(data);
+            $(".div_popup_back").css("display", "block");
+            $(".main_iframe").addClass("blur");
+        }); 
+
+        $("#popup_cancel").click(function() {
+            $(".main_iframe").removeClass("blur");
+            $(".div_popup_back").fadeOut(190, "linear");
+        });
+    });
 </script>
