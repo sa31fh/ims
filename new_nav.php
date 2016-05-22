@@ -34,10 +34,24 @@ if(isset($_POST["dateview"])) {
                 <?php endif ?>
             </ul>
         </li>
-        <li id="logout">    
+        <li id="logout">
             <form action="new_nav.php" method="post">
                 <input type="submit" name="logout" value="logout" class ="button">
             </form>
+        </li>
+        <li id="burger_list">
+            <a >&#9776;</a>
+            <ul>
+                <li><a href="user_account.php">Account</a></li>
+                <?php if ($_SESSION["userrole"] == "admin"): ?>
+                    <li><a href="admin_tasks.php">Admin Tasks</a></li>
+                <?php endif ?>
+                <li>
+                    <form action="new_nav.php" method="post">
+                        <input type="submit" name="logout" value="logout" class ="button">
+                    </form>
+                </li>
+            </ul>
         </li>
     </ul>
 </nav>
