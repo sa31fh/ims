@@ -28,7 +28,6 @@ if (isset($_POST["checkbox"])) {
 </head>
 <body>
     <div class="main_iframe">
-    <div>
         <div class="toolbar_main">
             <div class="toolbar_div">
                 <input class="toolbar_checkbox" title="Select All" id="select_all" type="checkbox">
@@ -65,7 +64,6 @@ if (isset($_POST["checkbox"])) {
             <input type="hidden" id="conversation_id" name="conversation_id">
             <input type="hidden" id="receiver_name" name="receiver_name">
         </form>
-   </div> 
    </div>
 </body>
 </html>

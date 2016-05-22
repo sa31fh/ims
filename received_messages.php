@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 include_once "utilities.php";
 require_once "database/conversation_table.php";
@@ -6,7 +6,7 @@ require_once "database/conversation_table.php";
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
-} 
+}
 if (isset($_POST["conversation_id"])) {
     if(ConversationTable::update_conversation_status($_SESSION["username"], $_POST["conversation_id"], "deleted")) {
         $date = date_format((date_add(date_create(gmdate("Y-m-d")), date_interval_create_from_date_string("1 week"))), "Y-m-d");
@@ -30,7 +30,6 @@ if (isset($_POST["checkbox"])) {
 </head>
 <body>
     <div class="main_iframe">
-    <div>
         <div class="toolbar_main">
             <div class="toolbar_div">
                 <input class="toolbar_checkbox" title="Select All" id="select_all" type="checkbox">
@@ -57,9 +56,9 @@ if (isset($_POST["checkbox"])) {
                 <tr <?php if($row["sender"] == $_SESSION["username"] AND $row["sender_status"] == "unread" OR $row["receiver"] == $_SESSION["username"] AND $row["receiver_status"] == "unread" ) {
                               echo 'class="unread"';} ?> >
                     <td class="checkbox"><input type="checkbox" name="checkbox[]" form="multi_delete_form" value="<?php echo $row["id"] ?>"></td>
-                    <td class="name" onclick=openMessage(this)> 
+                    <td class="name" onclick=openMessage(this)>
                         <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
-                        <?php echo $row["first_name"]." ".$row["last_name"]; ?> 
+                        <?php echo $row["first_name"]." ".$row["last_name"]; ?>
                     <td class="title" onclick=openMessage(this)> <?php echo $row["title"]; ?></td>
                     <td class="conversation" onclick=openMessage(this)> <?php echo $row["mSender"].": ".$row["message"]; ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
@@ -77,7 +76,6 @@ if (isset($_POST["checkbox"])) {
             <input type="hidden" id="receiver_name" name="receiver_name">
             <input type="hidden" name="status_to_read">
         </form>
-   </div> 
    </div>
 </body>
 </html>
@@ -105,7 +103,7 @@ if (isset($_POST["checkbox"])) {
                 $("#button_div").css("display", "inline-block");
             } else if($("input[type='checkbox']").filter(':checked').length == 0) {
                 $("#button_div").fadeOut(200, "linear");
-            } 
+            }
             countChecked();
         });
 
@@ -118,7 +116,6 @@ if (isset($_POST["checkbox"])) {
                 $("#button_div").fadeOut(200, "linear");
             }
             countChecked();
-
         });
 
         $(".dropdown_div #read").click(function(){
