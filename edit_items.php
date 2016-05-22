@@ -52,13 +52,23 @@ if (isset($_POST["base_sales"])) {
             <button id="drawer_tag_item" class="drawer_tag_open">Close</button>
         </div>
         <div class="div_fade"></div>
+
         <div class="div_category" id="item_list_div">
             <ul class="category_list">
                 <button class="button_flat inline" id="item_list_cancel">Close</button>
                 <h4 class="inline">ALL ITEMS</h4><hr>
-                <?php $result = ItemTable::get_items(); ?>
+                <?php $result = ItemTable::get_items_categories(); ?>
+                <?php $current_category = 1; ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
-                    <li class="list_li"><span><?php echo $row["name"]; ?></span></li>
+                    <?php if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
+                       <?php $current_category = $row["category_name"];?>
+                        <li class="list_li_category"><span><?php echo $row["category_name"]; ?></span></li>
+                    <?php endif ?>
+                    <?php if ($row["category_name"] != $current_category AND $row["category_name"] == null): ?>
+                       <?php $current_category = $row["category_name"]; ?>
+                        <li class="list_li_category"><span><?php echo "Uncategorized"; ?></span></li>
+                    <?php endif ?>
+                    <li class="list_li" id="item_list"><span><?php echo $row["name"]; ?></span></li>
                 <?php endwhile ?>
             </ul>
         </div>
@@ -78,14 +88,14 @@ if (isset($_POST["base_sales"])) {
                     </div>
                 <?php endwhile ?>
                 </ul>
-                <input type="submit" class="tab_add_button" value="+">
                 <button class="tab_delete_button" onclick=tabDelete()><img src="images/delete.png" alt="" width="25px" height="25px"></button>
+                <input type="submit" class="tab_add_button" value="+">
             </div>
 
             <table class="table_view" id="table" border="1px" >
                 <tr class="option_bar">
                     <th colspan="2"><button class="button_flat" id="add_item_button">Add New Item</button></th>
-                    <th>
+                    <th colspan="2" id="th_sales">
                         <div class="none" id="div_quantity_sales">
                             Quantity for sales ($)
                             <form action="edit_items.php" method="post" class="inline middle">
@@ -93,7 +103,7 @@ if (isset($_POST["base_sales"])) {
                             </form>
                         </div>
                     </th>
-                    <th id="td_delete"></th>
+                    <th  id="td_delete"></th>
                 </tr>
                 <tr class="tr_confirm">
                     <td class="td_checkbox"><input type="checkbox" class="item_checkbox" id="select_all"></td>
@@ -101,10 +111,11 @@ if (isset($_POST["base_sales"])) {
                     <td id="td_done">Done</th>
                 </tr>
                 <tr>
-                    <th></th>
+                    <th id="buffer"></th>
                     <th>Item</th>
                     <th>Unit</th>
                     <th id="th_quantity">Quantity</th>
+                    <th id="th_rounding">Rounding</th>
                 </tr>
                 <tbody id="item_tbody">
                 </tbody>
@@ -113,7 +124,7 @@ if (isset($_POST["base_sales"])) {
     </div>
 
     <div class="div_popup_back">
-        <div class="div_popup">
+        <div class="div_popup popup_add_timeslot">
             <h4>New Timeslot
             <input type="button" class="popup_cancel" id="popup_cancel" value="x"><hr></h4>
             <form action="edit_items.php" method="post">
@@ -140,23 +151,27 @@ if (isset($_POST["base_sales"])) {
         $(".list_li").removeClass("selected");
         timeSlotName = tabName.innerHTML;
         if (timeSlotName == "Full Day") {
-            if (!$("#delete_item").length) {
-                var deleteButton = '<button id="delete_item" class="button_flat">Delete</button>';
-                $("#td_delete").append(deleteButton);
-            }
             $("#add_item_button").html("Add New Item");
-            $("#div_quantity_sales").css("display", "block");
-            $("#th_quantity").html("Quantity");
             $.post("jq_ajax.php", {getItems: ""}, function(data, status) {
                 document.getElementById("item_tbody").innerHTML = data;
+                $("#th_sales").attr("colspan", "2");
+                $("#div_quantity_sales").css("display", "block");
+                if (!$("#delete_item").length) {
+                    var deleteButton = '<button id="delete_item" class="button_flat">Delete</button>';
+                    $("#td_delete").append(deleteButton);
+                }
+                $("#th_quantity").html("Quantity");
+                $("#th_rounding").css("display", "table-cell");
             });
         } else {
             $("#add_item_button").html("Item List");
-            $("#div_quantity_sales").css("display", "none");
-            $("#th_quantity").html("Quantity Factor");
+            $("#th_rounding").css("display", "none");
             $("#delete_item").remove();
             $.post("jq_ajax.php", {getCategoryItemsTimeSlot: "", timeSlotName: timeSlotName}, function(data, status) {
                 document.getElementById("item_tbody").innerHTML = data;
+                $("#div_quantity_sales").css("display", "none");
+                $("#th_sales").attr("colspan", "1");
+                $("#th_quantity").html("Equation");
                 $(".item_name").each(function() {
                     var itemName = $(this).val();
                     $(".list_li").each(function() {
@@ -169,10 +184,26 @@ if (isset($_POST["base_sales"])) {
         }
     }
 
-    function deleteTab(deleteButton) {
-     var tabName = deleteButton.parentNode.parentNode.children[0].value;
-       deleteButton.parentNode.children[1].value = tabName;
-       deleteButton.parentNode.submit();
+    function updateRoundingOption(obj) {
+        var option = obj.value;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+
+        $.post("jq_ajax.php", {updateRoundingOption: "", roundingOption: option, itemId: itemId});
+
+        if (option == "none") {
+            $(obj).next().attr("disabled", "disabled");
+        } else {
+            $(obj).next().removeAttr("disabled");
+        }
+    }
+
+    function updateRoundingFactor(obj) {
+        var factor = obj.value;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+
+        $.post("jq_ajax.php", {updateRoundingFactor: "", roundingFactor: factor, itemId: itemId})
     }
 
     function tabDelete() {
@@ -187,28 +218,33 @@ if (isset($_POST["base_sales"])) {
 
     function factorChange(obj) {
         var factor = obj.value;
-        if (factor > 1) {
-            obj.value = 1;
-            factor = 1;
+        var eqTest = factor.replace(/x/gi, 1);
+        try {
+            eval(eqTest);
+            factor = factor.toLowerCase();
+            var rowIndex = obj.parentNode.parentNode.rowIndex;
+            var tsiId = document.getElementById("table").rows[rowIndex].children[4].value;
+            $.post("jq_ajax.php", {UpdateTimeslotFactor: "", tsiId: tsiId, factor: factor});
+        } catch (e) {
+            var erMessage = "<div class='error'> Incorrect Equation </div>";
+            $("body").append(erMessage);
+            $(obj, this).addClass("incorrect");
         }
-        var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var tsiId = document.getElementById("table").rows[rowIndex].children[4].value;
-        $.post("jq_ajax.php", {UpdateTimeslotFactor: "", tsiId: tsiId, factor: factor});
     }
 
     function quantityChange(obj) {
         var quantity = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("table").rows[rowIndex].children[4].value;
+        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
 
         $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
     }
 
     function updateItem(obj) {
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemName = document.getElementById("table").rows[rowIndex].children[1].children[0].value;
-        var itemUnit  = document.getElementById("table").rows[rowIndex].children[2].children[0].value;
-        var itemId  = document.getElementById("table").rows[rowIndex].children[4].value;
+        var itemName = document.getElementById("table").rows[rowIndex].children[2].children[0].value;
+        var itemUnit  = document.getElementById("table").rows[rowIndex].children[3].children[0].value;
+        var itemId  = document.getElementById("table").rows[rowIndex].children[0].value;
         $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId});
     }
 
@@ -253,6 +289,18 @@ if (isset($_POST["base_sales"])) {
                     });
                     return "selected";
                 });
+            }
+        });
+
+        $(".list_li_category").click(function() {
+            $(this).nextUntil(".list_li_category").toggle();
+        });
+        $(document).on("click", ".item_category_tr", function() {
+            $(this).nextUntil(".item_category_tr").toggle();
+            if ($(this).find("span").hasClass("up")) {
+                $(this).find("span").removeClass("up").css("transform", "rotate(45deg)");
+            } else {
+                $(this).find("span").addClass("up").css("transform", "rotate(225deg)")
             }
         });
 
@@ -311,11 +359,13 @@ if (isset($_POST["base_sales"])) {
             var itemUnit = $("#new_item_unit").val();
             var itemQuantity = $("#new_item_quantity").val();
 
-            $.post("jq_ajax.php", {addItem: "", itemName: itemName, itemUnit: itemUnit, itemQuant: itemQuantity}, function(data, status) {
-                $("body").append(data);
-                getTab(document.getElementById("day_tab"));
-                $("userinput").trigger("reset");
-            });
+            if (itemName) {
+                $.post("jq_ajax.php", {addItem: "", itemName: itemName, itemUnit: itemUnit, itemQuant: itemQuantity}, function(data, status) {
+                    $("body").append(data);
+                    getTab(document.getElementById("day_tab"));
+                    $("userinput").trigger("reset");
+                });
+            }
         });
 
         $(document).on("click", "#delete_item", function() {
@@ -340,11 +390,14 @@ if (isset($_POST["base_sales"])) {
 
         $("#item_list_cancel").click(function() {
             $("#item_list_div").css("width", "0px");
-            $(".div_table").css("width", "98%");
+            $(".div_table").css("width", "99%");
         });
 
         $("#select_all").change(function() {
             $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
+        });
+        $(document).on("click", "input.incorrect", function() {
+            $(this).removeClass("incorrect");
         });
     });
 </script>

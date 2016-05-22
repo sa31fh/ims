@@ -93,6 +93,27 @@ class ItemTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    /**
+     * Gets all items with their categories.
+     *
+     * @return object|false    Returns mysqli_result object on query success or false if query fails.
+     */
+    public static function get_items_categories() {
+        $sql = "SELECT Item.name, unit, quantity, rounding_option, rounding_factor, Item.id, Category.name AS category_name FROM Item
+                LEFT JOIN Category ON Item.category_id = Category.id
+                LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
+                WHERE Item.deletion_date IS NULL
+                ORDER BY category_name ASC";
+
+        return parent::query($sql);
+    }
+
+    /**
+     * Gets all items within the given timeslot.
+     *
+     * @param  string   $timeslot_name
+     * @return object|false             Returns mysqli_result object on query success or false if query fails.
+     */
     public static function get_items_by_timeslot($timeslot_name) {
         $sql = "SELECT name, unit, Item.id, TimeSlotItem.factor, TimeSlotItem.id AS tsi_id FROM Item
                 INNER JOIN TimeSlotItem ON Item.id = TimeSlotItem.item_id
@@ -102,6 +123,12 @@ class ItemTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    /**
+     * Gets all items with categories for given timeslot.
+     *
+     * @param  string   $timeslot_name
+     * @return object|false             Returns mysqli_result object on query success or false if query fails.
+     */
     public static function get_category_items_by_timeslot($timeslot_name) {
         $sql = "SELECT Item.name, unit, Item.id, TimeSlotItem.factor, TimeSlotItem.id AS tsi_id, Category.name AS cat_name FROM Item
                 LEFT JOIN Category ON Item.category_id = Category.id
@@ -129,6 +156,12 @@ class ItemTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    /**
+     * Delete multiple items.
+     *
+     * @param  array $item_ids   Id's of items to be deleted.
+     * @return boolean           Returns true on query success and false if it fails.
+     */
     public static function delete_multiple_items($item_ids) {
         $date = date('Y-m-d');
 
@@ -194,7 +227,8 @@ class ItemTable extends DatabaseTable {
                 LEFT JOIN Inventory ON Item.id = Inventory.item_id
                 WHERE Category.id = {$category_id} AND Inventory.date = '{$date}'
                     AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
-                    AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))";
+                    AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))
+                    AND Inventory.quantity IS NOT NULL";
 
         if ($result = parent::query($sql)) {
             return $result->fetch_assoc()['num'];
@@ -264,6 +298,36 @@ class ItemTable extends DatabaseTable {
     public static function update_item_order($item_id, $order_id) {
         $sql = "UPDATE Item
                 SET order_id = '$order_id'
+                WHERE id = '$item_id'";
+
+        return parent::query($sql);
+    }
+
+    /**
+     * Update a given items rounding option.
+     *
+     * @param  string   $rounding_option    New option name.
+     * @param  int      $item_id            Id of item to update.
+     * @return boolean                     Returns true on query success and false if it fails.
+     */
+    public static function update_rounding_option($rounding_option, $item_id) {
+        $sql = "UPDATE Item
+                SET rounding_option =  '$rounding_option'
+                WHERE id = '$item_id'";
+
+        return parent::query($sql);
+    }
+
+    /**
+     * Update a given items rounding factor.
+     *
+     * @param  int $rounding_factor     New rounding factor value.
+     * @param  int $item_id             Id of item to update
+     * @return boolean                  Returns true on query success and false if it fails.
+     */
+    public static function update_rounding_factor($rounding_factor, $item_id) {
+        $sql = "UPDATE Item
+                SET rounding_factor = '$rounding_factor'
                 WHERE id = '$item_id'";
 
         return parent::query($sql);

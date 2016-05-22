@@ -10,6 +10,8 @@ require_once "database/variables_table.php";
 require_once "database/conversation_table.php";
 require_once "database/timeslot_table.php";
 require_once "database/timeslot_item_table.php";
+require_once "database/recipe_item_table.php";
+require_once "database/recipe_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -124,17 +126,41 @@ if(isset($_POST["addItem"])) {
 }
 
 if(isset($_POST["getItems"])) {
-    $result = ItemTable::get_items();
+    $result = ItemTable::get_items_categories();
+    $current_category = 1;
     while($row = $result->fetch_assoc()) {
-      echo ' <tr>
-            <td class="td_checkbox">
-                <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
-            </td>
-            <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center"></td>
-            <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
-            <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center"></td>
-            <input type="hidden" name="item_id" value="'.$row["id"].'">
-        </tr>';
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '
+                <tr class="item_category_tr">
+                    <td id="category" colspan="5"><h4>'.$row["category_name"].'<span class="arrow_down float_right"></span></h4></td>
+                </tr>';
+        } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
+            $current_category = $row["category_name"];
+            echo '
+                <tr class="item_category_tr">
+                    <td id="category" colspan="5"><h4>'."Uncategorized Items".'<span class="arrow_down float_right"></span></h4></td>
+                </tr>';
+        }
+        echo '
+            <tr>
+                <input type="hidden" name="item_id" value="'.$row["id"].'">
+                <td class="td_checkbox">
+                    <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
+                </td>
+                <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center"></td>
+                <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
+                <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center"></td>
+                <td id="round_tr">
+                    <select name="" id="" onchange=updateRoundingOption(this)>
+                        <option value="none" '; if ($row["rounding_option"] == "none") {echo "selected";} echo'>none</option>
+                        <option value="up" '; if ($row["rounding_option"] == "up") {echo "selected";} echo'>up</option>
+                        <option value="down" '; if ($row["rounding_option"] == "down") {echo "selected";} echo'>down</option>
+                    </select>
+                    <input id="round_input" type="number" step="any" value="'.$row["rounding_factor"].'" onchange=updateRoundingFactor(this)
+                            class="align_center" '; if ($row["rounding_option"] == "none") {echo "disabled";} echo'>
+                </td>
+            </tr>';
     }
 }
 
@@ -181,13 +207,19 @@ if(isset($_POST["getItemsTimeSlot"])) {
 
 if(isset($_POST["getCategoryItemsTimeSlot"])) {
     $result = ItemTable::get_category_items_by_timeslot($_POST["timeSlotName"]);
-    $current_category = null;
+    $current_category = 1;
     while ($row = $result->fetch_assoc()) {
         if ($row["cat_name"] != $current_category AND $row["cat_name"] != null) {
             $current_category = $row["cat_name"];
             echo '
-                <tr>
-                    <td colspan="4"><h4>'.$row["cat_name"].'</h4></td>
+                <tr class="item_category_tr">
+                    <td id="category" colspan="4"><h4>'.$row["cat_name"].'<span class="arrow_down float_right"></span></h4></td>
+                </tr>';
+        } else if ($row["cat_name"] != $current_category AND $row["cat_name"] == null) {
+            $current_category = $row["cat_name"];
+            echo '
+                <tr class="item_category_tr">
+                    <td id="category" colspan="4"><h4>'."Uncategorized Items".'<span class="arrow_down float_right"></span></h4></td>
                 </tr>';
         }
     echo '
@@ -195,7 +227,7 @@ if(isset($_POST["getCategoryItemsTimeSlot"])) {
             <td class="td_checkbox"></td>
             <td><input type="text" class="align_center item_name" name="item_name" value="'.$row["name"].'" onchange="this.form.submit()" readonly></td>
             <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange="this.form.submit()" class="align_center" readonly></td>
-            <td><input type="number" name="item_quantity" step="0.01" min="0.00" max="1.00" value="'.$row["factor"].'" onchange=factorChange(this) class="align_center"></td>
+            <td><input type="text" name="item_quantity" value="'.$row["factor"].'" onchange=factorChange(this) class="align_center"></td>
             <input type="hidden" name="tsi_id" value="'.$row["tsi_id"].'">
         </tr>';
     }
@@ -219,10 +251,16 @@ if (isset($_POST["getPrintPreview"])) {
         }
         echo '<tr id="column_data" class="row">';
                     $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales();
+                    $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-");
+                    if ($row["rounding_option"] == "up") {
+                        $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                    } else if ($row["rounding_option"] == "down") {
+                        $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                    }
         echo  '     <td>'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
                     <td>'.$row["quantity"].'</td>
-                    <td class="quantity_required">'.(is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-").'</td>
+                    <td class="quantity_required">'.$quantity.'</td>
                     <td class="align_left">'.$row["notes"].'</td>
                 </tr>';
     }
@@ -246,7 +284,15 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
         }
         echo '<tr id="column_data" class="row">';
                     $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales();
-                    $quantity = (is_numeric($row["quantity"]) ? (BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"]) * $row["factor"] : "-");
+                    $quantity = (is_numeric($row["quantity"]) ? (BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"]): "-");
+                    if ($quantity != "-") {
+                        $quantity = eval("return ".str_replace('x', $quantity, $row["factor"]).";");
+                        if ($row["rounding_option"] == "up") {
+                            $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                        } else if ($row["rounding_option"] == "down") {
+                            $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                        }
+                    }
         echo  '     <td>'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
                     <td>'.$row["quantity"].'</td>
@@ -270,6 +316,32 @@ if (isset($_POST["UpdateTimeslotFactor"])) {
 }
 if (isset($_POST["updateItems"])) {
     echo ItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"]);
+}
+if (isset($_POST["updateRoundingOption"])) {
+    echo ItemTable::update_rounding_option($_POST["roundingOption"], $_POST["itemId"]);
+}
+if (isset($_POST["updateRoundingFactor"])) {
+    echo ItemTable::update_rounding_factor($_POST["roundingFactor"], $_POST["itemId"]);
+}
+if (isset($_POST["addRecipeItem"])) {
+    echo RecipeItemTable::add_recipe_item($_POST["itemId"], $_POST["recipeId"]);
+}
+if (isset($_POST["deleteRecipeItem"])) {
+    echo RecipeItemTable::delete_recipe_item($_POST["itemId"], $_POST["recipeId"]);
+}
+if (isset($_POST["getRecipeItems"])) {
+    $result = RecipeItemTable::get_recipe_items($_POST["recipeId"]);
+    if ($result) {
+        echo '<ul class="category_list" id="categorized_list" >';
+        while ($row = $result->fetch_assoc()) {
+            echo '<li class="list_li recipe_item" recipe-item-id="'.$row["id"].'" item-name="'.$row["name"].'">' .$row["name"]. '
+                  <input type="number" value="'.$row["quantity"].'" onchange=updateQuantity(this)></li>';
+        }
+         echo '</ul>';
+    }
+}
+if (isset($_POST["updateRecipeInventoryQuantity"])) {
+    echo RecipeItemTable::update_recipe_inventory_quantity($_POST["quantity"], $_POST["recipeItemId"]);
 }
 
 ?>
