@@ -12,6 +12,18 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+?>
+    <script>
+        window.parent.location.href = window.parent.location.href;
+    </script>
+<?php
+exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["add_button"]) AND !empty($_POST["recipe"])) {
     try {
         if (!RecipeTable::add_recipe($_POST["recipe"])) {
@@ -90,7 +102,6 @@ if(isset($_POST["delete_id"])) {
         </div>
 
     </div>
-    <!-- <div class="warning">UNDER CONSTRUCTION </div> -->
 </body>
 </html>
 
@@ -104,7 +115,7 @@ if(isset($_POST["delete_id"])) {
 
     function recipeSelect(obj) {
         var recipeId = $(obj).attr("id");
-        
+
         $.post("jq_ajax.php", {getRecipeItems: "", recipeId: recipeId}, function(data, status) {
             document.getElementById("div").innerHTML = data;
             $(".all_items").removeClass("selected");
@@ -136,7 +147,7 @@ if(isset($_POST["delete_id"])) {
     function updateQuantity(obj) {
         var quantity = obj.value;
         var recipeItemId = $(obj).parent().attr("recipe-item-id");
-        
+
         $.post("jq_ajax.php", {updateRecipeInventoryQuantity: "", quantity: quantity, recipeItemId: recipeItemId});
     }
 

@@ -1,5 +1,5 @@
 <?php
-session_start(); 
+session_start();
 require_once "database/user_table.php";
 require_once "database/user_role_table.php";
 
@@ -11,6 +11,18 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+?>
+    <script>
+        window.parent.location.href = window.parent.location.href;
+    </script>
+<?php
+exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["new_username"])) {
     try {
         if (!UserTable::add_new_user($_POST['new_username'], $_POST["new_firstname"], $_POST["new_lastname"], $_POST['new_password'], $_POST['userrole'])) {
@@ -111,7 +123,7 @@ if(isset($_POST["delete_username"])){
         var role = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var roleUserName = document.getElementById("table").rows[rowIndex].cells[0].innerHTML;
-        
+
         $.post("jq_ajax.php", {newRole: role, roleUserName: roleUserName});
     }
 

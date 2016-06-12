@@ -4,6 +4,13 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+$_SESSION["last_activity"] = time();
 ?>
 
 <!DOCTYPE html>
@@ -32,13 +39,10 @@ if (!isset($_SESSION["username"])) {
             <div class="popup_titlebar">New Message
                 <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
             </div>
-            <iframe id="popup_frame" name="popup_frame" src="compose_messages.php" frameborder="0"></iframe>
+            <iframe id="popup_frame" name="popup_frame" frameborder="0"></iframe>
         </div>
     </div>
-
-    <form action="compose_messages.php" method="post" id="print_form" target="message_frame">
-         <input type="hidden" name="new_print_data" value='<?php if(isset($_POST["print_data"])){echo $_POST["print_data"];}?>'>
-    </form>
+    <form id="popup_form" action="compose_messages.php" method="post" target="popup_frame"></form>
     <input type="hidden" id="session_name" value="<?php echo $_SESSION['username']; ?>">
 </body>
 </html>
@@ -46,6 +50,7 @@ if (!isset($_SESSION["username"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function composeButton() {
+        $("#popup_form").submit();
         $(".div_popup_back").css("display", "block");
     }
 
@@ -74,7 +79,3 @@ if (!isset($_SESSION["username"])) {
         });
     });
 </script>
-
-<?php if (isset($_POST["print_data"])): ?>
-     <script> $(function(){ $("#print_form").submit();  });</script>
-<?php endif ?>

@@ -3,10 +3,19 @@ session_start();
 require_once "database/category_table.php";
 require_once "database/item_table.php";
 
+
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (!isset($_SESSION["date"])) {
     $_SESSION["date"] = date("Y-m-d");
 }

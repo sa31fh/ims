@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 include "utilities.php";
 require_once "database/conversation_table.php";
@@ -7,6 +7,18 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+?>
+    <script>
+        window.parent.location.href = window.parent.location.href;
+    </script>
+<?php
+exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["conversation_id"])) {
     if(ConversationTable::update_conversation_status($_SESSION["username"], $_POST["conversation_id"], "read")){
        ConversationTable::set_destroy_date($_SESSION["username"], $_POST["conversation_id"], 'NULL');
@@ -47,7 +59,7 @@ if (isset($_POST["checkbox"])) {
                 <tr >
                     <td class="checkbox"><input type="checkbox" name="checkbox[]" form="multi_delete_form" value="<?php echo $row["id"] ?>"></td>
                     <td class="name" onclick=openMessage(this)>
-                        <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>"> 
+                        <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?> </td>
                     <td class="title" onclick=openMessage(this)> <?php echo $row["title"] ?></td>
                     <td class="conversation" onclick=openMessage(this)> <?php echo $row["mSender"].": ".$row["message"]; ?></td>

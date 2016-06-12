@@ -7,9 +7,23 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+?>
+    <script>
+        window.parent.location.href = window.parent.location.href;
+    </script>
+<?php
+exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["message"])) {
     foreach ($_POST["recipient"] as $value) {
-        ConversationTable::create_conversation($_SESSION["username"], $value, $_POST["title"], $_POST["message"], gmdate("Y-m-d H:i:s"), isset($_POST["attached"]) ? $_POST["attached"] : null, "read", "unread");
+        ConversationTable::create_conversation($_SESSION["username"], $value, $_POST["title"],
+            $_POST["message"], gmdate("Y-m-d H:i:s"),
+            isset($_POST["attached"]) ? $_POST["attached"] : null, "read", "unread");
     }
 }
 ?>

@@ -8,6 +8,13 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+$_SESSION["last_activity"] = time();
 ?>
 
 <!DOCTYPE html>

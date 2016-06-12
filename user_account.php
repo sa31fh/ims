@@ -6,6 +6,14 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["new_password"])) {
     UserTable::update_user_password($_POST["user_name"], $_POST["new_password"]);
 } 

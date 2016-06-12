@@ -11,6 +11,18 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+?>
+    <script>
+        window.parent.location.href = window.parent.location.href;
+    </script>
+<?php
+exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["add_button"]) AND !empty($_POST["category"])) {
     try {
         if (!CategoryTable::add_category($_POST["category"])) {
@@ -57,7 +69,7 @@ if(isset($_POST["delete_id"])) {
             </div>
             <div class="category_add_drawer">
                 <form action="edit_categories.php" method="post" >
-                    <input class="category_input" type="text" name="category" id="category_name" placeholder="Category">
+                    <input class="category_input" type="text" name="category" id="category_name" placeholder="Category Name">
                     <input type="submit" name="add_button" value="Add" class="button">
                 </form>
                 <button class="button_cancel">cancel</button>
@@ -97,7 +109,7 @@ if(isset($_POST["delete_id"])) {
       integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
       crossorigin="anonymous"></script>
 <script>
-    function categorySelect(obj){
+    function categorySelect(obj) {
         var categoryName = obj.children[1].innerHTML;
         document.getElementById("category_select").value = obj.children[1].innerHTML;
 
@@ -127,12 +139,12 @@ if(isset($_POST["delete_id"])) {
                         $.post("jq_ajax.php", {UpdateItemsCategory: "", itemName: $(this).attr("item-name"), categoryName: categoryName});
                     });
                 },
-                update: function(event, ui){
+                update: function(event, ui) {
                     ui.item.after(ui.item.data('multidrag')).remove();
                     var itemIds = $(this).sortable('toArray');
                     $.post("jq_ajax.php", {UpdateItemOrder: "", itemIds: itemIds});
                 }
-            }).on("click", "li", function (){
+            }).on("click", "li", function () {
                 $(this).toggleClass("selected");
                 $("#uncategorized_list li").removeClass("selected");
             });
@@ -143,9 +155,9 @@ if(isset($_POST["delete_id"])) {
         $(".category_add_drawer").slideToggle(180, "linear");
     }
 
-    $(function(){
+    $(document).ready(function() {
 
-        $(".list_category_li:first").each(function(){
+        $(".list_category_li:first").each(function() {
            categorySelect($(this)[0]);
            $(this).addClass("active");
         });
@@ -201,12 +213,11 @@ if(isset($_POST["delete_id"])) {
             handle: ".handle_delete",
             containment: ".div_list_category",
             zIndex: 500,
-            helper: function(event, ui){
+            helper: function(event, ui) {
                 var helper = $(this).clone()
                 helper.addClass("category_drag");
                 $(this).css("opacity", "0");
                 return helper;
-
             },
             start: function(event, ui) {
                 $(".category_delete").slideToggle(180, "linear");

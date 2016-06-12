@@ -4,6 +4,26 @@ require_once "database/item_table.php";
 require_once "database/variables_table.php";
 require_once "database/timeslot_table.php";
 
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit();
+}
+if ($_SESSION["userrole"] != "admin") {
+    header("Location: login.php");
+    exit();
+}
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+    session_unset();
+    session_destroy();
+?>
+    <script>
+        window.parent.location.href = window.parent.location.href;
+    </script>
+<?php
+exit();
+}
+$_SESSION["last_activity"] = time();
+
 if (isset($_POST["timeslot_name"])) {
     TimeslotTable::add_timeslot($_POST["timeslot_name"]);
 }
