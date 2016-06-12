@@ -1186,6 +1186,10 @@ select{
 #toolbar_toggle{
     margin: 2px 0px 0px 0px;
 }
+.collapse_arrow{
+    margin-right: 20px;
+    margin-left: 0px;
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .message_table{
 }

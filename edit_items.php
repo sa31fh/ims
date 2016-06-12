@@ -62,11 +62,17 @@ if (isset($_POST["base_sales"])) {
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <?php if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
                        <?php $current_category = $row["category_name"];?>
-                        <li class="list_li_category"><span><?php echo $row["category_name"]; ?></span></li>
+                        <li class="list_li_category">
+                            <span><?php echo $row["category_name"]; ?></span>
+                            <span class="arrow_down float_right collapse_arrow"></span>
+                        </li>
                     <?php endif ?>
                     <?php if ($row["category_name"] != $current_category AND $row["category_name"] == null): ?>
                        <?php $current_category = $row["category_name"]; ?>
-                        <li class="list_li_category"><span><?php echo "Uncategorized"; ?></span></li>
+                        <li class="list_li_category">
+                            <span><?php echo "Uncategorized"; ?></span>
+                            <span class="arrow_down float_right collapse_arrow"></span>
+                        </li>
                     <?php endif ?>
                     <li class="list_li" id="item_list"><span><?php echo $row["name"]; ?></span></li>
                 <?php endwhile ?>
@@ -294,6 +300,11 @@ if (isset($_POST["base_sales"])) {
 
         $(".list_li_category").click(function() {
             $(this).nextUntil(".list_li_category").toggle();
+            if ($(this).find(".arrow_down").hasClass("up")) {
+                $(this).find(".arrow_down").removeClass("up").css("transform", "rotate(45deg)");
+            } else {
+                $(this).find(".arrow_down").addClass("up").css("transform", "rotate(225deg)")
+            }
         });
         $(document).on("click", ".item_category_tr", function() {
             $(this).nextUntil(".item_category_tr").toggle();
