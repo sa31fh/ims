@@ -302,6 +302,18 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
     }
 }
 
+if (isset($_POST["getInventory"])) {
+    $result = InventoryTable::get_inventory($_POST["categoryId"], $_POST["date"]);
+    while ($row = $result -> fetch_assoc()) {
+        echo '<tr>
+                <td>'.$row["name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td class="td_quantity"><input type="number" class="align_center" min="0" step="any" value="'.$row["quantity"].'" onchange=updateInventory(this)></td>
+                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
+                <input type="hidden" value='.$row["id"].'>
+            </tr>';
+    }
+}
 
 if(isset($_POST["AddTimeslotItem"])) {
    echo TimeslotItemTable::add_timeslot_item($_POST["itemName"], $_POST["timeslotName"]);
