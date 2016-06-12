@@ -2,6 +2,7 @@
 session_start();
 require_once "database/variables_table.php";
 require_once "database/timeslot_table.php";
+require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -9,6 +10,15 @@ if (!isset($_SESSION["username"])) {
 }
 if (isset($_POST["expected_sales"])) {
     VariablesTable::update_expected_sales($_POST["expected_sales"]);
+}
+if (isset($_POST["table_data"])) {
+    $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
+    $stylesheet = file_get_contents("styles.css");
+    $mpdf->useSubstitutions=false;
+    $mpdf->simpleTables = true;
+    $mpdf->WriteHtml($stylesheet, 1);
+    $mpdf->WriteHtml($_POST["table_data"], 2);
+    $mpdf->Output($_POST["table_name"]." - ".$_POST["table_date"].".pdf", "D");
 }
 ?>
 
@@ -43,6 +53,10 @@ if (isset($_POST["expected_sales"])) {
         <div class="toolbar_div">
             <a id="print_share" class="option" onclick=sendPrint()>Share</a>
         </div>
+        <div class="divider"></div>
+        <div class="toolbar_div">
+            <a id="print_pdf" class="option" onclick=printPdf()>PDF</a>
+        </div>
     </div>
 
     <div class="div_table" id="div_table">
@@ -66,19 +80,12 @@ if (isset($_POST["expected_sales"])) {
                 <tr id="print_date" class="row">
                     <th colspan="5">
                         <span><?php echo date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'D, M d Y'); ?></span>
-                        <span class="print_table_date"><?php echo "created on ".date('D, M d Y', strtotime($_SESSION["date"])); ?></span>
+                        <div class="print_table_date"><?php echo "created on ".date('D, M d Y', strtotime($_SESSION["date"])); ?></div>
                     </th>
                 </tr>
             </table>
         </div>
     </div>
-
-    <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
-    <form action="compose_messages.php" method="post" id="print_form" target="popup_frame">
-        <input type="hidden" id="print_table_date" name="print_table_date">
-        <input type="hidden" id="print_table_name" name="print_table_name">
-        <input type="hidden" id="new_print_data" name="new_print_data">
-    </form>
 
     <div class="div_popup_back">
         <div class="div_popup popup_share">
@@ -88,11 +95,24 @@ if (isset($_POST["expected_sales"])) {
             <iframe id="popup_frame" name="popup_frame" src="" frameborder="0"></iframe>
         </div>
     </div>
+
+    <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
+
+    <form action="compose_messages.php" method="post" id="print_form" target="popup_frame">
+        <input type="hidden" id="print_table_date" name="print_table_date">
+        <input type="hidden" id="print_table_name" name="print_table_name">
+        <input type="hidden" id="new_print_data" name="new_print_data">
+    </form>
+
+    <form action="print_preview.php" method="post" id="test_form" name="test_form">
+        <input type="hidden" id="table_data" name="table_data">
+        <input type="hidden" id="table_date" name="table_date">
+        <input type="hidden" id="table_name" name="table_name">
+    </form>
 </body>
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jspdf/1.2.61/jspdf.min.js"></script>
 <script>
     function  getTab(tabName) {
         var timeSlotName = tabName.innerHTML;
@@ -112,13 +132,27 @@ if (isset($_POST["expected_sales"])) {
         }
     }
 
+    function printPdf() {
+        var table = document.createElement("table");
+        table.setAttribute("class", "table_view");
+        $(".table_view tr").each(function() {
+            if($(this).css('display') != 'none') {
+                table.innerHTML += this.outerHTML;
+            }
+        });
+        $("#table_data").val(table.outerHTML);
+        document.getElementById("table_name").value = $(".tab_li.selected").children().html();
+        document.getElementById("table_date").value = $("#print_date").children().children().html();
+        $("#test_form").submit();
+    }
+
     function goBack() {
         location.assign("category_status.php");
     }
 
     function sendPrint() {
-        var dat = document.getElementById("div_print_table").innerHTML;
-        document.getElementById("new_print_data").value = dat;
+        var data = document.getElementById("div_print_table").innerHTML;
+        document.getElementById("new_print_data").value = data;
         document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
         document.getElementById("print_table_date").value = $("#print_date").children().children().html();
         $(".div_popup_back").css("display", "block");
@@ -138,6 +172,7 @@ if (isset($_POST["expected_sales"])) {
                 });
                 if (total - remove == 0) {
                     $(this).hide();
+                    $(this).children().hide();
                 }
             });
         } else {

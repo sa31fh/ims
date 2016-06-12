@@ -133,13 +133,13 @@ if(isset($_POST["getItems"])) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="5"><h4>'.$row["category_name"].'<span class="arrow_down float_right"></span></h4></td>
+                    <td id="category" colspan="5" class="table_heading"><h4 class="none">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="5"><h4>'."Uncategorized Items".'<span class="arrow_down float_right"></span></h4></td>
+                    <td id="category" colspan="5" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         }
         echo '
@@ -213,13 +213,13 @@ if(isset($_POST["getCategoryItemsTimeSlot"])) {
             $current_category = $row["cat_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="4"><h4>'.$row["cat_name"].'<span class="arrow_down float_right"></span></h4></td>
+                    <td id="category" colspan="4" class="table_heading"><h4 class="none">'.$row["cat_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         } else if ($row["cat_name"] != $current_category AND $row["cat_name"] == null) {
             $current_category = $row["cat_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="4"><h4>'."Uncategorized Items".'<span class="arrow_down float_right"></span></h4></td>
+                    <td id="category" colspan="4" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         }
     echo '
@@ -240,7 +240,7 @@ if (isset($_POST["getPrintPreview"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="5" class="none"><h4>'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category"><td colspan="5" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
                     <tr id="category_columns">
                         <th>Item</th>
                         <th>Unit</th>
@@ -273,7 +273,7 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="5" class="none"><h4>'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category"><td colspan="5" class="table_heading"><h4 class="none">'.$row["category_name"].'</h4></td></tr>
                     <tr id="category_columns">
                         <th>Item</th>
                         <th>Unit</th>
@@ -353,7 +353,7 @@ if (isset($_POST["getRecipeItems"])) {
     }
 }
 if (isset($_POST["updateRecipeInventoryQuantity"])) {
-    echo RecipeItemTable::update_recipe_inventory_quantity($_POST["quantity"], $_POST["recipeItemId"]);
+    echo RecipeItemTable::update_recipe_inventory_quantity($_POST["recipeItemId"], $_POST["quantity"]);
 }
 
 ?>
