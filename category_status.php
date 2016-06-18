@@ -56,7 +56,7 @@ if (!isset($_SESSION["date"])) {
                 </label>
                 <h4 id="name">Drinks</h4>
             </div>
-            <div class="none">
+            <div class="inventory_table">
                 <table class="table_view" id="upinven_table">
                     <tr>
                         <th>Item</th>
