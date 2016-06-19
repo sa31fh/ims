@@ -438,8 +438,8 @@ select{
     background: none;
     outline: none;
     font-size: 18px;
-    padding: 4px 6px;
-    margin: 5px;
+    padding: 4px 10px;
+    margin: 5px 20px;
     border: 2px solid transparent;
     border-bottom: 2px solid #9ACC79;
     transition: border 0.25s;
@@ -1045,6 +1045,14 @@ td.table_heading{
     height: 22px;
     color: white;
     font-size: 16px;
+}
+.search_bar{
+    background-image: url(images/search.png);
+    background-size: 18px 18px;
+    background-position: 0px 5px;
+    background-repeat: no-repeat;
+    text-indent: 17px;
+    outline: none;
 }
 .tab_ul {
     padding: 0;

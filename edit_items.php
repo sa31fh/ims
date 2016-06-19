@@ -120,7 +120,11 @@ if (isset($_POST["base_sales"])) {
 
             <table class="table_view" id="table" border="1px" >
                 <tr class="option_bar">
-                    <th colspan="2"><button class="button_flat" id="add_item_button">Add New Item</button></th>
+                    <th colspan="2" id="button_th">
+                        <button class="button_flat" id="add_item_button">Add</button>
+                        <div class="divider"></div>
+                        <button id="delete_item" class="button_flat">Delete</button>
+                    </th>
                     <th colspan="2" id="th_sales">
                         <div class="none" id="div_quantity_sales">
                             Quantity for sales ($)
@@ -129,7 +133,9 @@ if (isset($_POST["base_sales"])) {
                             </form>
                         </div>
                     </th>
-                    <th  id="td_delete"></th>
+                    <th>
+                        <input class="search_bar" id="search_bar" type="search" placeholder="search" oninput=searchBar(this)>
+                    </th>
                 </tr>
                 <tr class="tr_confirm">
                     <td class="td_checkbox"><input type="checkbox" class="item_checkbox" id="select_all"></td>
@@ -177,26 +183,28 @@ if (isset($_POST["base_sales"])) {
         $(".list_li").removeClass("selected");
         timeSlotName = tabName.innerHTML;
         if (timeSlotName == "Full Day") {
-            $("#add_item_button").html("Add New Item");
             $.post("jq_ajax.php", {getItems: ""}, function(data, status) {
                 document.getElementById("item_tbody").innerHTML = data;
-                $("#th_sales").attr("colspan", "2");
-                $("#div_quantity_sales").css("display", "block");
+                $("#add_item_button").html("Add");
                 if (!$("#delete_item").length) {
                     var deleteButton = '<button id="delete_item" class="button_flat">Delete</button>';
-                    $("#td_delete").append(deleteButton);
+                    $("#button_th").append(deleteButton);
                 }
+                $("#th_sales").attr("colspan", "2");
+                $("#div_quantity_sales").css("display", "block");
                 $("#th_quantity").html("Quantity");
                 $("#th_rounding").css("display", "table-cell");
+                $(".divider").show();
             });
         } else {
-            $("#add_item_button").html("Item List");
-            $("#th_rounding").css("display", "none");
-            $("#delete_item").remove();
             $.post("jq_ajax.php", {getCategoryItemsTimeSlot: "", timeSlotName: timeSlotName}, function(data, status) {
                 document.getElementById("item_tbody").innerHTML = data;
                 $("#div_quantity_sales").css("display", "none");
                 $("#th_sales").attr("colspan", "1");
+                $("#th_rounding").css("display", "none");
+                $("#delete_item").remove();
+                $("#add_item_button").html("Item List");
+                $(".divider").hide();
                 $("#th_quantity").html("Equation");
                 $(".item_name").each(function() {
                     var itemName = $(this).val();
@@ -274,6 +282,21 @@ if (isset($_POST["base_sales"])) {
         $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId});
     }
 
+    function searchBar(obj) {
+        var searchText = new RegExp(obj.value, "i");
+        if (obj.value != "") {
+            $("#item_tbody").children().hide();
+            $(".item_name").each(function() {
+                var val = $(this).val();
+                if (val.search(searchText) > -1) {
+                    $(this).parent().parent().show();
+                }
+            });
+        } else {
+            $("#item_tbody").children().show();
+        }
+    }
+
     $(document).ready(function() {
         $(".tab_li span:first").each(function() {
            getTab($(this)[0]);
@@ -326,6 +349,7 @@ if (isset($_POST["base_sales"])) {
                 $(this).find(".arrow_down").addClass("up").css("transform", "rotate(225deg)")
             }
         });
+
         $(document).on("click", ".item_category_tr", function() {
             $(this).nextUntil(".item_category_tr").toggle();
             if ($(this).find("span").hasClass("up")) {
@@ -427,6 +451,7 @@ if (isset($_POST["base_sales"])) {
         $("#select_all").change(function() {
             $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
         });
+
         $(document).on("click", "input.incorrect", function() {
             $(this).removeClass("incorrect");
         });

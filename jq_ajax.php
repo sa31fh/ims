@@ -148,7 +148,7 @@ if(isset($_POST["getItems"])) {
                 <td class="td_checkbox">
                     <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
                 </td>
-                <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center"></td>
+                <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>
                 <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
                 <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center"></td>
                 <td id="round_tr">
