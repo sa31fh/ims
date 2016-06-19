@@ -11,7 +11,7 @@ if(isset($_POST["dateview"])) {
 }
 ?>
 
-<nav>
+<nav class="nav_bar">
     <ul class="clearfix">
         <li class=<?php if (isset($page) AND ($page == "home")) {echo "active";} ?>><a href="category_status.php">Home</a></li>
         <li class=<?php if (isset($page) AND ($page == "messages")) {echo "active";} ?>><a href="messages.php">Messages</a></li>

@@ -174,6 +174,7 @@ if (isset($_POST["base_sales"])) {
  </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script
       src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
       integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
@@ -243,10 +244,10 @@ if (isset($_POST["base_sales"])) {
     function tabDelete() {
         var tabName = $(".tab_li.selected").children().html();
         if (tabName != "Full Day") {
-           if (confirm("delete '"+tabName+"' ?")) {
+            alertify.confirm("Delete tab '"+tabName+"' ?", function () {
                 document.getElementById("tab_name").value = tabName;
                 document.getElementById("tab_name").parentNode.submit();
-            }
+            });
         }
     }
 

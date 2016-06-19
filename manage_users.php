@@ -104,8 +104,8 @@ if(isset($_POST["delete_username"])){
                         </select>
                     </td>
                     <td id="delete">
-                        <form action="manage_users.php" method="post" onsubmit="return confirm('delete this user?');">
-                            <input type="hidden" name="delete_username" value="<?php echo $userdata["username"] ?>">
+                        <form action="manage_users.php" method="post" onsubmit=deleteUser(this)>
+                            <input type="hidden" id="delete_username" name="delete_username" value="<?php echo $userdata["username"] ?>">
                             <input type="submit" value="delete" class="button" <?php if ($userdata["username"] == $_SESSION["username"]) { echo "disabled";} ?>>
                         </form>
                     </td>
@@ -118,8 +118,9 @@ if(isset($_POST["delete_username"])){
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script>
-     function updateRole(obj){
+     function updateRole(obj) {
         var role = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var roleUserName = document.getElementById("table").rows[rowIndex].cells[0].innerHTML;
@@ -127,8 +128,16 @@ if(isset($_POST["delete_username"])){
         $.post("jq_ajax.php", {newRole: role, roleUserName: roleUserName});
     }
 
-    $(document).ready(function(){
-        $("#drawer_tag").click(function(){
+    function deleteUser(obj) {
+        this.event.preventDefault();
+        var name = obj.children[0].value;
+        alertify.confirm("Delete '"+name+"' ?", function () {
+            obj.submit();
+        });
+    }
+
+    $(document).ready(function() {
+        $("#drawer_tag").click(function() {
             $("#add_div").slideToggle(200, "linear", function() {
                 if($("#add_div").css("display") == "none") {
                     $(".div_fade").css("display", "none");

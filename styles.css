@@ -1610,7 +1610,7 @@ td.table_heading{
 
 /* -----------------------NAVIGATION BAR STYLING--------------------------- */
 
-nav{
+.nav_bar{
     background: #1d272f;
     padding: 0;
     margin: 0;
@@ -1622,25 +1622,25 @@ nav{
     z-index: 8000;
 }
 
-nav ul{
+.nav_bar ul{
     position: relative;
     display: inline-flex;
     list-style-type: none;
 }
 
-nav ul:after{
+.nav_bar ul:after{
     content: ""; clear: both; display: block;
 }
 
-nav ul li{
+.nav_bar ul li{
     float: left;
     transition: background-color .25s;
 }
-nav ul li:hover:not(#logout):not(#userrole_li):not(#timezone_li){
+.nav_bar ul li:hover:not(#logout):not(#userrole_li):not(#timezone_li){
     background-color: rgba(218, 218, 218, 0.26);
 }
 
-nav ul li a{
+.nav_bar ul li a{
     display: block;
     padding: 10px 16px;
     color: white;
@@ -1648,7 +1648,7 @@ nav ul li a{
     text-decoration: none;
 }
 
-nav ul ul {
+.nav_bar ul ul {
     display: none;
     background: #1d272f;
     border-radius: 0px;
@@ -1657,14 +1657,14 @@ nav ul ul {
     top: 100%;
     box-shadow: 0px 3px 8px -2px #444;
 }
-nav ul ul li{
+.nav_bar ul ul li{
     float:none;
     position: relative;
     text-align: center;
     border-bottom: 1px solid silver;
 }
 
-nav ul ul li a{
+.nav_bar ul ul li a{
     padding: 12px 16px;
     font-size: 14px;
 }
@@ -1732,7 +1732,7 @@ nav ul ul li a{
     margin: 0px 10px 0px 2px;
 }
 
-nav .active{
+.nav_bar .active{
     border-bottom: 3px solid #79bc4d;
 }
 
