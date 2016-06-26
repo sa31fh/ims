@@ -71,12 +71,13 @@ class UserTable extends DatabaseTable{
      * @param  string $time_zone            New time zone to update.
      * @return boolean                      Return true on query success and false if it fails.
      */
-    public static function update_user_details($current_username, $new_username, $first_name, $last_name, $time_zone) {
+    public static function update_user_details($current_username, $new_username, $first_name, $last_name, $time_zone, $time_out) {
         $sql = "UPDATE User
                 SET username = '$new_username',
                     first_name = '$first_name',
                     last_name = '$last_name',
-                    time_zone = '$time_zone'
+                    time_zone = '$time_zone',
+                    time_out = '$time_out'
                 WHERE username ='$current_username'";
 
         return parent::query($sql);
@@ -151,6 +152,7 @@ class UserTable extends DatabaseTable{
         } else {
             $_SESSION["timezone"] = date_default_timezone_get();
         }
+        $_SESSION["time_out"] = $row["time_out"];
         return true;
     }
 }

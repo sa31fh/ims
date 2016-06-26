@@ -71,7 +71,7 @@ CREATE TABLE `Conversation` (
   KEY `FK_receiver_idx` (`receiver`),
   KEY `FK_senderConversationId_idx` (`sender_conversationStatusId`),
   KEY `FK_receiverConversationId_idx` (`receiver_conversationStatusId`)
-) ENGINE=MyISAM AUTO_INCREMENT=77 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,7 +118,7 @@ CREATE TABLE `Item` (
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) NOT NULL,
   `rounding_option` varchar(45) DEFAULT 'none',
-  `rounding_factor` float DEFAULT '1',
+  `rounding_factor` float DEFAULT NULL,
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -141,7 +141,7 @@ CREATE TABLE `Message` (
   `attachment` text,
   `conversation_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=123 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=126 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -225,6 +225,7 @@ CREATE TABLE `User` (
   `password_hash` text NOT NULL,
   `userrole_id` int(11) NOT NULL,
   `time_zone` varchar(45) DEFAULT NULL,
+  `time_out` int(11) NOT NULL DEFAULT '60',
   PRIMARY KEY (`username`),
   UNIQUE KEY `username_UNIQUE` (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -308,4 +309,4 @@ CREATE TABLE `Variables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-05-22 21:44:01
+-- Dump completed on 2016-06-26 13:40:27

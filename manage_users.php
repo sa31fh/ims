@@ -11,7 +11,7 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
-if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
     session_destroy();
 ?>
@@ -83,18 +83,17 @@ if(isset($_POST["delete_username"])){
     <div class="user_table_div">
         <table class="user_table" id="table" >
             <tr>
-                <th>User</th>
-                <th>First Name</th>
-                <th>Last Name</th>
+                <th>Name</th>
+                <th>Username</th>
                 <th>Role</th>
+                <th>Session timeout</th>
                 <th></th>
             </tr>
             <?php $result = UserTable::get_users(); ?>
             <?php while ($userdata = $result->fetch_assoc()): ?>
                 <tr>
+                    <td> <?php echo $userdata["first_name"]." ".$userdata["last_name"]; ?></td>
                     <td id="name"><?php echo $userdata["username"]; ?></td>
-                    <td> <?php echo $userdata["first_name"]; ?></td>
-                    <td> <?php echo $userdata["last_name"]; ?></td>
                     <td id="role">
                         <select onchange=updateRole(this) id=""class="none" <?php if ($userdata["username"] == $_SESSION["username"]) {echo "disabled";} ?>>
                             <?php $result2 = UserRoleTable::get_roles(); ?>
@@ -103,10 +102,12 @@ if(isset($_POST["delete_username"])){
                             <?php endwhile ?>
                         </select>
                     </td>
+                    <td id="timeout"> <?php echo $userdata["time_out"]; ?>
+                    </td>
                     <td id="delete">
                         <form action="manage_users.php" method="post" onsubmit=deleteUser(this)>
                             <input type="hidden" id="delete_username" name="delete_username" value="<?php echo $userdata["username"] ?>">
-                            <input type="submit" value="delete" class="button" <?php if ($userdata["username"] == $_SESSION["username"]) { echo "disabled";} ?>>
+                            <input type="image" src="images/delete.png" alt="delete" width="28px" height="28px" <?php if ($userdata["username"] == $_SESSION["username"]) { echo "style='display: none;'";} ?>>
                         </form>
                     </td>
                 </tr>

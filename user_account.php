@@ -6,7 +6,7 @@ if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
-if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
     session_destroy();
     header("Location: login.php");
@@ -23,8 +23,9 @@ if (isset($_POST["update_user"])) {
         $tz = ($_POST["region_select"]. "/" .$_POST["city_select"]);
         $_SESSION["timezone"] = $tz;
     }
-    if (UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz)) {
+    if (UserTable::update_user_details($_SESSION["username"], $_POST["update_user"], $_POST["update_first"], $_POST["update_last"], $tz, $_POST["update_timeout"])) {
         $_SESSION["username"] = $_POST["update_user"];
+        $_SESSION["time_out"] = $_POST["update_timeout"];
     }
 }
 ?>
@@ -60,6 +61,7 @@ if (isset($_POST["update_user"])) {
                     <?php $oldregion= $region[0]; endforeach ?>
                 </select>
                 <select class="user_select" name="city_select" id="city_select"></select><br/>
+                <label>Session Timeout <input class="userinput" type="text" name="update_timeout" value="<?php echo $row["time_out"]; ?>"></label><br>
                 <input class="button" type="submit" value="Save">
             </form>
         </div>

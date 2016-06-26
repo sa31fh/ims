@@ -12,7 +12,7 @@ if ($_SESSION["userrole"] != "admin") {
     header("Location: login.php");
     exit();
 }
-if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + 3600 < time()) {
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
     session_destroy();
 ?>

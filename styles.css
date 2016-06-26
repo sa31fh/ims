@@ -654,7 +654,8 @@ select{
 }
 
 .user_table_div{
-    margin: 50px 30px 30px 30px;
+    margin: 50px 0px 0px 0px;
+    padding: 0;
     display: block;
 }
 
@@ -663,35 +664,48 @@ select{
     width: 100%;
     margin: 0;
     border-collapse:collapse;
-    border: 1px solid #75a4a4;
+    border:none;
 }
 
 .user_table td{
     text-align: center;
     color: #444;
-    border: 0;
-    height: 20px;
-    padding: 10px;
+    border: none;
+    padding: 20px 0px;
+    border-bottom: 1px solid #e4e4e4;
 }
 
 .user_table th{
     text-align: center;
-    background-color: #517b7b;
-    color: white;
-    border: 0;
+    background: #F1EFEF;
+    border: 1px solid #cecece;
+    border-left: none;
+    border-right: none;
     padding: 5px 10px;
 }
 
 .user_table td#name{
     text-align: center;
-    width: 20%;
 }
-.user_table td#role{
-    width: 20%;
+.user_table td#role > select{
+    text-align-last: center;
 }
-
-.user_table td#delete{
-    width: 10%;
+.user_table td#timeout input{
+    border: 1px solid transparent;
+    border-bottom: 1px solid #bfbfbf;
+    margin: 5px 0px;
+    padding: 2px;
+    font-size: 17px;
+    width: 50px;
+    text-align: center;
+    outline: none;
+}
+.user_table td#timeout:after{
+    content: "mins";
+    font-size: 16px;
+}
+.user_table td#delete input{
+    outline: none;
 }
 .toolbar_print{
     width: 90%;
