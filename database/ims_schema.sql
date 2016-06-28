@@ -71,7 +71,7 @@ CREATE TABLE `Conversation` (
   KEY `FK_receiver_idx` (`receiver`),
   KEY `FK_senderConversationId_idx` (`sender_conversationStatusId`),
   KEY `FK_receiverConversationId_idx` (`receiver_conversationStatusId`)
-) ENGINE=MyISAM AUTO_INCREMENT=80 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=88 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -139,9 +139,10 @@ CREATE TABLE `Message` (
   `receiver` varchar(45) DEFAULT NULL,
   `message` text NOT NULL,
   `attachment` text,
+  `attachment_title` varchar(45) DEFAULT NULL,
   `conversation_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=126 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=136 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -309,4 +310,4 @@ CREATE TABLE `Variables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-06-26 13:40:27
+-- Dump completed on 2016-06-28 21:01:57

@@ -43,7 +43,8 @@ if (isset($_POST["reply"])) {
                     </div>
                 <?php if ($row["attachment"] != null): ?>
                     <div class="div_attachment">
-                        <span>Attachment</span>
+                        <img src="images/paperclip.png" alt="" width="24px" height="21px">
+                        <span><?php echo $row["attachment_title"] ?></span>
                         <input type="hidden" value='<?php echo $row["attachment"] ?>'>
                     </div>
                 <?php endif ?>
@@ -65,6 +66,7 @@ if (isset($_POST["reply"])) {
 
     <div class="div_popup_back">
         <div class="div_popup popup_print_table">
+        <div id="table_div"></div>
         <input type="button" class="popup_cancel" id="popup_cancel" value="x">
         </div>
     </div>
@@ -78,7 +80,7 @@ if (isset($_POST["reply"])) {
     $(document).ready(function() {
         $(".div_attachment").click(function() {
             var data = $(this).children("input").val();
-            $(".div_popup").append(data);
+            $(".div_popup #table_div").append(data);
             $(".div_popup_back").css("display", "block");
             $(".main_iframe").addClass("blur");
         }); 
@@ -86,6 +88,7 @@ if (isset($_POST["reply"])) {
         $("#popup_cancel").click(function() {
             $(".main_iframe").removeClass("blur");
             $(".div_popup_back").fadeOut(190, "linear");
+            $(".div_popup #table_div").html("");
         });
     });
 </script>

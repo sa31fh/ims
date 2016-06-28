@@ -18,7 +18,7 @@ class ConversationTable extends DatabaseTable {
      * @param  string $receiver_status Conversation status of the receiver.
      * @return boolean                 Returns true if query is successful and false if it fails.
      */
-    public static function create_conversation($sender_name, $receiver_name, $title, $message, $date, $attachment, $sender_status, $receiver_status) {
+    public static function create_conversation($sender_name, $receiver_name, $title, $message, $date, $attachment, $attachment_title, $sender_status, $receiver_status) {
         $sql = "INSERT INTO Conversation (`timestamp`, sender, receiver, title, sender_conversationStatusId, receiver_conversationStatusId)
                 VALUES ('$date' , '$sender_name' , '$receiver_name' , '$title', (SELECT id FROM ConversationStatus WHERE status = '$sender_status'),
                        (SELECT id FROM ConversationStatus WHERE status = '$receiver_status'))";
@@ -29,8 +29,8 @@ class ConversationTable extends DatabaseTable {
             if ($result = parent::query($sql)) {
                 $id = (int) $result->fetch_assoc()['id'];
 
-                $sql = "INSERT INTO Message (`timestamp`, sender, receiver, message, attachment, conversation_id)
-                        VALUES ('$date', '$sender_name', '$receiver_name', '$message', '$attachment', '$id')";
+                $sql = "INSERT INTO Message (`timestamp`, sender, receiver, message, attachment, attachment_title, conversation_id)
+                        VALUES ('$date', '$sender_name', '$receiver_name', '$message', '$attachment', '$attachment_title', '$id')";
 
                 return parent::query($sql);
             }

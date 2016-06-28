@@ -36,8 +36,9 @@ $_SESSION["last_activity"] = time();
 
      <div class="div_popup_back">
         <div class="div_popup popup_share">
-            <div class="popup_titlebar">New Message
-                <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
+            <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
+            <div class="popup_titlebar">
+                <span>New Message</span>
             </div>
             <iframe id="popup_frame" name="popup_frame" frameborder="0"></iframe>
         </div>

@@ -97,7 +97,8 @@ if (isset($_POST["table_data"])) {
 
     <div class="div_popup_back">
         <div class="div_popup popup_share">
-            <div class="popup_titlebar">New Message
+            <div class="popup_titlebar">
+                <span>New Message</span>
                 <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
             </div>
             <iframe id="popup_frame" name="popup_frame" src="" frameborder="0"></iframe>
@@ -143,6 +144,8 @@ if (isset($_POST["table_data"])) {
     function printPdf() {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");
+        table.innerHTML += "<tr class='row'><th colspan='5' class='heading'> " +
+                            $(".tab_li.selected").children().html(); + "</th></tr>";
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
                 table.innerHTML += this.outerHTML;
@@ -159,8 +162,12 @@ if (isset($_POST["table_data"])) {
     }
 
     function sendPrint() {
-        var data = document.getElementById("div_print_table").innerHTML;
-        document.getElementById("new_print_data").value = data;
+        var table = document.createElement("table");
+        table.setAttribute("class", "table_view");
+        table.innerHTML += "<tr class='row'><th colspan='5' class='heading'> " +
+                            $(".tab_li.selected").children().html(); + "</th></tr>";
+        table.innerHTML += $(".table_view").html();
+        document.getElementById("new_print_data").value = table.outerHTML;
         document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
         document.getElementById("print_table_date").value = $("#print_date").children().children().html();
         $(".div_popup_back").css("display", "block");

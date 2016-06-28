@@ -23,7 +23,8 @@ if (isset($_POST["message"])) {
     foreach ($_POST["recipient"] as $value) {
         ConversationTable::create_conversation($_SESSION["username"], $value, $_POST["title"],
             $_POST["message"], gmdate("Y-m-d H:i:s"),
-            isset($_POST["attached"]) ? $_POST["attached"] : null, "read", "unread");
+            isset($_POST["attachment"]) ? $_POST["attachment"] : null,
+            isset($_POST["attachment_title"]) ? $_POST["attachment_title"] : null, "read", "unread");
     }
 }
 ?>
@@ -62,9 +63,8 @@ if (isset($_POST["message"])) {
             <div class="compose_attachment">
                 <img src="images/paperclip.png" alt="" width="24px" height="21px">
             <?php if (isset($_POST["new_print_data"])): ?>
-                <span id="name"><?php echo '"'.$_POST["print_table_name"].'"'?></span>
-                <span id="date"><?php echo $_POST["print_table_date"] ?></span>
-                <input type="hidden" name="attached" id="attached" value='<?php  echo $_POST["new_print_data"] ?>'>
+                <input id="name" name="attachment_title" value="<?php echo $_POST["print_table_name"]. ' - ' . $_POST["print_table_date"]?>"></input>
+                <input type="hidden" name="attachment" id="attachment" value='<?php  echo $_POST["new_print_data"] ?>'>
             <?php endif ?>
             </div>
             <div class="compose_toolbar">
