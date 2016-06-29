@@ -516,7 +516,7 @@ select{
     position: absolute;
     bottom: 0;
     width: 100%;
-    z-index: 100;
+    z-index: 2;
     box-shadow: -24px -6px 10px 2px white
 }
 .category_add_drawer{
@@ -540,7 +540,7 @@ select{
     position: absolute;
     bottom: 0;
     text-align: center;
-    z-index: 200;
+    z-index: 2;
 }
 .category_input{
     display: inline;

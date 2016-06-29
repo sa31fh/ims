@@ -104,6 +104,7 @@ if(isset($_POST["delete_id"])) {
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script
       src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
       integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
@@ -230,8 +231,9 @@ if(isset($_POST["delete_id"])) {
 
         $(".category_delete").droppable({
             drop: function(event, ui) {
-                $(ui.draggable).fadeOut(100, "linear");
-                $(ui.draggable).children("form").submit();
+                alertify.confirm("Delete Category '"+$(ui.draggable).children("span").html()+"' ?", function() {
+                    $(ui.draggable).children("form").submit();
+                });
             }
         });
 
