@@ -71,6 +71,7 @@ $_SESSION["last_activity"] = time();
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script>
     function getInventory(categoryId) {
         var date = document.getElementById("session_date").value;
@@ -82,15 +83,31 @@ $_SESSION["last_activity"] = time();
 
     function updateInventory(obj) {
         var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemName = document.getElementById("upinven_table").rows[rowIndex].children[0].innerHTML;
         var itemDate = document.getElementById("session_date").value;
         var itemId = document.getElementById("upinven_table").rows[rowIndex].children[4].value;
         var itemQuantity = document.getElementById("upinven_table").rows[rowIndex].cells[2].children[0].value;
         if (itemQuantity == "") {itemQuantity = 'NULL'};
         var itemNote = document.getElementById("upinven_table").rows[rowIndex].cells[3].children[0].value;
 
-        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
-        if ($(".switch-input").prop("checked")) { checkEmpty(); }
-        updateCount();
+        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote}, function(data, status) {
+            if (data) {
+                alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+                if ($(".switch-input").prop("checked")) { checkEmpty(); }
+                updateCount();
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Item '"+itemName+"' not saved. Click here to try again", function(event) {
+                    updateInventory(obj);
+                });
+        });
     }
 
     function checkEmpty() {
