@@ -1,13 +1,13 @@
-<?php 
+<?php
 session_start();
 require_once "database/user_table.php";
 require_once "database/conversation_table.php";
 
- if (isset($_SESSION["username"])) {
+if (isset($_SESSION["username"])) {
     header("Location: category_status.php");
     exit();
 }
-if(isset($_POST["username"])){
+if (isset($_POST["username"])) {
     try {
         if (UserTable::verify_credentials($_POST["username"], $_POST["password"])) {
             UserTable::set_session_variables($_POST["username"]);
@@ -41,6 +41,6 @@ if(isset($_POST["username"])){
             </form>
         </div>
     </div>
-    <span class="version">v2.3.0</span>
+    <span class="version">v2.4.0</span>
 </body>
 </html>
