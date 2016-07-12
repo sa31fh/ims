@@ -15,10 +15,6 @@ if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION[
     exit();
 }
 $_SESSION["last_activity"] = time();
-
-if (!isset($_SESSION["date"])) {
-    $_SESSION["date"] = date("Y-m-d");
-}
 ?>
 
 <!DOCTYPE html>

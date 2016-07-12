@@ -147,11 +147,13 @@ class UserTable extends DatabaseTable{
         $row = $result->fetch_assoc();
         $_SESSION["username"] = $user_name;
         $_SESSION["userrole"] = $row["role"];
+
         if (!empty($row["time_zone"])) {
             $_SESSION["timezone"] = $row["time_zone"];
         } else {
             $_SESSION["timezone"] = date_default_timezone_get();
         }
+        $_SESSION["date"] = date_format((date_create(NULL, timezone_open($_SESSION["timezone"]))), "Y-m-d");
         $_SESSION["time_out"] = $row["time_out"];
         return true;
     }
