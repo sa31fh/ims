@@ -39,8 +39,10 @@ iframe{
 }
 label{
     display: inline-block;
-    font-size: 15px;
+    font-size: 16px;
     color: #333;
+    font-weight: bold;
+    padding: 5px;
 }
 input{
     margin: 5px 0px;
@@ -95,9 +97,12 @@ select{
     margin: 100px 0px;
 }
 .div_card{
-    padding: 20px;
-    box-shadow: 0px 0px 5px -1px #222;
+    display: inline-block;
+    padding: 1.8%;
+    width: 46%;
+    min-width: 350px;
     background-color: white;
+    vertical-align: top;
 }
 .div_collapsable{
     display: none;
@@ -242,7 +247,6 @@ select{
 
 .inline{
     display: inline-block;
-    vertical-align: top;
 }
 .inventory_div{
     float:left;
@@ -901,7 +905,7 @@ td.table_heading{
     color: #444;
     width: 300px;
     margin: 5px 0px;
-    border: 1px solid #93e5ab;
+    border: 1px solid #bdbdbd;
     border-radius: 3px;
 }
 .userinput_login{
@@ -1273,6 +1277,10 @@ td.table_heading{
 .collapse_arrow{
     margin-right: 20px;
     margin-left: 0px;
+}
+#credential_save{
+    position: relative;
+    left: 20%;
 }
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .message_table{
