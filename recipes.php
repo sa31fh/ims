@@ -164,6 +164,7 @@ if(isset($_POST["delete_id"])) {
         $("#recipe_list li").draggable({
             scroll: false,
             revert: "invalid",
+            handle: ".handle_delete",
             containment: ".div_list_category",
             zIndex: 500,
             helper: function(event, ui) {
@@ -194,6 +195,15 @@ if(isset($_POST["delete_id"])) {
             $(".list_category_li").removeClass("active");
             $(this).addClass("active");
         });
+
+        $(".list_category_li").hover(
+            function() {
+                $(".handle_delete", this).css("display", "block");
+            },
+            function() {
+                $(".handle_delete", this).css("display", "none");
+            }
+        );
 
         $(".all_items").click(function() {
             $(this).toggleClass(function() {
