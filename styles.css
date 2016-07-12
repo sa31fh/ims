@@ -1,13 +1,13 @@
 *{
     margin: 0px;
     padding: 0px;
+    font-family: "Roboto",arial, sans-serif !important;
 }
 html{
     height: 100%;
 }
 body{
     height: 100%;
-    font-family: "Roboto",arial, sans-serif !important;
     font-size: 18px;
     color: #333;
 }
@@ -25,12 +25,6 @@ caption{
 
 span{
     text-align: center;
-}
-
-textarea{
-    font-family: sans-serif;
-    font-size: 18px;
-    padding: 4px;
 }
 iframe{
     width: 100%;
@@ -322,25 +316,6 @@ select{
     padding: 0px;
     top: 43px;
     left: 100px;
-}
-.error{
-    display: inline-block;
-    position: fixed;
-    bottom: 0px;
-    left: 0;
-    right: 0;
-    min-width: 200px;
-    max-width: 600px;
-    text-align: center;
-    margin: auto;
-    background-color: rgba(0, 0, 0, 0.68);
-    padding: 10px 20px;
-    border-radius: 2px;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    z-index: 8000;
-    animation: notification 0.2s linear 3s forwards;
 }
 .warning{
     display: inline-block;
@@ -831,6 +806,19 @@ td.table_heading{
 .table_view input.incorrect{
     background: rgba(255, 103, 103, 0.75);
     border: 1px solid red;
+}
+.table_view textarea{
+    padding: 2px 4px;
+    width: 90%;
+    font-size: 17px;
+    resize: none;
+    border: 1px solid transparent;
+    transition: border 0.25s;
+    overflow: hidden;
+}
+.table_view textarea:hover{
+    border: 1px solid #cecece;
+    overflow: auto;
 }
 #round_tr select{
     text-align: center;
@@ -1666,6 +1654,9 @@ td.table_heading{
     border-bottom: none;
     vertical-align: bottom;
     outline: none;
+    padding: 4px;
+    font-size: 18px;
+    resize: none;
 }
 .reply_toolbar{
     background: #F5F5F5;

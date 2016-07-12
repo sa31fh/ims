@@ -98,9 +98,10 @@ class CategoryTable extends DatabaseTable {
      * @return object|false     returns mysqli_result object if data is retrieved or false if query fails.
      */
     public static function get_print_preview($date) {
-        $sql = "SELECT Category.name as category_name, Item.name as item_name,
+        $sql = "SELECT Category.name as category_name, Item.name as item_name, Item.id as item_id,
                     IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes,
-                    Category.order_id as Cat_order, Item.order_id as Item_order
+                    Category.order_id as Cat_order, Item.order_id as Item_order,
+                    Item.rounding_option, Item.rounding_factor
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
                 LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id
@@ -111,10 +112,18 @@ class CategoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    /**
+     * Get data for print preview table for a given timeslot
+     *
+     * @param  string $date          Date till which data should be retrieved.
+     * @param  string $timeslot_name Name of timeslot to get data for.
+     * @return object|false          Returns mysqli_result object if data is retrieved or false if query fails.
+     */
     public static function get_print_preview_timeslots($date, $timeslot_name) {
-        $sql = "SELECT Category.name as category_name, Item.name as item_name,
-                    IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes,
-                    Category.order_id as Cat_order, Item.order_id as Item_order, TimeSlotItem.factor
+        $sql = "SELECT  Category.name as category_name, Item.name as item_name, Item.id as item_id,
+                        IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes,
+                        Category.order_id as Cat_order, Item.order_id as Item_order, TimeSlotItem.factor,
+                        Item.rounding_option, Item.rounding_factor
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
                 INNER JOIN TimeSlotItem ON Item.id = TimeSlotItem.item_id

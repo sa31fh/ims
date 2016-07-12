@@ -141,6 +141,16 @@ if (isset($_POST["table_data"])) {
         }
     }
 
+    function updateNotes(obj) {
+        var itemNote = obj.value;
+        var itemId = obj.parentNode.children[1].value;
+        var itemQuantity = obj.parentNode.parentNode.children[2].innerHTML;
+        itemQuantity = (itemQuantity == "-") ? "NULL" : itemQuantity;
+        var itemDate = document.getElementById("session_date").value;
+
+        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote});
+    }
+
     function printPdf() {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");

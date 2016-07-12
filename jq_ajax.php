@@ -20,7 +20,7 @@ if (isset($_POST["newRole"])) {
 
 /*----------------------update_inventory.php-----------------*/
 if (isset($_POST["itemQuantity"])) {
-    InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
+    echo InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
 }
 
 /*-----------------------print_preview.php---------------*/
@@ -261,7 +261,10 @@ if (isset($_POST["getPrintPreview"])) {
                     <td>'.$row["unit"].'</td>
                     <td>'.$row["quantity"].'</td>
                     <td class="quantity_required">'.$quantity.'</td>
-                    <td class="align_left">'.$row["notes"].'</td>
+                    <td>
+                        <textarea name="" id="" rows="2" onchange=updateNotes(this) value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                        <input type="hidden" value="'.$row["item_id"].'">
+                    </td>
                 </tr>';
     }
 }
@@ -315,32 +318,38 @@ if (isset($_POST["getInventory"])) {
     }
 }
 
-if(isset($_POST["AddTimeslotItem"])) {
+if (isset($_POST["AddTimeslotItem"])) {
    echo TimeslotItemTable::add_timeslot_item($_POST["itemName"], $_POST["timeslotName"]);
 }
 
-if(isset($_POST["RemoveTimeslotItem"])) {
+if (isset($_POST["RemoveTimeslotItem"])) {
     echo TimeslotItemTable::remove_timeslot_item($_POST["itemName"], $_POST["timeslotName"]);
 }
 
 if (isset($_POST["UpdateTimeslotFactor"])) {
     echo TimeslotItemTable::update_timeslot_factor($_POST["tsiId"], $_POST["factor"]);
 }
+
 if (isset($_POST["updateItems"])) {
     echo ItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"]);
 }
+
 if (isset($_POST["updateRoundingOption"])) {
     echo ItemTable::update_rounding_option($_POST["roundingOption"], $_POST["itemId"]);
 }
+
 if (isset($_POST["updateRoundingFactor"])) {
     echo ItemTable::update_rounding_factor($_POST["roundingFactor"], $_POST["itemId"]);
 }
+
 if (isset($_POST["addRecipeItem"])) {
     echo RecipeItemTable::add_recipe_item($_POST["itemId"], $_POST["recipeId"]);
 }
+
 if (isset($_POST["deleteRecipeItem"])) {
     echo RecipeItemTable::delete_recipe_item($_POST["itemId"], $_POST["recipeId"]);
 }
+
 if (isset($_POST["getRecipeItems"])) {
     $result = RecipeItemTable::get_recipe_items($_POST["recipeId"]);
     if ($result) {
@@ -352,6 +361,7 @@ if (isset($_POST["getRecipeItems"])) {
          echo '</ul>';
     }
 }
+
 if (isset($_POST["updateRecipeInventoryQuantity"])) {
     echo RecipeItemTable::update_recipe_inventory_quantity($_POST["recipeItemId"], $_POST["quantity"]);
 }
