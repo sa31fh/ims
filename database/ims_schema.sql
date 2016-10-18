@@ -16,6 +16,21 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `ActualSale`
+--
+
+DROP TABLE IF EXISTS `ActualSale`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ActualSale` (
+  `id` int(11) NOT NULL,
+  `value` int(11) NOT NULL,
+  `date` date NOT NULL,
+  PRIMARY KEY (`id`,`date`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `BaseQuantity`
 --
 
@@ -117,12 +132,13 @@ CREATE TABLE `Item` (
   `order_id` int(10) DEFAULT '0',
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) NOT NULL,
+  `deviation` int(11) DEFAULT '0',
   `rounding_option` varchar(45) DEFAULT 'none',
   `rounding_factor` float DEFAULT NULL,
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=73 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

@@ -125,7 +125,7 @@ if (isset($_POST["base_sales"])) {
                         <div class="divider"></div>
                         <button id="delete_item" class="button_flat">Delete</button>
                     </th>
-                    <th colspan="2" id="th_sales">
+                    <th colspan="3" id="th_sales">
                         <div class="none" id="div_quantity_sales">
                             Quantity for sales ($)
                             <form action="edit_items.php" method="post" class="inline middle">
@@ -147,6 +147,7 @@ if (isset($_POST["base_sales"])) {
                     <th>Item</th>
                     <th>Unit</th>
                     <th id="th_quantity">Quantity</th>
+                    <th>Deviation</th>
                     <th id="th_rounding">Rounding</th>
                 </tr>
                 <tbody id="item_tbody">
@@ -191,7 +192,7 @@ if (isset($_POST["base_sales"])) {
                     var deleteButton = '<button id="delete_item" class="button_flat">Delete</button>';
                     $("#button_th").append(deleteButton);
                 }
-                $("#th_sales").attr("colspan", "2");
+                $("#th_sales").attr("colspan", "3");
                 $("#div_quantity_sales").css("display", "block");
                 $("#th_quantity").html("Quantity");
                 $("#th_rounding").css("display", "table-cell");
@@ -238,7 +239,15 @@ if (isset($_POST["base_sales"])) {
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
 
-        $.post("jq_ajax.php", {updateRoundingFactor: "", roundingFactor: factor, itemId: itemId})
+        $.post("jq_ajax.php", {updateRoundingFactor: "", roundingFactor: factor, itemId: itemId});
+    }
+
+    function updateItemDeviation(obj) {
+        var deviation = obj.value;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+
+        $.post("jq_ajax.php", {updateItemDeviation: "", deviation: deviation, itemId: itemId});
     }
 
     function tabDelete() {

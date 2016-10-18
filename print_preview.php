@@ -40,15 +40,16 @@ if (isset($_POST["table_data"])) {
 </head>
 <body>
     <div class="toolbar_print">
-        <input class="option" type="button" onClick=goBack() value="Back">
-        <div class="divider"></div>
         <div class="toolbar_div">
-            <label class="switch float_left" id="toolbar_toggle">
-                <input class="switch-input" type="checkbox" onclick=checkRequired() />
-                <span class="switch-label" data-on="Required" data-off="All"></span>
-                <span class="switch-handle"></span>
-            </label>
-        </div> <div class="divider"></div>
+            <input class="option" type="button" onClick=goBack() value="Back">
+        </div>
+        <div class="divider"></div>
+        <label class="switch" id="toolbar_toggle">
+            <input class="switch-input" type="checkbox" onclick=checkRequired() />
+            <span class="switch-label" data-on="Required" data-off="All"></span>
+            <span class="switch-handle"></span>
+        </label>
+        <div class="divider"></div>
         <?php if ($_SESSION["userrole"] == "admin"): ?>
         <div class="toolbar_div">
             <form action="print_preview.php" method="post">
