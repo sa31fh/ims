@@ -2,7 +2,7 @@
 session_start();
 require_once "database/category_table.php";
 require_once "database/item_table.php";
-require_once "database/actual_sale_table.php";
+require_once "database/sales_table.php";
 
 
 if (!isset($_SESSION["username"])) {
@@ -10,7 +10,7 @@ if (!isset($_SESSION["username"])) {
     exit();
 }
 if (isset($_POST["actual_sale"])) {
-    ActualSale::add_actual_sale($_POST["actual_sale"], $_SESSION["date"]);
+    SalesTable::add_actual_sale($_POST["actual_sale"], $_SESSION["date"]);
 }
 if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
@@ -57,7 +57,7 @@ $_SESSION["last_activity"] = time();
                 <div class="toolbar_div">
                     <form class="inline" action="category_status.php" method="post">
                         <span >Actual Sales ($):</span>
-                        <input class="print_expected" type="number" name="actual_sale" value="<?php echo ActualSale::get_actual_sale($_SESSION["date"]) ?>" onchange="this.form.submit()">
+                        <input class="print_expected" type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="this.form.submit()">
                     </form>
                 </div>
                 <h4 id="name">Drinks</h4>
@@ -135,7 +135,7 @@ $_SESSION["last_activity"] = time();
             alertify
                 .maxLogItems(20)
                 .delay(5000)
-                .error("Item '"+itemName+"' below deviation limit.")
+                .error("Item '"+itemName+"' is below deviation limit.")
         } else {
             row.children[0].className = "item_name";
         }

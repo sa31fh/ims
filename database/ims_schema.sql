@@ -16,21 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `ActualSale`
---
-
-DROP TABLE IF EXISTS `ActualSale`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `ActualSale` (
-  `id` int(11) NOT NULL,
-  `value` int(11) NOT NULL,
-  `date` date NOT NULL,
-  PRIMARY KEY (`id`,`date`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `BaseQuantity`
 --
 
@@ -191,7 +176,22 @@ CREATE TABLE `RecipeItems` (
   `item_id` int(10) NOT NULL,
   `quantity` int(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `Sales`
+--
+
+DROP TABLE IF EXISTS `Sales`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Sales` (
+  `date` date NOT NULL,
+  `actual_sales` int(11) DEFAULT '0',
+  `expected_sales` int(11) DEFAULT '0',
+  PRIMARY KEY (`date`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

@@ -12,7 +12,7 @@ require_once "database/timeslot_table.php";
 require_once "database/timeslot_item_table.php";
 require_once "database/recipe_item_table.php";
 require_once "database/recipe_table.php";
-require_once "database/actual_sale_table.php";
+require_once "database/sales_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -23,12 +23,6 @@ if (isset($_POST["newRole"])) {
 if (isset($_POST["itemQuantity"])) {
     echo InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
 }
-
-/*-----------------------print_preview.php---------------*/
-if (isset($_POST["sales"])) {
-    VariablesTable::update_expected_sales($_POST["sales"]);
-}
-
 /*--------------edit_items.php------------*/
 if (isset($_POST["quantity"])) {
     BaseQuantityTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
@@ -252,7 +246,7 @@ if (isset($_POST["getPrintPreview"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales();
+                    $sales_factor = SalesTable::get_expected_sale($_SESSION["date"]) / VariablesTable::get_base_sales();
                     $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-");
                     if ($row["rounding_option"] == "up") {
                         $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
@@ -288,7 +282,7 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales();
+                    $sales_factor = SalesTable::get_expected_sale($_SESSION["date"]) / VariablesTable::get_base_sales();
                     $quantity = (is_numeric($row["quantity"]) ? (BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"]): "-");
                     if ($quantity != "-") {
                         $quantity = eval("return ".str_replace('x', $quantity, $row["factor"]).";");
@@ -314,9 +308,15 @@ if (isset($_POST["getInventory"])) {
                 <td class="item_name">'.$row["name"].'</td>
                 <td>'.$row["unit"].'</td>';
                 $quantity_factor = BaseQuantityTable::get_base_quantity($row["name"]) / VariablesTable::get_base_sales();
-                $expected_quantity = VariablesTable::get_expected_sales() * $quantity_factor;
-                $actual_quantity = ActualSale::get_actual_sale($_SESSION["date"]) * $quantity_factor;
-                $estimated_quantity = round($expected_quantity - $actual_quantity, 2);
+                $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
+                $expected_quantity = SalesTable::get_expected_sale($date) * $quantity_factor;
+                $actual_quantity = SalesTable::get_actual_sale($_SESSION["date"]) * $quantity_factor;
+                $estimated_quantity = $expected_quantity - $actual_quantity;
+                if ($row["rounding_option"] == "up") {
+                    $estimated_quantity = ceil($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                } else if ($row["rounding_option"] == "down") {
+                    $estimated_quantity = floor($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                }
         echo  '<td class="td_expected">'.$estimated_quantity.'</td>
                <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].'" onchange="updateInventory(this); checkDeviation(this);" ></td>
                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>

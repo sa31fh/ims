@@ -14,11 +14,13 @@ class InventoryTable extends DatabaseTable {
      */
     public static function get_inventory($category_id, $date) {
         $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, null) AS quantity, 
-                T1.notes AS notes, T2.deviation AS deviation FROM
+                T1.notes AS notes, T2.deviation AS deviation, T2.rounding_option AS rounding_option,
+                T2.rounding_factor AS rounding_factor FROM
                 (SELECT * FROM Inventory
                 WHERE Inventory.date = '{$date}') AS T1
                 RIGHT JOIN
-                (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit, Item.order_id, deviation FROM Item
+                (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit,
+                        Item.order_id, deviation, rounding_option, rounding_factor FROM Item
                 INNER JOIN Category ON Item.category_id = Category.id
                 WHERE Category.id = {$category_id}
                     AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
