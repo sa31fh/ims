@@ -35,74 +35,91 @@ if (isset($_POST["update_user"])) {
 <head>
     <meta charset="UTF-8">
     <title>Account</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <?php include_once "new_nav.php" ?>
-    <div class="main">
-        <div class="div_card">
-            <h4>Edit Credentials<hr></h4>
-            <?php $result = UserTable::get_user_details($_SESSION["username"]);
-                  $row = $result->fetch_assoc(); ?>
-            <form action="user_account.php" method="post">
-                <div>
-                    <label>First Name<input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name"></label>
-                    <label>Last Name<input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name"></label>
-                    <label>User Name<input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"></label>
-                </div>
-                <div>
-                    <label>Time zone<input class="userinput" type="text" value="<?php echo $_SESSION['timezone'] ?>" readonly>
-                    <div class="inline none">
-                        <select class="user_select" name="region_select" id="region_select" onchange=onTimeZoneSelect(this)>
-                            <?php $oldregion = ""; ?>
-                            <?php foreach (timezone_identifiers_list() as $tz): ?>
-                                <?php $region = explode("/", $tz); ?>
-                                <?php $removetz = array('Pacific', 'Antarctica', 'Arctic', 'UTC', 'Indian', 'Atlantic', $oldregion); ?>
-                                <?php if (!in_array($region[0], $removetz, true)): ?>
-                                         <option value="<?php echo $region[0] ?>"> <?php echo $region[0] ?></option>
-                                <?php endif ?>
-                            <?php $oldregion= $region[0]; endforeach ?>
-                        </select>
-                        <select class="user_select" name="city_select" id="city_select"></select>
-                        </label>
-                    </div>
-                </div>
-                <div>
-                    <label for="update_timeout">Session Timeout</label>
-                    <select class="user_select" name="update_timeout" >
-                        <option value="15" <?php echo $row["time_out"] == 15? "selected" : "" ?>>15 mins</option>
-                        <option value="30" <?php echo $row["time_out"] == 30? "selected" : "" ?>>30 mins</option>
-                        <option value="60" <?php echo $row["time_out"] == 60? "selected" : "" ?>>60 mins</option>
-                        <option value="120" <?php echo $row["time_out"] == 120? "selected" : "" ?>>120 mins</option>
-                        <option value="150" <?php echo $row["time_out"] == 150? "selected" : "" ?>>150 mins</option>
-                        <option value="300" <?php echo $row["time_out"] == 300? "selected" : "" ?>>300 mins</option>
-                    </select>
-                </div>
-                <div>
-                    <input class="button" id="credential_save" type="submit" value="Save">
-                </div>
-            </form>
-        </div>
+<body class="overflow_hidden">
+    <?php $page= "user account";
+    include_once "new_nav.php" ?>
 
-        <div class="div_card">
-            <h4>Edit Password<hr></h4>
-            <div>
-                <form action="user_account.php" method="post">
-                    <label>Current Password<input class="userinput password_view" type="password" id="current_password" name="current_password" oninput= verifyCurrentPassword() required ></label><br/>
-                    <label>New Password<input class="userinput password_view" type="password" id="new_password" name="new_password" oninput= verifyNewPassword() required></label><br/>
-                    <label>Retype Password<input class="userinput password_view" type="password" id="retype_password" name="retype_password" oninput= verifyNewPassword() required></label><br/>
-                    <input class="button" type="submit" id="submit_password" name="submit_password" value="Submit" disabled>
-                    <input type="hidden" id="user_name" name="user_name" value="<?php echo $_SESSION['username']; ?>">
-                </form>
+    <div class="main font_open_sans">
+        <?php $result = UserTable::get_user_details($_SESSION["username"]);
+              $row = $result->fetch_assoc(); ?>
+        <div class="user_div_container left">
+            <div class="div_card info">
+                <div>
+                    <span class="entypo-user avatar_big"></span>
+                </div>
+                <div>
+                    <span id="display_user_name"><?php echo $row["username"] ?></span>
+                    <span id="display_full_name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span>
+                    <span id="display_user_role"><?php echo $row["role"] ?></span>
+                </div>
             </div>
         </div>
+        <div class="user_div_container right">
+            <div class="div_card edit">
+                <h4>Edit Credentials</h4>
+                <form action="user_account.php" method="post">
+                    <div>
+                        <label id="label_user_name">User Name<input class="userinput" name="update_user" type="text" value="<?php echo $row["username"] ?>" placeholder="User Name"></label>
+                        <label>First Name<input class="userinput" name="update_first" type="text" value="<?php echo $row["first_name"] ?>" placeholder="First Name"></label>
+                        <label>Last Name<input class="userinput" name="update_last" type="text" value="<?php echo $row["last_name"] ?>" placeholder="Last Name"></label>
+                    </div>
+                    <div>
+                        <label>Time zone<input class="userinput" type="text" value="<?php echo $_SESSION['timezone'] ?>" readonly>
+                        </label>
+                        <div class="inline none">
+                            <select class="user_select" name="region_select" id="region_select" onchange=onTimeZoneSelect(this)>
+                                <?php $oldregion = ""; ?>
+                                <?php foreach (timezone_identifiers_list() as $tz): ?>
+                                    <?php $region = explode("/", $tz); ?>
+                                    <?php $removetz = array('Pacific', 'Antarctica', 'Arctic', 'UTC', 'Indian', 'Atlantic', $oldregion); ?>
+                                    <?php if (!in_array($region[0], $removetz, true)): ?>
+                                            <option value="<?php echo $region[0] ?>"> <?php echo $region[0] ?></option>
+                                    <?php endif ?>
+                                <?php $oldregion= $region[0]; endforeach ?>
+                            </select>
+                            <select class="user_select" name="city_select" id="city_select"></select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="update_timeout">Session Timeout</label>
+                        <select class="user_select" name="update_timeout" >
+                            <option value="15" <?php echo $row["time_out"] == 15? "selected" : "" ?>>15 mins</option>
+                            <option value="30" <?php echo $row["time_out"] == 30? "selected" : "" ?>>30 mins</option>
+                            <option value="60" <?php echo $row["time_out"] == 60? "selected" : "" ?>>60 mins</option>
+                            <option value="120" <?php echo $row["time_out"] == 120? "selected" : "" ?>>120 mins</option>
+                            <option value="150" <?php echo $row["time_out"] == 150? "selected" : "" ?>>150 mins</option>
+                            <option value="300" <?php echo $row["time_out"] == 300? "selected" : "" ?>>300 mins</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input class="button" type="submit" value="Save">
+                    </div>
+                </form>
+            </div>
+
+            <div class="div_card">
+                <h4>Edit Password</h4>
+                <div>
+                    <form action="user_account.php" method="post">
+                        <label>Current Password<input class="userinput password_view" type="password" id="current_password" name="current_password" oninput= verifyCurrentPassword() required ></label><br/>
+                        <label>New Password<input class="userinput password_view" type="password" id="new_password" name="new_password" oninput= verifyNewPassword() required></label><br/>
+                        <label>Retype Password<input class="userinput password_view" type="password" id="retype_password" name="retype_password" oninput= verifyNewPassword() required></label><br/>
+                        <div>
+                            <input class="button" type="submit" id="submit_password" name="submit_password" value="save" disabled>
+                        </div>
+                        <input type="hidden" id="value_user_name" name="user_name" value="<?php echo $_SESSION['username'] ?>">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <span class="version_dark">v3.0.0</span>
     </div>
-    <span class="version_dark">v2.4.0</span>
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     var verified;
     var newPass;
@@ -110,7 +127,7 @@ if (isset($_POST["update_user"])) {
 
     function verifyCurrentPassword(){
         var current_pass = document.getElementById("current_password");
-        var userName = document.getElementById("user_name").value;
+        var userName = document.getElementById("value_user_name").value;
 
         $(function(){
             $.post("jq_ajax.php", {userName: userName, password: current_pass.value}, function(data,status){

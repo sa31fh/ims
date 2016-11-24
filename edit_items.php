@@ -43,37 +43,36 @@ if (isset($_POST["base_sales"])) {
 <head>
     <meta charset="UTF-8">
     <title>Time Slots</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="main_iframe">
-        <div id="add_div_main" class="none">
+        <div id="add_div_main" class="none font_open_sans">
             <div id="add_div" class="add_div">
-            <div>
-                <h4>Add New Item <hr></h4>
-                <div class="inline">
-                    <label for="new_item_name">Name</label>
-                    <input class="userinput" type="text" id="new_item_name" placeholder="Item Name" required autofocus>
+                <div>
+                    <h4>Add New Item</h4>
+                    <div class="inline">
+                        <label for="new_item_name">Name</label>
+                        <input class="userinput" type="text" id="new_item_name" placeholder="Item Name" required autofocus>
+                    </div>
+                    <div class="inline">
+                        <label for="new_item_unit">Unit</label>
+                        <input class="userinput" type="text" id="new_item_unit" placeholder="Item Unit" required>
+                    </div>
+                    <div class="inline">
+                        <label for="new_item_quantity">Quantity</label>
+                        <input class="userinput" type="text" id="new_item_quantity" placeholder="Item Quantity">
+                    </div>
+                    <div class="block" id="item_add_div" >
+                        <input type="submit" value="Add Item" class="button button_add_drawer" id="item_add_button">
+                    </div>
                 </div>
-                <div class="inline">
-                    <label for="new_item_unit">Unit</label>
-                    <input class="userinput" type="text" id="new_item_unit" placeholder="Item Unit" required>
-                </div>
-                <div class="inline">
-                    <label for="new_item_quantity">Quantity</label>
-                    <input class="userinput" type="text" id="new_item_quantity" placeholder="Item Quantity">
-                </div>
-                <div class="block" id="item_add_div" >
-                    <input type="submit" value="Add Item" class="button button_add_drawer" id="item_add_button">
-                </div>
-            </div>
             </div>
             <button id="drawer_tag_item" class="drawer_tag_open">Close</button>
         </div>
         <div class="div_fade"></div>
 
-        <div class="div_category" id="item_list_div">
+        <div class="div_category font_open_sans" id="item_list_div">
             <ul class="category_list">
                 <button class="button_flat inline" id="item_list_cancel">Close</button>
                 <h4 class="inline">ALL ITEMS</h4><hr>
@@ -99,7 +98,7 @@ if (isset($_POST["base_sales"])) {
             </ul>
         </div>
 
-        <div class="div_table" id="items_div_table">
+        <div class="div_table font_roboto" id="items_div_table">
             <div class="div_left_tabs">
                 <ul class="tab_ul">
                     <li class="tab_li"><span id="day_tab" onclick=getTab(this)><?php echo "Full Day" ?></span></li>
@@ -121,14 +120,15 @@ if (isset($_POST["base_sales"])) {
             <table class="table_view" id="table" border="1px" >
                 <tr class="option_bar">
                     <th colspan="2" id="button_th">
-                        <button class="button_flat" id="add_item_button">Add</button>
+                        <button class="button_flat entypo-plus" id="add_item_button">Add</button>
                         <div class="divider"></div>
-                        <button id="delete_item" class="button_flat">Delete</button>
+                        <button class="button_flat entypo-trash" id="delete_item">Delete</button>
                     </th>
                     <th colspan="3" id="th_sales">
                         <div class="none" id="div_quantity_sales">
-                            Quantity for sales ($)
+                            Quantity for sales
                             <form action="edit_items.php" method="post" class="inline middle">
+                            <span>$</span>
                                 <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center">
                             </form>
                         </div>
@@ -147,7 +147,7 @@ if (isset($_POST["base_sales"])) {
                     <th>Item</th>
                     <th>Unit</th>
                     <th id="th_quantity">Quantity</th>
-                    <th>Deviation</th>
+                    <th id="th_deviation">Deviation</th>
                     <th id="th_rounding">Rounding</th>
                 </tr>
                 <tbody id="item_tbody">
@@ -159,7 +159,7 @@ if (isset($_POST["base_sales"])) {
     <div class="div_popup_back">
         <div class="div_popup popup_add_timeslot">
             <h4>New Timeslot
-            <input type="button" class="popup_cancel" id="popup_cancel" value="x"><hr></h4>
+            <input type="button" class="popup_cancel" id="popup_cancel" value="&#9747;"><hr></h4>
             <form action="edit_items.php" method="post">
                 <input type="text" id="timeslot_name" name="timeslot_name" placeholder="Name">
                 <input type="submit" value="Add" class="button">
@@ -177,9 +177,10 @@ if (isset($_POST["base_sales"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script
-      src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
-      integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
+      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
       crossorigin="anonymous"></script>
+<script src="touch_punch.js"></script>
 <script>
     function  getTab(tabName) {
         $(".list_li").removeClass("selected");
@@ -189,12 +190,13 @@ if (isset($_POST["base_sales"])) {
                 document.getElementById("item_tbody").innerHTML = data;
                 $("#add_item_button").html("Add");
                 if (!$("#delete_item").length) {
-                    var deleteButton = '<button id="delete_item" class="button_flat">Delete</button>';
+                    var deleteButton = '<button id="delete_item" class="button_flat entypo-trash">Delete</button>';
                     $("#button_th").append(deleteButton);
                 }
                 $("#th_sales").attr("colspan", "3");
                 $("#div_quantity_sales").css("display", "block");
                 $("#th_quantity").html("Quantity");
+                $("#th_deviation").css("display", "table-cell");
                 $("#th_rounding").css("display", "table-cell");
                 $(".divider").show();
             });
@@ -204,6 +206,7 @@ if (isset($_POST["base_sales"])) {
                 $("#div_quantity_sales").css("display", "none");
                 $("#th_sales").attr("colspan", "1");
                 $("#th_rounding").css("display", "none");
+                $("#th_deviation").css("display", "none");
                 $("#delete_item").remove();
                 $("#add_item_button").html("Item List");
                 $(".divider").hide();
@@ -244,6 +247,10 @@ if (isset($_POST["base_sales"])) {
 
     function updateItemDeviation(obj) {
         var deviation = obj.value;
+        if (deviation < 0 ) {
+            deviation = Math.abs(obj.value);
+            obj.value = deviation;
+        }
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
 

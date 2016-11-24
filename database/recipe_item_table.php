@@ -54,7 +54,7 @@ class RecipeItemTable extends DatabaseTable {
      * @param  int $recipe_inventory_id     Id of table row to update.
      * @return boolean                      Returns true on query success and false if item already exists.
      */
-    public static function update_recipe_inventory_quantity($quantity, $recipe_inventory_id) {
+    public static function update_recipe_inventory_quantity($recipe_inventory_id, $quantity) {
         $sql = "UPDATE RecipeItems
                 SET quantity = '$quantity'
                 WHERE id = '$recipe_inventory_id'";

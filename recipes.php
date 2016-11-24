@@ -43,13 +43,12 @@ if(isset($_POST["delete_id"])) {
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe">
+    <div class="main_iframe font_open_sans">
         <div class="div_category">
-            <h4>Recipes</h4><hr>
+            <h4 class="font_roboto">Recipes</h4>
             <div class="div_list_category">
                 <ul class="category_list" id="recipe_list">
                 <?php $result = RecipeTable::get_recipes($date = date('Y-m-d')) ?>
@@ -83,13 +82,13 @@ if(isset($_POST["delete_id"])) {
 
         <div class="list_container" id="list_container">
             <div class="div_item_list">
-                <h4>Items in Recipe</h4><hr>
+                <h4 class="font_roboto">Items in Recipe</h4>
                 <div id="div" class="div_list">
                     <ul class="category_list" name="" id="categorized_list" ></ul>
                 </div>
             </div>
             <div class="div_item_list">
-                <h4>Items List</h4><hr>
+                <h4 class="font_roboto">Items List</h4>
                 <div class="div_list">
                     <ul class="category_list" >
                     <?php $result = ItemTable::get_items(); ?>
@@ -111,6 +110,7 @@ if(isset($_POST["delete_id"])) {
       src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
       integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
       crossorigin="anonymous"></script>
+<script src="touch_punch.js"></script>
 <script>
 
     function recipeSelect(obj) {

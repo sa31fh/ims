@@ -24,11 +24,10 @@ if (isset($_POST["reply"])) {
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe">
+    <div class="main_iframe font_open_sans">
         <div class="messages_div" id="messages_div">
         <?php $result = MessageTable::get_messages($_POST["conversation_id"]); ?>
         <?php while ($row = $result->fetch_assoc()): ?>
@@ -64,7 +63,7 @@ if (isset($_POST["reply"])) {
         </div>
     </div>
 
-    <div class="div_popup_back">
+    <div class="div_popup_back font_open_sans">
         <div class="div_popup popup_print_table">
         <div id="table_div"></div>
         <input type="button" class="popup_cancel" id="popup_cancel" value="x">
@@ -83,7 +82,7 @@ if (isset($_POST["reply"])) {
             $(".div_popup #table_div").append(data);
             $(".div_popup_back").css("display", "block");
             $(".main_iframe").addClass("blur");
-        }); 
+        });
 
         $("#popup_cancel").click(function() {
             $(".main_iframe").removeClass("blur");

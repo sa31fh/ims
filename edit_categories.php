@@ -42,13 +42,12 @@ if(isset($_POST["delete_id"])) {
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe">
+    <div class="main_iframe font_open_sans">
         <div class="div_category">
-            <h4>Categories</h4><hr>
+            <h4 class="font_roboto">Categories</h4>
             <div class="div_list_category">
             <ul class="category_list" id="category_list" >
                 <?php $result = CategoryTable::get_categories($date = date('Y-m-d')) ?>
@@ -82,13 +81,13 @@ if(isset($_POST["delete_id"])) {
 
         <div class="list_container" id="list_container">
             <div class="div_item_list">
-                <h4>Categorized Items</h4><hr>
+                <h4 class="font_roboto">Categorized Items</h4>
                 <div id="div" class="div_list">
                     <ul class="category_list" name="" id="categorized_list" ></ul>
                 </div>
             </div>
             <div class="div_item_list">
-                <h4>Uncategorized Items</h4><hr>
+                <h4 class="font_roboto">Uncategorized Items</h4>
                 <div class="div_list">
                     <ul class="category_list" name="select_uncat" id="uncategorized_list" >
                     <?php $result = ItemTable::get_uncategorized_items(); ?>
@@ -109,6 +108,7 @@ if(isset($_POST["delete_id"])) {
       src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
       integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw="
       crossorigin="anonymous"></script>
+<script src="touch_punch.js"></script>
 <script>
     function categorySelect(obj) {
         var categoryName = obj.children[1].innerHTML;

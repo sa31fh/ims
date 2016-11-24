@@ -17,7 +17,7 @@ class BaseQuantityTable extends DatabaseTable {
         if($result = parent::query($sql)) {
             return $result->fetch_assoc()['quantity'];
         } else {
-            throw new Exception("get_base_quantity query failed");
+            throw new Exception("get_base_quantity query failed '".$item_name."");
         }
     }
 

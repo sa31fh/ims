@@ -30,6 +30,7 @@ class RecipeTable extends DatabaseTable {
                 $sql = "UPDATE Recipe SET deletion_date = NULL
                         WHERE name = '{$recipe_name}' and deletion_date = '{$date}'";
             }
+
             if (parent::query($sql)) {
                 return true;
             } else {

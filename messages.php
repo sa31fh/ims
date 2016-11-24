@@ -19,24 +19,23 @@ $_SESSION["last_activity"] = time();
     <meta charset="UTF-8">
     <title>Messages</title>
     <link rel="stylesheet" href="styles.css">
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
 </head>
 <body>
-    <ul class="sidenav" id="sideNav">
-        <li id="compose_li"><button class="button" onclick=composeButton()>Compose</button></li>
+    <ul class="sidenav font_roboto" id="sideNav">
+        <li id="compose_li"><button class="button_flat fa-edit" onclick=composeButton()>Compose</button></li>
         <li><a id="inbox" class="active" href="received_messages.php" target="message_frame" >Inbox <span id="status_view"></span></a></li>
         <li><a id="deleted" href="deleted_messages.php" target="message_frame">Deleted</a></li>
     </ul>
     <?php $page = "messages";
           include_once "new_nav.php" ?>
 
-    <div class="main_top_side">
+    <div class="main_top_side font_open_sans">
         <iframe class="iframe" src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" onload="showUnreadCount(this);" ></iframe>
     </div>
 
-     <div class="div_popup_back">
+     <div class="div_popup_back font_open_sans">
         <div class="div_popup popup_share">
-            <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
+            <input type="button" class="popup_cancel white" id="popup_cancel" value="&#9747;">
             <div class="popup_titlebar">
                 <span>New Message</span>
             </div>

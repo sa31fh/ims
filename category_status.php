@@ -12,6 +12,9 @@ if (!isset($_SESSION["username"])) {
 if (isset($_POST["actual_sale"])) {
     SalesTable::add_actual_sale($_POST["actual_sale"], $_SESSION["date"]);
 }
+if(isset($_POST["new_date"])) {
+    $_SESSION["date"] = $_POST["new_date"];
+}
 if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
     session_destroy();
@@ -26,52 +29,82 @@ $_SESSION["last_activity"] = time();
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="overflow_hidden">
     <?php $page = "home";
           include_once "new_nav.php" ?>
     <div class="main">
-        <div class="div_category" id="home_list">
-           <ul class="category_list">
-            <h4><?php echo date('D, M d Y', strtotime($_SESSION["date"])); ?></h4><hr>
+        <div class="div_category " id="home_list">
+            <?php $current_date = strtotime($_SESSION["date"]); ?>
+            <div class="time_div font_open_sans">
+                <div class="time_div_container">
+                    <span class="date_span fa-calendar" aria-hidden="true"><?php echo date("d", $current_date); ?></span>
+                </div>
+                <div class="time_div_container">
+                    <span class="year_span"><?php echo date("Y", $current_date); ?></span>
+                    <span class="month_span"><?php echo date("F", $current_date); ?></span>
+                </div>
+                    <span class="day_span"><?php echo date("l", $current_date); ?></span>
+                <div id="div_cal"></div>
+                <form action="category_status.php" method="post" id="cal_form">
+                    <input type="hidden" id="cal_date" name="new_date" value="<?php echo $_SESSION["date"] ?>">
+                </form>
+            </div>
+            <div class="div_actual_sales">
+                <div id="left">
+                    <span >Actual Sales</span>
+                </div>
+                <div id="right">
+                    <form  class="inline" action="category_status.php" method="post">
+                        <span>$</span>
+                        <input type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="this.form.submit()">
+                    </form>
+                </div>
+            </div>
+            <ul class="category_list home_category_list font_roboto" >
             <?php $result = CategoryTable::get_categories($_SESSION["date"]);
                  while ($row = $result->fetch_assoc()): ?>
-                 <li class="list_category_li">
-                    <span><?php echo $row["name"]; ?></span>
-                    <input type="hidden" id="category_id" name="category_id" value="<?php echo $row['id'] ?>">
-                    <span class="item_counter" id="total"><?php echo ItemTable::get_total_items($row['id'], $_SESSION["date"]) ?></span>
-                    <span class="float_right" id="<?php echo $row['name'].'_count' ?>"><?php echo ItemTable::get_updated_items_count($row['id'], $_SESSION["date"]). "/" ?> </span>
+                 <li class="list_category_li home_category_list_li">
+                    <div class="list_li_div_left">
+                        <span id="category_name"><?php echo $row["name"]; ?></span>
+                    </div>
+                    <div class="list_li_div_right">
+                        <span class="count_span_filled" id="<?php echo $row['name'].'_count' ?>">
+                        <?php echo ItemTable::get_updated_items_count($row['id'], $_SESSION["date"]) ?></span>
+                        <span class="count_span_total"><?php echo ItemTable::get_total_items($row['id'], $_SESSION['date']) ?></span>
+                        <input type="hidden" id="category_id" name="category_id" value="<?php echo $row['id'] ?>">
+                    </div>
                  </li>
             <?php  endwhile?>
             </ul>
         </div>
         <div class="inventory_div">
-            <div class="inventory_toolbar">
-                <label class="switch float_left">
-                    <input class="switch-input" type="checkbox" onclick=checkEmpty() />
-                    <span class="switch-label" data-on="incomplete" data-off="All"></span>
-                    <span class="switch-handle"></span>
-                </label>
-                <div class="toolbar_div">
-                    <form class="inline" action="category_status.php" method="post">
-                        <span >Actual Sales ($):</span>
-                        <input class="print_expected" type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="this.form.submit()">
-                    </form>
+            <div class="inventory_toolbar font_roboto">
+                <div class="toolbar_div" id="div_switch">
+                   <label class="switch float_left">
+                       <input class="switch-input" type="checkbox" onclick=checkEmpty() />
+                       <span class="switch-label" data-on="incomplete" data-off="All"></span>
+                       <span class="switch-handle"></span>
+                   </label>
                 </div>
-                <h4 id="name">Drinks</h4>
+                <div class="toolbar_div">
+                    <h4 id="name">Drinks</h4>
+                </div>
+                <div class="toolbar_div" id="div_pp">
+                    <a href="print_preview.php" class="fa-print print_preview">Print Preview</a>
+                </div>
             </div>
             <div class="inventory_table">
                 <table class="table_view" id="upinven_table">
-                    <tr>
+                    <tr  class="font_roboto">
                         <th id="heading_item">Item</th>
                         <th>Unit</th>
                         <th>Expected Quantity</th>
                         <th>Quantity Present</th>
                         <th>Notes</th>
                     </tr>
-                    <tbody id="item_tbody">
+                    <tbody class="font_open_sans" id="item_tbody">
                     </tbody>
                 </table>
             </div>
@@ -83,6 +116,10 @@ $_SESSION["last_activity"] = time();
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
+<script
+      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"></script>
 <script>
     function getInventory(categoryId) {
         var date = document.getElementById("session_date").value;
@@ -90,7 +127,7 @@ $_SESSION["last_activity"] = time();
             document.getElementById("item_tbody").innerHTML = data;
             if ($(".switch-input").prop("checked")) { checkEmpty(); }
             $(".quantity_input").each(function() {
-                checkDeviation($(this)[0]);
+                checkDeviation($(this)[0], false, true);
             });
         });
     }
@@ -123,21 +160,29 @@ $_SESSION["last_activity"] = time();
                 });
         });
     }
-    function checkDeviation(obj) {
+    function checkDeviation(obj, message, icon) {
         var quantityPresent = obj.value;
         var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
         var itemName = row.children[0].innerHTML;
         var estimated_quantity = row.children[2].innerHTML;
-        var current_deviation = (-(quantityPresent - estimated_quantity) * 100) / quantityPresent;
+        if (quantityPresent > 0) {
+            var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / quantityPresent;
+        } else {
+            var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / 1;
+        }
         var max_deviation = row.children[6].value;
         if(max_deviation < current_deviation && quantityPresent != "") {
-            row.children[0].className += " warning_sign";
-            alertify
-                .maxLogItems(20)
-                .delay(5000)
-                .error("Item '"+itemName+"' is below deviation limit.")
+            if (icon) {
+                row.children[0].className += " warning_sign";
+            }
+            if (message) {
+                alertify
+                    .maxLogItems(20)
+                    .delay(5000)
+                    .error("Item '"+itemName+"' is outside deviation range.")
+            }
         } else {
-            row.children[0].className = "item_name";
+            row.children[0].className = "item_name entypo-attention";
         }
     }
 
@@ -159,23 +204,49 @@ $_SESSION["last_activity"] = time();
             if ($(this).children().val() >= "0" ) {
                 count++;
             }
-        var categoryName = document.getElementById("name").innerHTML;
-        document.getElementById(categoryName+"_count").innerHTML = count+"/";
         });
+
+        var categoryName = document.getElementById("name").innerHTML;
+        document.getElementById(categoryName+"_count").innerHTML = count;
     }
 
     $(document).ready(function() {
         $(".list_category_li:first").each(function() {
-            getInventory($(this).children("#category_id").val());
+            getInventory($(this).find("#category_id").val());
             $(this).addClass("active");
-            $("#name").html($(this).children().html());
+            $("#name").html($(this).find("#category_name").html());
         });
 
         $(".list_category_li").click(function() {
-            getInventory($(this).children("#category_id").val());
+            getInventory($(this).find("#category_id").val());
             $(".list_category_li").removeClass("active");
             $(this).addClass("active");
-            $("#name").html($(this).children().html());
+            $("#name").html($(this).find("#category_name").html());
+        });
+
+        $(".time_div").click(function() {
+            $(".ui-datepicker").css("display", "block");
+            $("#div_cal").datepicker({
+                dateFormat: "yy-mm-dd",
+                defaultDate: $("#cal_date").val(),
+                dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                showButtonPanel: true,
+                currentText: "close",
+                prevText: "previous",
+                onSelect: function(dateText) {
+                    $(".ui-datepicker").css("display", "none");
+                    $("#cal_date").val(dateText);
+                    $("#cal_form").submit();
+                }
+            });
+        });
+
+        $(document).click(function(event) {
+            if(!$(event.target).closest('.time_div').length && !$(event.target).is("a, span") ) {
+                if($('.ui-datepicker').is(":visible")) {
+                    $('.ui-datepicker').css("display", "none");
+                }
+            }
         });
     });
 </script>

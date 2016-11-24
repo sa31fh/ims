@@ -43,15 +43,14 @@ if(isset($_POST["delete_username"])){
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe">
+    <div class="main_iframe font_open_sans">
     <div id="add_div_main" class="none">
         <div id="add_div" class="add_div">
         <div>
-            <h4>Add New User <hr></h4>
+            <h4>Add New User</h4>
             <form action="manage_users.php" method="post">
             <div class="inline">
                 <label for="new_username">User name</label>
@@ -124,7 +123,7 @@ if(isset($_POST["delete_username"])){
      function updateRole(obj) {
         var role = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var roleUserName = document.getElementById("table").rows[rowIndex].cells[0].innerHTML;
+        var roleUserName = document.getElementById("table").rows[rowIndex].cells[1].innerHTML;
 
         $.post("jq_ajax.php", {newRole: role, roleUserName: roleUserName});
     }

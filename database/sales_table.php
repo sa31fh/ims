@@ -26,7 +26,7 @@ class SalesTable extends DatabaseTable {
                 WHERE `date` = '$date'";
 
         if ($result = parent::query($sql)) {
-            return (int) $result->fetch_assoc()['actual_sales'];
+            return $result->fetch_assoc()['actual_sales'];
         }
         return parent::query($sql);
     }
@@ -36,7 +36,7 @@ class SalesTable extends DatabaseTable {
                 WHERE `date` = '$date'";
 
         if ($result = parent::query($sql)) {
-            return (int) $result->fetch_assoc()['expected_sales'];
+            return $result->fetch_assoc()['expected_sales'];
         }
         return parent::query($sql);
     }

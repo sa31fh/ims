@@ -35,11 +35,10 @@ if (isset($_POST["checkbox"])) {
 <head>
     <meta charset="UTF-8">
     <title>Deleted</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe">
+    <div class="main_iframe font_open_sans">
         <div class="toolbar_main">
             <div class="toolbar_div">
                 <input class="toolbar_checkbox" title="Select All" id="select_all" type="checkbox">

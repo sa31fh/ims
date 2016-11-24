@@ -35,13 +35,12 @@ $_SESSION["last_activity"] = time();
 <head>
     <meta charset="UTF-8">
     <title>Print Preview</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="font_roboto">
     <div class="toolbar_print">
         <div class="toolbar_div">
-            <input class="option" type="button" onClick=goBack() value="Back">
+            <a href="category_status.php" class="option" id="back">back</a>
         </div>
         <div class="divider"></div>
         <label class="switch" id="toolbar_toggle">
@@ -51,11 +50,16 @@ $_SESSION["last_activity"] = time();
         </label>
         <div class="divider"></div>
         <?php if ($_SESSION["userrole"] == "admin"): ?>
-        <div class="toolbar_div">
-            <form action="print_preview.php" method="post">
-            <span >Expected Sales ($):</span>
-            <input class="print_expected" type="number" name="expected_sales" value="<?php echo SalesTable::get_expected_sale($_SESSION['date']) ?>" onchange="this.form.submit()">
-            </form>
+        <div class="toolbar_div" id="print_expected_div">
+            <div id="div_left">
+                <span>Expected Sales</span>
+            </div>
+            <div id="div_right">
+                <form action="print_preview.php" method="post">
+                <span>$</span>
+                <input class="print_expected" type="number" name="expected_sales" value="<?php echo SalesTable::get_expected_sale($_SESSION['date']) ?>" onchange="this.form.submit()">
+                </form>
+            </div>
         </div>
         <div class="divider"></div>
         <?php endif ?>
@@ -166,10 +170,6 @@ $_SESSION["last_activity"] = time();
         document.getElementById("table_name").value = $(".tab_li.selected").children().html();
         document.getElementById("table_date").value = $("#print_date").children().children().html();
         $("#test_form").submit();
-    }
-
-    function goBack() {
-        location.assign("category_status.php");
     }
 
     function sendPrint() {

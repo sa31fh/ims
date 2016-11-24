@@ -22,18 +22,18 @@ $_SESSION["last_activity"] = time();
 <head>
     <meta charset="UTF-8">
     <title>Admin Tasks</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="overflow_hidden">
-    <ul class="sidenav" id="sideNav">
-        <li id="heading"><h4>Admin Tasks</h4><hr></li>
-        <li><a class="active" href="edit_categories.php" target="task_frame" >Categories</a></li>
-        <li><a href="edit_items.php" target="task_frame" >Items</a></li>
-        <li><a href="recipes.php" target="task_frame" >Recipes</a></li>
-        <li><a href="manage_users.php" target="task_frame">Users</a></li>
+    <ul class="sidenav font_roboto" id="sideNav">
+        <li id="heading"><h4>Admin Tasks</h4></li>
+        <li><a class="entypo-archive active" href="edit_categories.php" target="task_frame" >Categories</a></li>
+        <li><a class="entypo-basket" href="edit_items.php" target="task_frame" >Items</a></li>
+        <li><a class="entypo-book-open" href="recipes.php" target="task_frame" >Recipes</a></li>
+        <li><a class="entypo-users" href="manage_users.php" target="task_frame">Users</a></li>
     </ul>
-    <?php include_once "new_nav.php" ?>
+    <?php $page = "admin tasks";
+    include_once "new_nav.php" ?>
 
     <div class="main_top_side">
         <iframe class="iframe" src="edit_categories.php" frameborder="0" name="task_frame" id="task_frame"></iframe>
@@ -45,7 +45,7 @@ $_SESSION["last_activity"] = time();
 <script>
     $(document).ready(function() {
         $('#sideNav li a').click(function() {
-           $('#sideNav li a').removeClass();
+           $('#sideNav li a').removeClass("active");
            $(this).addClass('active');
         });
      });

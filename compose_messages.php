@@ -20,8 +20,8 @@ exit();
 $_SESSION["last_activity"] = time();
 
 if (isset($_POST["message"])) {
-    foreach ($_POST["recipient"] as $value) {
-        ConversationTable::create_conversation($_SESSION["username"], $value, $_POST["title"],
+    foreach ($_POST["recipient"] as $recipient) {
+        ConversationTable::create_conversation($_SESSION["username"], $recipient, $_POST["title"],
             $_POST["message"], gmdate("Y-m-d H:i:s"),
             isset($_POST["attachment"]) ? $_POST["attachment"] : null,
             isset($_POST["attachment_title"]) ? $_POST["attachment_title"] : null, "read", "unread");
@@ -34,11 +34,10 @@ if (isset($_POST["message"])) {
 <head>
     <meta charset="UTF-8">
     <title>Compose</title>
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe">
+    <div class="main_iframe font_open_sans">
         <form id="compose_form" class="compose_form" onsubmit=submitMessage() action="compose_messages.php" method="post">
             <div class="compose_recipient">
                 <label>To</label>
