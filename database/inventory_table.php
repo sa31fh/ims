@@ -13,11 +13,14 @@ class InventoryTable extends DatabaseTable {
      * @return object|false             Returns mysqli_result object on query success or false if query fails.
      */
     public static function get_inventory($category_id, $date) {
-        $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, \"-\") AS quantity, T1.notes AS notes FROM
+        $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, null) AS quantity, 
+                T1.notes AS notes, T2.deviation AS deviation, T2.rounding_option AS rounding_option,
+                T2.rounding_factor AS rounding_factor FROM
                 (SELECT * FROM Inventory
                 WHERE Inventory.date = '{$date}') AS T1
                 RIGHT JOIN
-                (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit, Item.order_id FROM Item
+                (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit,
+                        Item.order_id, deviation, rounding_option, rounding_factor FROM Item
                 INNER JOIN Category ON Item.category_id = Category.id
                 WHERE Category.id = {$category_id}
                     AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
@@ -38,7 +41,7 @@ class InventoryTable extends DatabaseTable {
      */
     public static function update_inventory($date, $item_id, $quantity, $item_note) {
         $sql = "INSERT INTO Inventory (`date`, item_id, quantity, notes)
-                VALUES ('$date', '$item_id', '$quantity', '$item_note')
+                VALUES ('$date', '$item_id', $quantity, '$item_note')
                 ON DUPLICATE KEY UPDATE
                 `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
 

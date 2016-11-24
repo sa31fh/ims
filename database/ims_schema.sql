@@ -117,12 +117,13 @@ CREATE TABLE `Item` (
   `order_id` int(10) DEFAULT '0',
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) NOT NULL,
+  `deviation` int(11) DEFAULT '0',
   `rounding_option` varchar(45) DEFAULT 'none',
   `rounding_factor` float DEFAULT NULL,
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=73 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -175,7 +176,22 @@ CREATE TABLE `RecipeItems` (
   `item_id` int(10) NOT NULL,
   `quantity` int(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `Sales`
+--
+
+DROP TABLE IF EXISTS `Sales`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Sales` (
+  `date` date NOT NULL,
+  `actual_sales` int(11) DEFAULT '0',
+  `expected_sales` int(11) DEFAULT '0',
+  PRIMARY KEY (`date`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

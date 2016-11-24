@@ -2,11 +2,15 @@
 session_start();
 require_once "database/category_table.php";
 require_once "database/item_table.php";
+require_once "database/sales_table.php";
 
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
+}
+if (isset($_POST["actual_sale"])) {
+    SalesTable::add_actual_sale($_POST["actual_sale"], $_SESSION["date"]);
 }
 if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
@@ -50,13 +54,20 @@ $_SESSION["last_activity"] = time();
                     <span class="switch-label" data-on="incomplete" data-off="All"></span>
                     <span class="switch-handle"></span>
                 </label>
+                <div class="toolbar_div">
+                    <form class="inline" action="category_status.php" method="post">
+                        <span >Actual Sales ($):</span>
+                        <input class="print_expected" type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="this.form.submit()">
+                    </form>
+                </div>
                 <h4 id="name">Drinks</h4>
             </div>
             <div class="inventory_table">
                 <table class="table_view" id="upinven_table">
                     <tr>
-                        <th>Item</th>
+                        <th id="heading_item">Item</th>
                         <th>Unit</th>
+                        <th>Expected Quantity</th>
                         <th>Quantity Present</th>
                         <th>Notes</th>
                     </tr>
@@ -78,6 +89,9 @@ $_SESSION["last_activity"] = time();
         $.post("jq_ajax.php", {getInventory: "", categoryId: categoryId, date: date}, function(data, status) {
             document.getElementById("item_tbody").innerHTML = data;
             if ($(".switch-input").prop("checked")) { checkEmpty(); }
+            $(".quantity_input").each(function() {
+                checkDeviation($(this)[0]);
+            });
         });
     }
 
@@ -85,10 +99,10 @@ $_SESSION["last_activity"] = time();
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemName = document.getElementById("upinven_table").rows[rowIndex].children[0].innerHTML;
         var itemDate = document.getElementById("session_date").value;
-        var itemId = document.getElementById("upinven_table").rows[rowIndex].children[4].value;
-        var itemQuantity = document.getElementById("upinven_table").rows[rowIndex].cells[2].children[0].value;
+        var itemId = document.getElementById("upinven_table").rows[rowIndex].children[5].value;
+        var itemQuantity = document.getElementById("upinven_table").rows[rowIndex].cells[3].children[0].value;
         if (itemQuantity == "") {itemQuantity = 'NULL'};
-        var itemNote = document.getElementById("upinven_table").rows[rowIndex].cells[3].children[0].value;
+        var itemNote = document.getElementById("upinven_table").rows[rowIndex].cells[4].children[0].value;
 
         $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote}, function(data, status) {
             if (data) {
@@ -108,6 +122,23 @@ $_SESSION["last_activity"] = time();
                     updateInventory(obj);
                 });
         });
+    }
+    function checkDeviation(obj) {
+        var quantityPresent = obj.value;
+        var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
+        var itemName = row.children[0].innerHTML;
+        var estimated_quantity = row.children[2].innerHTML;
+        var current_deviation = (-(quantityPresent - estimated_quantity) * 100) / quantityPresent;
+        var max_deviation = row.children[6].value;
+        if(max_deviation < current_deviation && quantityPresent != "") {
+            row.children[0].className += " warning_sign";
+            alertify
+                .maxLogItems(20)
+                .delay(5000)
+                .error("Item '"+itemName+"' is below deviation limit.")
+        } else {
+            row.children[0].className = "item_name";
+        }
     }
 
     function checkEmpty() {

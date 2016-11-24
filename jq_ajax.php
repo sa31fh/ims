@@ -12,6 +12,7 @@ require_once "database/timeslot_table.php";
 require_once "database/timeslot_item_table.php";
 require_once "database/recipe_item_table.php";
 require_once "database/recipe_table.php";
+require_once "database/sales_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -22,12 +23,6 @@ if (isset($_POST["newRole"])) {
 if (isset($_POST["itemQuantity"])) {
     echo InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
 }
-
-/*-----------------------print_preview.php---------------*/
-if (isset($_POST["sales"])) {
-    VariablesTable::update_expected_sales($_POST["sales"]);
-}
-
 /*--------------edit_items.php------------*/
 if (isset($_POST["quantity"])) {
     BaseQuantityTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
@@ -133,13 +128,13 @@ if(isset($_POST["getItems"])) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="5" class="table_heading"><h4 class="none">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="6" class="table_heading"><h4 class="none">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="5" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="6" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         }
         echo '
@@ -151,6 +146,7 @@ if(isset($_POST["getItems"])) {
                 <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>
                 <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
                 <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center"></td>
+                <td><input type="number" name="item_deviation step=1 min="1" max="100" value="'.$row["deviation"].'" onchange=updateItemDeviation(this) class="align_center"></td>
                 <td id="round_tr">
                     <select name="" id="" onchange=updateRoundingOption(this)>
                         <option value="none" '; if ($row["rounding_option"] == "none") {echo "selected";} echo'>none</option>
@@ -250,7 +246,7 @@ if (isset($_POST["getPrintPreview"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales();
+                    $sales_factor = SalesTable::get_expected_sale($_SESSION["date"]) / VariablesTable::get_base_sales();
                     $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-");
                     if ($row["rounding_option"] == "up") {
                         $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
@@ -286,7 +282,7 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $sales_factor = VariablesTable::get_expected_sales() / VariablesTable::get_base_sales();
+                    $sales_factor = SalesTable::get_expected_sale($_SESSION["date"]) / VariablesTable::get_base_sales();
                     $quantity = (is_numeric($row["quantity"]) ? (BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"]): "-");
                     if ($quantity != "-") {
                         $quantity = eval("return ".str_replace('x', $quantity, $row["factor"]).";");
@@ -309,11 +305,23 @@ if (isset($_POST["getInventory"])) {
     $result = InventoryTable::get_inventory($_POST["categoryId"], $_POST["date"]);
     while ($row = $result -> fetch_assoc()) {
         echo '<tr>
-                <td>'.$row["name"].'</td>
-                <td>'.$row["unit"].'</td>
-                <td class="td_quantity"><input type="number" class="align_center" min="0" step="any" value="'.$row["quantity"].'" onchange=updateInventory(this)></td>
-                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
-                <input type="hidden" value='.$row["id"].'>
+                <td class="item_name">'.$row["name"].'</td>
+                <td>'.$row["unit"].'</td>';
+                $quantity_factor = BaseQuantityTable::get_base_quantity($row["name"]) / VariablesTable::get_base_sales();
+                $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
+                $expected_quantity = SalesTable::get_expected_sale($date) * $quantity_factor;
+                $actual_quantity = SalesTable::get_actual_sale($_SESSION["date"]) * $quantity_factor;
+                $estimated_quantity = $expected_quantity - $actual_quantity;
+                if ($row["rounding_option"] == "up") {
+                    $estimated_quantity = ceil($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                } else if ($row["rounding_option"] == "down") {
+                    $estimated_quantity = floor($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                }
+        echo  '<td class="td_expected">'.$estimated_quantity.'</td>
+               <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].'" onchange="updateInventory(this); checkDeviation(this);" ></td>
+               <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
+               <input type="hidden" value='.$row["id"].'>
+               <input type="hidden" value='.$row["deviation"].'>
             </tr>';
     }
 }
@@ -332,6 +340,10 @@ if (isset($_POST["UpdateTimeslotFactor"])) {
 
 if (isset($_POST["updateItems"])) {
     echo ItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"]);
+}
+
+if (isset($_POST["updateItemDeviation"])) {
+    echo ItemTable::update_deviation($_POST["deviation"], $_POST["itemId"]);
 }
 
 if (isset($_POST["updateRoundingOption"])) {

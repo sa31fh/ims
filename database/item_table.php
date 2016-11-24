@@ -99,7 +99,8 @@ class ItemTable extends DatabaseTable {
      * @return object|false    Returns mysqli_result object on query success or false if query fails.
      */
     public static function get_items_categories() {
-        $sql = "SELECT Item.name, unit, quantity, rounding_option, rounding_factor, Item.id, Category.name AS category_name FROM Item
+        $sql = "SELECT Item.name, unit, quantity, deviation, rounding_option, rounding_factor, 
+                       Item.id, Category.name AS category_name FROM Item
                 LEFT JOIN Category ON Item.category_id = Category.id
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.deletion_date IS NULL
@@ -328,6 +329,14 @@ class ItemTable extends DatabaseTable {
     public static function update_rounding_factor($rounding_factor, $item_id) {
         $sql = "UPDATE Item
                 SET rounding_factor = '$rounding_factor'
+                WHERE id = '$item_id'";
+
+        return parent::query($sql);
+    }
+
+    public static function update_deviation($deviation, $item_id) {
+        $sql = "UPDATE Item
+                SET deviation = '$deviation'
                 WHERE id = '$item_id'";
 
         return parent::query($sql);

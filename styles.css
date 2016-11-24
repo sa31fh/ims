@@ -244,14 +244,13 @@ select{
 }
 .inventory_div{
     float:left;
-    width: 74.8%;
+    width: 79.8%;
     height: 100%;
     margin: 0;
     padding: 0;
 }
 .inventory_toolbar{
     width: 100%;
-    height: 30px;
     margin: 0;
     padding: 5px 0px;
     border: 1px solid #cecece;
@@ -261,13 +260,41 @@ select{
 .inventory_toolbar h4{
     text-align: center;
     padding: 5px 0px;
-    margin: 0;
+    margin: 0px 100px;
+    display: inline-block;
+}
+.inventory_toolbar .toolbar_div{
+    margin: 0px 10px;
+    font-size: 17px;
 }
 .inventory_table{
     margin: 0;
     padding: 0;
     height: 93.5%;
     overflow: auto;
+}
+.inventory_table #heading_item{
+    padding-left: 50px;
+}
+.item_name{
+    padding-left: 50px!important;
+}
+.item_name:before{
+    content: "";
+    background: url(images/warning.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    left: 15px;
+    margin-top: -10px;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+.item_name.warning_sign:before{
+    content: "";
+    opacity: 1;
 }
 .block{
     display: block;
@@ -335,6 +362,7 @@ select{
     font-weight: bold;
     z-index: 8000;
 }
+
 .version{
     position: fixed;
     bottom: 0;
@@ -752,7 +780,7 @@ select{
     width: 20px !important;
 }
 .table_view th{
-    width: 300px;
+    min-width: 50px;
     text-align: center;
     padding: 5px 0px;
     border: none;
@@ -771,10 +799,13 @@ select{
     color: #444;
     height: 30px;
     padding: 15px 0px;
-    min-width: 150px;
+    min-width: 50px;
     max-width: 200px;
     word-wrap: break-word;
 
+}
+.table_view.td_expected > input:after {
+    content: "min";
 }
 td.table_heading{
     background: #F1EFEF;
@@ -792,7 +823,7 @@ td.table_heading{
 .table_view input{
     border: 1px solid transparent;
     border-bottom: 1px solid #bfbfbf;
-    margin: 5px 0px;
+    margin: 5px 5px;
     padding: 5px;
     font-size: 16px;
     min-width: 130px;
@@ -840,7 +871,8 @@ td.table_heading{
     font-weight: normal;
 }
 .print_expected{
-    padding: 2px 0pc;
+    padding: 2px 0px;
+    margin: 0px;
     width: 150px;
     text-align: center;
 }
@@ -1246,7 +1278,7 @@ td.table_heading{
     padding: 0px 0px 5px 0px;
 }
 #home_list{
-    max-width: 25%;
+    max-width: 20%;
 }
 #div_table{
     display: block;
@@ -1345,7 +1377,6 @@ td.table_heading{
 }
 .toolbar_div {
     display: inline-block;
-    vertical-align: middle;
     padding: 0px 5px;
     margin: 0;
     height: 100%;
@@ -1687,7 +1718,9 @@ td.table_heading{
 }
 
 .nav_bar ul:after{
-    content: ""; clear: both; display: block;
+    content: ""; 
+    clear: both; 
+    display: block;
 }
 
 .nav_bar ul li{
@@ -1879,7 +1912,7 @@ td.table_heading{
 /***************************TOGGLE BUTTON****************************/
 .switch {
     position: relative;
-    display: block;
+    display: inline-block;
     vertical-align: top;
     width: 110px;
     height: 30px;

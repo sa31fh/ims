@@ -1,23 +1,15 @@
 <?php
 session_start();
-require_once "database/variables_table.php";
 require_once "database/timeslot_table.php";
+require_once "database/sales_table.php";
 require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
 }
-if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
-    session_unset();
-    session_destroy();
-    header("Location: login.php");
-    exit();
-}
-$_SESSION["last_activity"] = time();
-
 if (isset($_POST["expected_sales"])) {
-    VariablesTable::update_expected_sales($_POST["expected_sales"]);
+    SalesTable::add_expected_sale($_POST["expected_sales"], $_SESSION["date"]);
 }
 if (isset($_POST["table_data"])) {
     $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
@@ -28,6 +20,14 @@ if (isset($_POST["table_data"])) {
     $mpdf->WriteHtml($_POST["table_data"], 2);
     $mpdf->Output($_POST["table_name"]." - ".$_POST["table_date"].".pdf", "D");
 }
+if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+$_SESSION["last_activity"] = time();
+
 ?>
 
 <!DOCTYPE html>
@@ -40,20 +40,21 @@ if (isset($_POST["table_data"])) {
 </head>
 <body>
     <div class="toolbar_print">
-        <input class="option" type="button" onClick=goBack() value="Back">
-        <div class="divider"></div>
         <div class="toolbar_div">
-            <label class="switch float_left" id="toolbar_toggle">
-                <input class="switch-input" type="checkbox" onclick=checkRequired() />
-                <span class="switch-label" data-on="Required" data-off="All"></span>
-                <span class="switch-handle"></span>
-            </label>
-        </div> <div class="divider"></div>
+            <input class="option" type="button" onClick=goBack() value="Back">
+        </div>
+        <div class="divider"></div>
+        <label class="switch" id="toolbar_toggle">
+            <input class="switch-input" type="checkbox" onclick=checkRequired() />
+            <span class="switch-label" data-on="Required" data-off="All"></span>
+            <span class="switch-handle"></span>
+        </label>
+        <div class="divider"></div>
         <?php if ($_SESSION["userrole"] == "admin"): ?>
         <div class="toolbar_div">
             <form action="print_preview.php" method="post">
             <span >Expected Sales ($):</span>
-            <input class="print_expected" type="number" name="expected_sales" value="<?php echo VariablesTable::get_expected_sales() ?>" onchange="this.form.submit()">
+            <input class="print_expected" type="number" name="expected_sales" value="<?php echo SalesTable::get_expected_sale($_SESSION['date']) ?>" onchange="this.form.submit()">
             </form>
         </div>
         <div class="divider"></div>
