@@ -735,7 +735,7 @@ select{
     display: inline-block;
     padding: 0;
     margin: 5px 0px;
-    width: 67%;
+    width: 65%;
     text-align: left;
     vertical-align: middle
 }
@@ -1385,7 +1385,7 @@ td.table_heading{
     font-size: 15px;
     padding: 10px 2px;
 }
-#upinven_table .quantity_input, #upinven_table .td_expected{
+#upinven_table input, #upinven_table .td_expected{
     min-width: 90px;
     max-width: 120px;
     margin: 0;
@@ -2339,7 +2339,13 @@ td.table_heading{
     border: 1px solid #79bc4d;
 }
 
-@media screen  and (max-width: 1020px) {
+@media screen  and (max-width: 966px) {
+    .inventory_div{
+        width: 79.8%;
+    }
 
+    .list_li_div_left{
+        width: 62%;
+    }
 }
 
