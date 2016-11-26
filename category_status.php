@@ -53,7 +53,7 @@ $_SESSION["last_activity"] = time();
             </div>
             <div class="div_actual_sales">
                 <div id="left">
-                    <span >Actual Sales</span>
+                    <span >Todays Sales</span>
                 </div>
                 <div id="right">
                     <form  class="inline" action="category_status.php" method="post">
@@ -101,7 +101,7 @@ $_SESSION["last_activity"] = time();
                         <th id="heading_item">Item</th>
                         <th>Unit</th>
                         <th>Expected Quantity</th>
-                        <th>Quantity Present</th>
+                        <th>Actual Quantity</th>
                         <th>Notes</th>
                     </tr>
                     <tbody class="font_open_sans" id="item_tbody">
