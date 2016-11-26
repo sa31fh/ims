@@ -317,6 +317,7 @@ if (isset($_POST["getInventory"])) {
                     $expected_quantity = $expected_sales * $quantity_factor;
                     $actual_quantity = $actual_sales * $quantity_factor;
                     $estimated_quantity = $expected_quantity - $actual_quantity;
+                    $estimated_quantity = $estimated_quantity < 0 ? 0 : $estimated_quantity;
                     if ($row["rounding_option"] == "up") {
                         $estimated_quantity = ceil($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
                     } else if ($row["rounding_option"] == "down") {
