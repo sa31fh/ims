@@ -1,4 +1,6 @@
 <?php
+require_once "database/conversation_table.php";
+
 if (isset($_POST["logout"])) {
     session_start();
     session_unset();
@@ -8,6 +10,9 @@ if (isset($_POST["logout"])) {
 }
 if(isset($_POST["dateview"])) {
     $_SESSION["date"] = $_POST["dateview"];
+}
+if(isset($_SESSION["username"])) {
+    $unread_count = ConversationTable::count_unread_conversations($_SESSION["username"]);
 }
 ?>
 
@@ -19,10 +24,13 @@ if(isset($_POST["dateview"])) {
                 <span class="home" id="text">Home</span>
             </a>
         </li>
-        <li class=<?php if (isset($page) AND ($page == "messages")) {echo "active";} ?>>
+        <li class=<?php if (isset($page) AND ($page == "messages")) {echo "active";} ?> id="messages">
             <a href="messages.php">
                 <span class="entypo-mail"></span>
                 <span class="home" id="text">Message</span>
+                <div class="noti_dot">
+                    <span><?php echo $unread_count?></span>
+                </div>
             </a>
         </li>
     </ul>
@@ -65,5 +73,12 @@ if(isset($_POST["dateview"])) {
         }, function(){
             $("ul", this).slideUp(150, "linear");
         });
+
+        if (!$("#messages").hasClass("active")) {
+            if($(".noti_dot span").html() > 0) {
+                $(".noti_dot").addClass("show");
+            }
+        }
+
     });
 </script>
