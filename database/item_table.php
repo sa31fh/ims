@@ -100,11 +100,11 @@ class ItemTable extends DatabaseTable {
      */
     public static function get_items_categories() {
         $sql = "SELECT Item.name, unit, quantity, deviation, rounding_option, rounding_factor, 
-                       Item.id, Category.name AS category_name FROM Item
+                       Item.id, Category.name AS category_name, Item.order_id FROM Item
                 LEFT JOIN Category ON Item.category_id = Category.id
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.deletion_date IS NULL
-                ORDER BY category_name ASC";
+                ORDER BY Category.order_id ASC, Item.order_id ASC";
 
         return parent::query($sql);
     }
