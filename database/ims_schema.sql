@@ -99,8 +99,9 @@ CREATE TABLE `Inventory` (
   `date` date NOT NULL,
   `item_id` int(11) NOT NULL,
   `quantity` decimal(11,2) DEFAULT NULL,
+  `has_deviation` tinyint(1) DEFAULT '0',
   `notes` text,
-  PRIMARY KEY (`item_id`,`date`)
+  PRIMARY KEY (`date`,`item_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

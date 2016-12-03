@@ -42,6 +42,17 @@ class UserTable extends DatabaseTable{
     public static function get_users() {
         $sql = "SELECT * FROM User
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
+                WHERE username != 'System'
+                ORDER BY username ASC";
+
+        return parent::query($sql);
+    }
+
+    public static function get_admin_users() {
+        $sql = "SELECT * FROM User
+                INNER JOIN UserRole ON User.userrole_id = UserRole.id
+                WHERE role = 'admin'
+                AND username != 'System'
                 ORDER BY username ASC";
 
         return parent::query($sql);

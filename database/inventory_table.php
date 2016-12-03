@@ -13,9 +13,9 @@ class InventoryTable extends DatabaseTable {
      * @return object|false             Returns mysqli_result object on query success or false if query fails.
      */
     public static function get_inventory($category_id, $date) {
-        $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, null) AS quantity, 
+        $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, null) AS quantity,
                 T1.notes AS notes, T2.deviation AS deviation, T2.rounding_option AS rounding_option,
-                T2.rounding_factor AS rounding_factor FROM
+                T2.rounding_factor AS rounding_factor, T1.has_deviation FROM
                 (SELECT * FROM Inventory
                 WHERE Inventory.date = '{$date}') AS T1
                 RIGHT JOIN
@@ -39,11 +39,28 @@ class InventoryTable extends DatabaseTable {
      * @param  string   $item_note   Note value to update or add.
      * @return boolean               Returns true on query success or false if it fails.
      */
-    public static function update_inventory($date, $item_id, $quantity, $item_note) {
-        $sql = "INSERT INTO Inventory (`date`, item_id, quantity, notes)
-                VALUES ('$date', '$item_id', $quantity, '$item_note')
+    public static function update_inventory($date, $item_id, $quantity, $deviation, $item_note) {
+        $sql = "INSERT INTO Inventory (`date`, item_id, quantity, has_deviation, notes)
+                VALUES ('$date', '$item_id', $quantity, '$deviation', '$item_note')
                 ON DUPLICATE KEY UPDATE
-                `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity), notes = VALUES(notes)";
+                `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity),
+                has_deviation = VALUES(has_deviation), notes = VALUES(notes)";
+
+        return parent::query($sql);
+    }
+
+
+    public static function get_inventory_with_deviation($date) {
+        $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
+                        Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
+                        Inventory.has_deviation, Category.name AS category_name FROM Item
+                INNER JOIN Category ON Category.id = Item.category_id
+                LEFT JOIN
+                (SELECT * FROM Inventory WHERE Inventory.date = '$date') AS Inventory ON Item.id = Inventory.item_id
+                WHERE Inventory.has_deviation = 1
+                AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))
+                ORDER BY Category.order_id ASC, Item.order_id ASC";
 
         return parent::query($sql);
     }

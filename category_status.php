@@ -134,22 +134,40 @@ $_SESSION["last_activity"] = time();
         $.post("jq_ajax.php", {getInventory: "", categoryId: categoryId, date: date}, function(data, status) {
             document.getElementById("item_tbody").innerHTML = data;
             if ($(".switch-input").prop("checked")) { checkEmpty(); }
-            $(".quantity_input").each(function() {
-                checkDeviation($(this)[0], false, true);
-            });
         });
     }
 
     function updateInventory(obj) {
-        var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemName = document.getElementById("upinven_table").rows[rowIndex].children[0].innerHTML;
+        var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
+        var itemName = row.children[0].innerHTML;
         var itemDate = document.getElementById("session_date").value;
-        var itemId = document.getElementById("upinven_table").rows[rowIndex].children[5].value;
-        var itemQuantity = document.getElementById("upinven_table").rows[rowIndex].cells[3].children[0].value;
-        if (itemQuantity == "") {itemQuantity = 'NULL'};
-        var itemNote = document.getElementById("upinven_table").rows[rowIndex].cells[4].children[0].value;
+        var itemId = row.children[5].value;
+        var itemQuantity = row.cells[3].children[0].value;
+        itemQuantity = itemQuantity == "" ? 'NULL' : itemQuantity;
+        var itemNote = row.cells[4].children[0].value;
+        var estimatedQuantity = row.children[2].innerHTML;
+        var maxDeviation = row.children[6].value;
 
-        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote}, function(data, status) {
+        if (itemQuantity > 0) {
+            var currentDeviation = (Math.abs(itemQuantity - estimatedQuantity) * 100) / itemQuantity;
+        } else {
+            var currentDeviation = (Math.abs(itemQuantity - estimatedQuantity) * 100) / 1;
+        }
+
+        if (maxDeviation < currentDeviation && itemQuantity != "") {
+            row.children[0].className += " warning_sign";
+            alertify
+                .maxLogItems(20)
+                .delay(5000)
+                .error("Item '"+itemName+"' is outside deviation range.")
+            var hasDeviation = 1;
+        }
+        else {
+            row.children[0].className = "item_name entypo-attention";
+            var hasDeviation = 0;
+        }
+
+        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemDeviation: hasDeviation, itemNote: itemNote}, function(data, status) {
             if (data) {
                 alertify
                     .delay(2000)
@@ -167,31 +185,6 @@ $_SESSION["last_activity"] = time();
                     updateInventory(obj);
                 });
         });
-    }
-    function checkDeviation(obj, message, icon) {
-        var quantityPresent = obj.value;
-        var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
-        var itemName = row.children[0].innerHTML;
-        var estimated_quantity = row.children[2].innerHTML;
-        if (quantityPresent > 0) {
-            var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / quantityPresent;
-        } else {
-            var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / 1;
-        }
-        var max_deviation = row.children[6].value;
-        if(max_deviation < current_deviation && quantityPresent != "") {
-            if (icon) {
-                row.children[0].className += " warning_sign";
-            }
-            if (message) {
-                alertify
-                    .maxLogItems(20)
-                    .delay(5000)
-                    .error("Item '"+itemName+"' is outside deviation range.")
-            }
-        } else {
-            row.children[0].className = "item_name entypo-attention";
-        }
     }
 
     function checkEmpty() {
