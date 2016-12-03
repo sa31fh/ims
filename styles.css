@@ -2366,7 +2366,11 @@ td.table_heading{
 
 @media screen  and (max-width: 966px) {
     .inventory_div{
-        width: 79.8%;
+        display: inline;
+        overflow: visible;
+    }
+    .inventory_toolbar{
+        width: initial;
     }
 
     .list_li_div_left{

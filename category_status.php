@@ -28,12 +28,20 @@ $_SESSION["last_activity"] = time();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta id="vp" name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        if (screen.width < 700)
+        {
+            var vp = document.getElementById('vp');
+            vp.setAttribute('content','width=800');
+        }
+    </script>
     <title>Home</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="overflow_hidden">
     <?php $page = "home";
-          include_once "new_nav.php" ?>
+          include_once "new_nav.php"; ?>
     <div class="main">
         <div class="div_category " id="home_list">
             <?php $current_date = strtotime($_SESSION["date"]); ?>
