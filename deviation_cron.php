@@ -46,24 +46,26 @@
             } else {
                 $current_deviation = (abs($row["quantity"] - $estimated_quantity) * 100) / 1;
             }
-            if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
-                $current_category = $row["category_name"];
-            $attachment .=
-            '<tbody class="print_tbody" id="print_tbody">
-                <tr id="category"><td colspan="6" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
-                <tr id="category_columns">
-                    <th>Item</th><th>Unit</th><th>Expected Quantity</th><th>Quantity Present</th><th>Accepted Deviation</th><th>Current Deviation</th>
+            if ($row["deviation"] < $current_deviation AND $row["quantity"] != "") {
+                if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+                    $current_category = $row["category_name"];
+                $attachment .=
+                '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="6" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category_columns">
+                        <th>Item</th><th>Unit</th><th>Expected Quantity</th><th>Quantity Present</th><th>Accepted Deviation</th><th>Current Deviation</th>
+                    </tr>';
+                }
+                $attachment .=
+                '<tr id="column_data" class="row">
+                <td>'.$row["name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td>'.$estimated_quantity.'</td>
+                <td>'.$row["quantity"].'</td>
+                <td>'.$row["deviation"].' %'.'</td>
+                <td>'.$current_deviation.' %'.'</td>
                 </tr>';
             }
-            $attachment .=
-            '<tr id="column_data" class="row">
-            <td>'.$row["name"].'</td>
-            <td>'.$row["unit"].'</td>
-            <td>'.$estimated_quantity.'</td>
-            <td>'.$row["quantity"].'</td>
-            <td>'.$row["deviation"].' %'.'</td>
-            <td>'.$current_deviation.' %'.'</td>
-            </tr>';
         }
 
         while ($user = $admin_users->fetch_assoc()) {

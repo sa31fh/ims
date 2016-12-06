@@ -308,7 +308,6 @@ if (isset($_POST["getInventory"])) {
     $actual_sales = SalesTable::get_actual_sale($_SESSION["date"]);
     $base_sale = VariablesTable::get_base_sales();
     while ($row = $result -> fetch_assoc()) {
-        $val = $row["has_deviation"] > 0 ? "warning_sign" : "";
         if (is_null($actual_sales) OR is_null($expected_sales)) {
             $estimated_quantity = "-";
         } else {
@@ -326,10 +325,11 @@ if (isset($_POST["getInventory"])) {
             }
         }
         echo '<tr>
-                <td class="item_name entypo-attention '.$val.'">'.$row["name"].'</td>
+                <td class="item_name entypo-attention">'.$row["name"].'</td>
                 <td>'.$row["unit"].'</td>
                 <td class="td_expected">'.$estimated_quantity.'</td>
-                <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].'" onchange="updateInventory(this);" ></td>
+                <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].
+                                        '" onchange="updateInventory(this); checkDeviation(this, true, true);" ></td>
                 <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
                 <input type="hidden" value='.$row["id"].'>
                 <input type="hidden" value='.$row["deviation"].'>

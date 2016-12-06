@@ -15,7 +15,7 @@ class InventoryTable extends DatabaseTable {
     public static function get_inventory($category_id, $date) {
         $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, null) AS quantity,
                 T1.notes AS notes, T2.deviation AS deviation, T2.rounding_option AS rounding_option,
-                T2.rounding_factor AS rounding_factor, T1.has_deviation FROM
+                T2.rounding_factor AS rounding_factor FROM
                 (SELECT * FROM Inventory
                 WHERE Inventory.date = '{$date}') AS T1
                 RIGHT JOIN
@@ -53,12 +53,11 @@ class InventoryTable extends DatabaseTable {
     public static function get_inventory_with_deviation($date) {
         $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
                         Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
-                        Inventory.has_deviation, Category.name AS category_name FROM Item
+                        Category.name AS category_name FROM Item
                 INNER JOIN Category ON Category.id = Item.category_id
                 LEFT JOIN
                 (SELECT * FROM Inventory WHERE Inventory.date = '$date') AS Inventory ON Item.id = Inventory.item_id
-                WHERE Inventory.has_deviation = 1
-                AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
+                WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
                 AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))
                 ORDER BY Category.order_id ASC, Item.order_id ASC";
 
