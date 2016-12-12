@@ -102,6 +102,9 @@ $_SESSION["last_activity"] = time();
                 <div class="toolbar_div" id="div_pp">
                     <a href="print_preview.php" class="fa-print print_preview">Print Preview</a>
                 </div>
+                <div class="toolbar_div search_div">
+                    <input class="search_bar" id="search_bar" type="search" placeholder="search" oninput=searchBar(this)>
+                </div>
             </div>
             <div class="inventory_table">
                 <table class="table_view" id="upinven_table">
@@ -220,6 +223,21 @@ $_SESSION["last_activity"] = time();
 
         var categoryName = document.getElementById("name").innerHTML;
         document.getElementById(categoryName+"_count").innerHTML = count;
+    }
+
+    function searchBar(obj) {
+        var searchText = new RegExp(obj.value, "i");
+        if (obj.value != "") {
+            $("#item_tbody").children().hide();
+            $(".item_name").each(function() {
+                var val = $(this).html();
+                if (val.search(searchText) > -1) {
+                    $(this).parent().show();
+                }
+            });
+        } else {
+            $("#item_tbody").children().show();
+        }
     }
 
     $(document).ready(function() {

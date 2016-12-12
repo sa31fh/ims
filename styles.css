@@ -354,6 +354,19 @@ select{
     font-size: 17px;
     padding: 12px 0px;
 }
+.inventory_toolbar .search_div{
+    padding: 7px 5px;
+    float: right;
+}
+.inventory_toolbar .search_div input{
+    border: 1px solid #bfbfbf;
+    border-radius: 2px;
+    margin: 0px;
+    padding: 5px 5px;
+    font-size: 15px;
+    min-width: 60px;
+    max-width: 180px;
+}
 #div_switch{
     float: left;
     padding: 6px 0px;
@@ -1254,7 +1267,7 @@ td.table_heading{
 .search_bar{
     background-image: url(images/search.png);
     background-size: 18px 18px;
-    background-position: 0px 5px;
+    background-position: 2px 5px;
     background-repeat: no-repeat;
     text-indent: 17px;
     outline: none;
@@ -1596,6 +1609,7 @@ td.table_heading{
     font-size: 15px;
     vertical-align: middle;
 }
+
 .toolbar_div#print_expected_div{
     padding: 5px;
 }
