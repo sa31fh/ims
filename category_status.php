@@ -171,26 +171,30 @@ $_SESSION["last_activity"] = time();
     function checkDeviation(obj, message, icon) {
         var quantityPresent = obj.value;
         var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
-        var itemName = row.children[0].innerHTML;
-        var estimated_quantity = row.children[2].innerHTML;
-        if (quantityPresent > 0) {
-            var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / quantityPresent;
-        } else {
-            var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / 1;
-        }
-        var max_deviation = row.children[6].value;
-        if(max_deviation < current_deviation && quantityPresent != "") {
-            if (icon) {
-                row.children[0].className += " warning_sign";
+        if (quantityPresent != "") {
+            var itemName = row.children[0].innerHTML;
+            var estimated_quantity = row.children[2].innerHTML;
+            if (quantityPresent > 0) {
+                var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / quantityPresent;
+            } else {
+                var current_deviation = (Math.abs(quantityPresent - estimated_quantity) * 100) / 1;
             }
-            if (message) {
-                alertify
-                    .maxLogItems(20)
-                    .delay(5000)
-                    .error("Item '"+itemName+"' is outside deviation range.")
+            var max_deviation = row.children[6].value;
+            if(max_deviation < current_deviation) {
+                if (icon) {
+                    row.children[0].className += " warning_sign";
+                }
+                if (message) {
+                    alertify
+                        .maxLogItems(20)
+                        .delay(3000)
+                        .error("Item '"+itemName+"' is outside deviation range.")
+                }
+            } else {
+                row.children[0].className = "item_name entypo-attention";
             }
         } else {
-            row.children[0].className = "item_name entypo-attention";
+                row.children[0].className = "item_name entypo-attention";
         }
     }
 
