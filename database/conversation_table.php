@@ -53,7 +53,7 @@ class ConversationTable extends DatabaseTable {
                 ON senderStatusTable.sstId = sender_conversationStatusId
                 INNER JOIN (SELECT id AS rstId, `status` AS receiver_status FROM ConversationStatus) AS receiverStatusTable
                 ON receiverStatusTable.rstId = receiver_conversationStatusId
-                INNER JOIN (SELECT conversation_id, sender AS mSender, message FROM Message AS M1
+                LEFT JOIN (SELECT conversation_id, sender AS mSender, message FROM Message AS M1
                             JOIN ( SELECT conversation_id AS conID, MAX(id) AS id FROM Message GROUP BY conID) AS M2
                             ON M1.id = M2.id) AS mTable
                 ON mTable.conversation_id = Conversation.id

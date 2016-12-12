@@ -71,7 +71,7 @@ if (isset($_POST["checkbox"])) {
                         <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
                         <?php echo $row["first_name"]." ".$row["last_name"]; ?>
                     <td class="title" onclick=openMessage(this)> <?php echo $row["title"]; ?></td>
-                    <td class="conversation" onclick=openMessage(this)> <?php echo $row["mSender"].": ".$row["message"]; ?></td>
+                    <td class="conversation" onclick=openMessage(this)> <?php echo isset($row["mSender"]) ? $row["mSender"].": ".$row["message"] : ""; ?></td>
                     <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
                     <td class="delete_tr">
                         <form action="received_messages.php" method="post">
