@@ -46,6 +46,7 @@
             } else {
                 $current_deviation = (abs($row["quantity"] - $estimated_quantity) * 100) / 1;
             }
+            $current_deviation = round($current_deviation, 2);
             if ($row["deviation"] < $current_deviation AND $row["quantity"] != "") {
                 if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
                     $current_category = $row["category_name"];
