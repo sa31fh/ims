@@ -39,12 +39,12 @@ class InventoryTable extends DatabaseTable {
      * @param  string   $item_note   Note value to update or add.
      * @return boolean               Returns true on query success or false if it fails.
      */
-    public static function update_inventory($date, $item_id, $quantity, $deviation, $item_note) {
-        $sql = "INSERT INTO Inventory (`date`, item_id, quantity, has_deviation, notes)
-                VALUES ('$date', '$item_id', $quantity, '$deviation', '$item_note')
+    public static function update_inventory($date, $item_id, $quantity, $item_note) {
+        $sql = "INSERT INTO Inventory (`date`, item_id, quantity, notes)
+                VALUES ('$date', '$item_id', $quantity, '$item_note')
                 ON DUPLICATE KEY UPDATE
                 `date`= VALUES(`date`), item_id = VALUES(item_id), quantity = VALUES(quantity),
-                has_deviation = VALUES(has_deviation), notes = VALUES(notes)";
+                notes = VALUES(notes)";
 
         return parent::query($sql);
     }

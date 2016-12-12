@@ -21,7 +21,7 @@ if (isset($_POST["newRole"])) {
 
 /*----------------------update_inventory.php-----------------*/
 if (isset($_POST["itemQuantity"])) {
-    echo InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemDeviation"], $_POST["itemNote"]);
+    echo InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
 }
 /*--------------edit_items.php------------*/
 if (isset($_POST["quantity"])) {
