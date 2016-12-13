@@ -63,5 +63,19 @@ class InventoryTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+     public static function get_search_inventory($date) {
+        $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
+                        Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
+                        Inventory.notes, Category.name AS category_name FROM Item
+                INNER JOIN Category ON Category.id = Item.category_id
+                LEFT JOIN
+                (SELECT * FROM Inventory WHERE Inventory.date = '$date') AS Inventory ON Item.id = Inventory.item_id
+                WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
+                AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))
+                ORDER BY Category.order_id ASC, Item.order_id ASC";
+
+        return parent::query($sql);
+    }
 }
 ?>

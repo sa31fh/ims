@@ -115,8 +115,8 @@ $_SESSION["last_activity"] = time();
                         <th>Actual Quantity</th>
                         <th>Notes</th>
                     </tr>
-                    <tbody class="font_open_sans" id="item_tbody">
-                    </tbody>
+                    <tbody class="font_open_sans" id="item_tbody"></tbody>
+                    <tbody class="font_open_sans" id="search_tbody"></tbody>
                 </table>
             </div>
         </div>
@@ -132,10 +132,11 @@ $_SESSION["last_activity"] = time();
       integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
       crossorigin="anonymous"></script>
 <script>
-    function getInventory(categoryId) {
+    function getInventory(categoryId , callBack) {
         var date = document.getElementById("session_date").value;
         $.post("jq_ajax.php", {getInventory: "", categoryId: categoryId, date: date}, function(data, status) {
             document.getElementById("item_tbody").innerHTML = data;
+            typeof callBack === "function" ? callBack() : "";
             if ($(".switch-input").prop("checked")) { checkEmpty(); }
             $(".quantity_input").each(function() {
                 checkDeviation($(this)[0], false, true);
@@ -156,8 +157,10 @@ $_SESSION["last_activity"] = time();
                 alertify
                     .delay(2000)
                     .success("Changes Saved");
-                if ($(".switch-input").prop("checked")) { checkEmpty(); }
-                updateCount();
+                if ($("#name").html() != "search result") {
+                    if ($(".switch-input").prop("checked")) { checkEmpty(); }
+                    updateCount();
+                }
             }
         })
         .fail(function() {
@@ -226,17 +229,48 @@ $_SESSION["last_activity"] = time();
     }
 
     function searchBar(obj) {
-        var searchText = new RegExp(obj.value, "i");
         if (obj.value != "") {
-            $("#item_tbody").children().hide();
-            $(".item_name").each(function() {
-                var val = $(this).html();
-                if (val.search(searchText) > -1) {
-                    $(this).parent().show();
-                }
-            });
+            var date = document.getElementById("session_date").value;
+            var searchWord = new RegExp(obj.value, "i");
+            if ($("#search_tbody").html() == "") {
+                $.post("jq_ajax.php", {getSearchInventory: "", date: date}, function(data, status) {
+                    document.getElementById("search_tbody").innerHTML = data;
+                    $("#search_tbody").children().hide();
+                    $("#item_tbody").hide();
+                    $("#search_tbody").find(".item_name").each(function() {
+                        var val = $(this).html();
+                        if (val.search(searchWord) > -1) {
+                            $(this).parent().show();
+                        }
+                    });
+                    $("#search_tbody").show();
+                    $("#name").html("search result");
+                    $("#search_tbody .quantity_input").each(function() {
+                        checkDeviation($(this)[0], false, true);
+                    });
+                });
+            } else {
+                $("#search_tbody").children().hide();
+                $("#item_tbody").hide();
+                $("#search_tbody").find(".item_name").each(function() {
+                    var val = $(this).html();
+                    if (val.search(searchWord) > -1) {
+                        $(this).parent().show();
+                    }
+                });
+                $("#search_tbody").show();
+                $("#name").html("search result");
+                $("#search_tbody .quantity_input").each(function() {
+                    checkDeviation($(this)[0], false, true);
+                });
+            }
         } else {
-            $("#item_tbody").children().show();
+            getInventory($(".list_category_li.active").find("#category_id").val(), function() {
+                $("#search_tbody").hide();
+                $("#item_tbody").show();
+                $(".search_bar").val("");
+                $("#name").html($(".list_category_li.active").find("#category_name").html());
+            });
         }
     }
 
@@ -248,10 +282,14 @@ $_SESSION["last_activity"] = time();
         });
 
         $(".list_category_li").click(function() {
-            getInventory($(this).find("#category_id").val());
-            $(".list_category_li").removeClass("active");
-            $(this).addClass("active");
-            $("#name").html($(this).find("#category_name").html());
+            getInventory($(this).find("#category_id").val(), function() {
+                $("#search_tbody").hide();
+                $("#item_tbody").show();
+                $(".search_bar").val("");
+            });
+                $(".list_category_li").removeClass("active");
+                $(this).addClass("active");
+                $("#name").html($(this).find("#category_name").html());
         });
 
         $(".time_div").click(function() {

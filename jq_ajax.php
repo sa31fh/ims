@@ -337,6 +337,42 @@ if (isset($_POST["getInventory"])) {
     }
 }
 
+if (isset($_POST["getSearchInventory"])) {
+    $result = InventoryTable::get_search_inventory($_POST["date"]);
+    $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
+    $expected_sales = SalesTable::get_expected_sale($date);
+    $actual_sales = SalesTable::get_actual_sale($_SESSION["date"]);
+    $base_sale = VariablesTable::get_base_sales();
+    while ($row = $result -> fetch_assoc()) {
+        if (is_null($actual_sales) OR is_null($expected_sales)) {
+            $estimated_quantity = "-";
+        } else {
+            $quantity_factor = BaseQuantityTable::get_base_quantity($row["name"]) / $base_sale;
+            $expected_quantity = $expected_sales * $quantity_factor;
+            $actual_quantity = $actual_sales * $quantity_factor;
+            $estimated_quantity = $expected_quantity - $actual_quantity;
+            $estimated_quantity = $estimated_quantity < 0 ? 0 : $estimated_quantity;
+            if ($row["rounding_option"] == "up") {
+                $estimated_quantity = ceil($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            } else if ($row["rounding_option"] == "down") {
+                $estimated_quantity = floor($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            } else {
+                $estimated_quantity = round($estimated_quantity, 2);
+            }
+        }
+        echo '<tr>
+                <td class="item_name entypo-attention">'.$row["name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td class="td_expected">'.$estimated_quantity.'</td>
+                <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].
+                                        '" onchange="updateInventory(this); checkDeviation(this, true, true);" ></td>
+                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
+                <input type="hidden" value='.$row["id"].'>
+                <input type="hidden" value='.$row["deviation"].'>
+            </tr>';
+    }
+}
+
 if (isset($_POST["AddTimeslotItem"])) {
    echo TimeslotItemTable::add_timeslot_item($_POST["itemName"], $_POST["timeslotName"]);
 }
