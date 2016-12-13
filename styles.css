@@ -1525,6 +1525,27 @@ td.table_heading{
 #label_user_name{
     display: block;
 }
+#date_check_holder{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "Open Sans";
+}
+#date_check_popup{
+    z-index: 2;
+}
+#date_check_title{
+    background: #404040;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 15px;
+    padding: 10px 0px;
+    color: white;
+}
+#date_check_div{
+    padding: 0;
+}
 
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .message_table{

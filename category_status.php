@@ -14,6 +14,7 @@ if (isset($_POST["actual_sale"])) {
 }
 if(isset($_POST["new_date"])) {
     $_SESSION["date"] = $_POST["new_date"];
+    $_SESSION["date_check"] = "checked";
 }
 if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION["time_out"] * 60 < time()) {
     session_unset();
@@ -28,12 +29,12 @@ $_SESSION["last_activity"] = time();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta id="vp" name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta id="vp" name="viewport" content="width=device-width">
     <script>
         if (screen.width < 700)
         {
             var vp = document.getElementById('vp');
-            vp.setAttribute('content','width=800');
+            vp.setAttribute('content','width=780');
         }
     </script>
     <title>Home</title>
@@ -121,7 +122,11 @@ $_SESSION["last_activity"] = time();
             </div>
         </div>
     </div>
+    <div class="div_popup_back" id="date_check_popup">
+        <div id="date_check_holder"></div>
+    </div>
     <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"]; ?>">
+    <input type="hidden" id="date_check" value="<?php echo isset($_SESSION["date_check"]); ?>">
 </body>
 </html>
 
@@ -228,6 +233,33 @@ $_SESSION["last_activity"] = time();
         document.getElementById(categoryName+"_count").innerHTML = count;
     }
 
+    (function(){
+        if ($("#date_check").val() == "") {
+            $("#date_check_popup").css("display", "block");
+            $(".main").addClass("blur");
+            var date_check_holder = document.getElementById("date_check_holder");
+            var date_check_title = document.createElement("div");
+            var date_check_div = document.createElement("div");
+            date_check_title.setAttribute("id", "date_check_title");
+            date_check_title.innerHTML = "select date";
+            date_check_div.setAttribute("id", "date_check_div");
+            date_check_holder.appendChild(date_check_title);
+            date_check_holder.appendChild(date_check_div);
+
+            $("#date_check_div").datepicker({
+                    dateFormat: "yy-mm-dd",
+                    defaultDate: $("#cal_date").val(),
+                    dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                    currentText: "close",
+                    prevText: "previous",
+                    onSelect: function(dateText) {
+                        $("#cal_date").val(dateText);
+                        $("#cal_form").submit();
+                    }
+                });
+        }
+    })();
+
     function searchBar(obj) {
         if (obj.value != "") {
             var date = document.getElementById("session_date").value;
@@ -310,9 +342,11 @@ $_SESSION["last_activity"] = time();
         });
 
         $(document).click(function(event) {
-            if(!$(event.target).closest('.time_div').length && !$(event.target).is("a, span") ) {
-                if($('.ui-datepicker').is(":visible")) {
-                    $('.ui-datepicker').css("display", "none");
+            if ($("#date_check").val() != "") {
+                if(!$(event.target).closest('.time_div').length && !$(event.target).is("a, span")) {
+                    if($('.ui-datepicker').is(":visible")) {
+                        $('.ui-datepicker').css("display", "none");
+                    }
                 }
             }
         });
