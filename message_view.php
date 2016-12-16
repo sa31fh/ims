@@ -31,22 +31,23 @@ if (isset($_POST["reply"])) {
         <div class="messages_div" id="messages_div">
         <?php $result = MessageTable::get_messages($_POST["conversation_id"]); ?>
         <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="main_message_div">
-                <div class="message_name" <?php if($row["username"] == $_SESSION["username"]) {echo "style='float:right;'";} ?>>
-                    <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span>
-                </div>
-                <div class="message">
-                    <div>
-                        <pre id="message"><?php echo $row["message"] ?></pre>
-                        <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
+            <div  <?php if($row["username"] == $_SESSION["username"]) {echo "style='text-align:right;'";} ?>>
+                <div class="main_message_div ">
+                    <div class="message_name" >
+                        <span id="name"><?php echo $row["first_name"]." ".$row["last_name"] ?></span>
                     </div>
-                <?php if ($row["attachment"] != null): ?>
-                    <div class="div_attachment">
-                        <img src="images/paperclip.png" alt="" width="24px" height="21px">
-                        <span><?php echo $row["attachment_title"] ?></span>
-                        <input type="hidden" value='<?php echo $row["attachment"] ?>'>
+                    <div class="message">
+                        <div id="message_div">
+                            <pre id="message"><?php echo $row["message"] ?></pre>
+                            <span id="time"><?php echo convert_date_timezone($row["timestamp"]);?></span>
+                        </div>
+                    <?php if ($row["attachment"] != null): ?>
+                        <div class="div_attachment">
+                            <span><?php echo $row["attachment_title"] ?></span>
+                            <input type="hidden" value='<?php echo $row["attachment"] ?>'>
+                        </div>
+                    <?php endif ?>
                     </div>
-                <?php endif ?>
                 </div>
             </div>
         <?php endwhile ?>
@@ -77,8 +78,8 @@ if (isset($_POST["reply"])) {
     document.getElementById("messages_div").scrollIntoView(false);
 
     $(document).ready(function() {
-        $(".div_attachment").click(function() {
-            var data = $(this).children("input").val();
+        $(".div_attachment span").click(function() {
+            var data = $(this).next().val();
             $(".div_popup #table_div").append(data);
             $(".div_popup_back").css("display", "block");
             $(".main_iframe").addClass("blur");

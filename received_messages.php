@@ -40,12 +40,15 @@ if (isset($_POST["checkbox"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe font_open_sans">
-        <div class="toolbar_main">
+    <div class="main_iframe font_open_sans" id="message_iframe">
+        <div class="toolbar_conversation">
             <div class="toolbar_div">
-                <input class="toolbar_checkbox" title="Select All" id="select_all" type="checkbox">
+                <div class="checkbox">
+                    <input title="Select All" id="select_all" type="checkbox">
+                    <span class="checkbox_style"></span>
+                </div>
                 <span id="checked_count">0</span>
-                <img class="toolbar_image" src="images/mail.png" width="30px" height="30px">
+                <span class="toolbar_image entypo-mail"></span>
             </div>
             <div class="divider"></div>
             <div class="toolbar_div" id="button_div">
@@ -61,26 +64,40 @@ if (isset($_POST["checkbox"])) {
                 </div>
             </div>
         </div>
-        <table class="message_table" id="table">
+
+        <div class="message_table">
             <?php $result = ConversationTable::get_received_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
-                <tr <?php if($row["sender"] == $_SESSION["username"] AND $row["sender_status"] == "unread" OR $row["receiver"] == $_SESSION["username"] AND $row["receiver_status"] == "unread" ) {
-                              echo 'class="unread"';} ?> >
-                    <td class="checkbox"><input type="checkbox" name="checkbox[]" form="multi_delete_form" value="<?php echo $row["id"] ?>"></td>
-                    <td class="name" onclick=openMessage(this)>
-                        <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
-                        <?php echo $row["first_name"]." ".$row["last_name"]; ?>
-                    <td class="title" onclick=openMessage(this)> <?php echo $row["title"]; ?></td>
-                    <td class="conversation" onclick=openMessage(this)> <?php echo isset($row["mSender"]) ? $row["mSender"].": ".$row["message"] : ""; ?></td>
-                    <td class="date"> <?php echo convert_date_timezone($row["timestamp"]); ?></td>
-                    <td class="delete_tr">
-                        <form action="received_messages.php" method="post">
-                        <input class="delete" type="image" src="images/delete.png" alt="delete" width="28px" height="28px">
-                        <input type="hidden" name="conversation_id" value="<?php echo $row["id"] ?>"></form>
-                    </td>
-                </tr>
+                <div class="message_row <?php if($row['sender'] == $_SESSION['username'] AND $row['sender_status'] == 'unread'
+                                        OR $row['receiver'] == $_SESSION['username'] AND $row['receiver_status'] == "unread" ) {
+                                        echo 'unread';} ?>">
+                    <div class="div_left">
+                        <div class="message_cell checkbox">
+                            <input type="checkbox" name="checkbox[]" form="multi_delete_form" value="<?php echo $row["id"] ?>">
+                            <span class="checkbox_style"></span>
+                        </div>
+                        <div class="message_cell body"  onclick=openMessage(this)>
+                            <div class="message_cell name">
+                                <?php echo $row["first_name"]." ".$row["last_name"]; ?>
+                            </div>
+                            <div class="con_container">
+                                <span class="title">
+                                    <?php echo $row["title"]; ?>
+                                </span>
+                                <span class="conversation">
+                                    <?php echo $row["mSender"].": ".substr($row["message"], 0, 120); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="div_right">
+                        <div class="message_cell date"  onclick=openMessage(this)><?php echo convert_date_timezone($row["timestamp"]); ?></div>
+                    </div>
+                    <input type="hidden" value="<?php echo $row['sender'] == $_SESSION['username'] ? $row['receiver'] : $row['sender']; ?>">
+                    <input type="hidden" name="conversation_id" value="<?php echo $row["id"] ?>"></form>
+                </div>
             <?php endwhile ?>
-        </table>
+        </div>
 
         <form action="message_view.php" id="view_message" method="post">
             <input type="hidden" id="conversation_id" name="conversation_id">
@@ -94,8 +111,8 @@ if (isset($_POST["checkbox"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function openMessage(obj){
-        var id = document.getElementById("table").rows[obj.parentNode.rowIndex].cells[5].children[0].children[1].value;
-        var receiver = document.getElementById("table").rows[obj.parentNode.rowIndex].cells[1].children[0].value;
+        var id = obj.parentNode.parentNode.children[3].value;
+        var receiver = obj.parentNode.parentNode.children[2].value;
         document.getElementById("conversation_id").value = id;
         document.getElementById("receiver_name").value = receiver;
         document.getElementById("view_message").submit();
@@ -108,7 +125,7 @@ if (isset($_POST["checkbox"])) {
             $(".delete", this).hide();
         });
 
-        $("table tr").change(function() {
+        $(".message_row").change(function() {
             if($("input[type='checkbox']", this).prop('checked') == true){
                 $("#button_div").fadeIn(200, "linear");
                 $("#button_div").css("display", "inline-block");
@@ -130,22 +147,22 @@ if (isset($_POST["checkbox"])) {
         });
 
         $(".dropdown_div #read").click(function(){
-            $("input[type='checkbox']:checked").parents("tr").each(function(){
-                $(this).removeClass();
+            $("input[type='checkbox']:checked").parents(".message_row").each(function(){
+                $(this).removeClass("unread read");
                 $(this).addClass("read");
             });
-            var idVal = $("table input[type='checkbox']:checked").map(function(){
+            var idVal = $(".message_table input[type='checkbox']:checked").map(function(){
                 return $(this).val();
             }).get();
             $.post("jq_ajax.php", {checkedId: idVal, newStatus: "read"});
             showUnreadCount();
         });
         $(".dropdown_div #unread").click(function(){
-            $("input[type='checkbox']:checked").parents("tr").each(function(){
-                $(this).removeClass();
+            $("input[type='checkbox']:checked").parents(".message_row").each(function(){
+                $(this).removeClass("unread read");
                 $(this).addClass("unread");
             });
-            var idVal = $("table input[type='checkbox']:checked").map(function(){
+            var idVal = $(".message_table input[type='checkbox']:checked").map(function(){
                 return $(this).val();
             }).get();
             $.post("jq_ajax.php", {checkedId: idVal, newStatus: "unread"});
@@ -166,7 +183,7 @@ if (isset($_POST["checkbox"])) {
     }
 
     function countChecked(){
-        var count = $("table input[type='checkbox']:checked").length;
+        var count = $(".message_table input[type='checkbox']:checked").length;
         if(count == 0) {
             $("#checked_count").text("0");
         } else if (count > 1) {

@@ -40,7 +40,7 @@ if (isset($_POST["message"])) {
     <div class="main_iframe font_open_sans">
         <form id="compose_form" class="compose_form" onsubmit=submitMessage() action="compose_messages.php" method="post">
             <div class="compose_recipient">
-                <label>To</label>
+                <span id="send_label">Send To</span>
             </div>
             <div class="div_fade"></div>
             <div class="compose_title">
@@ -49,7 +49,9 @@ if (isset($_POST["message"])) {
                     <?php $result = UserTable::get_users(); ?>
                     <?php while ($row = $result->fetch_assoc()): ?>
                         <?php if ($row["username"] != $_SESSION["username"]): ?>
-                            <li class="contact_li" value="<?php echo $row['username'] ?>"><?php echo $row["first_name"]." ".$row["last_name"]." (".$row["username"].")"; ?></li>
+                            <li class="contact_li" value="<?php echo $row['username'] ?>"><?php echo $row["first_name"]."
+                                                         ".$row["last_name"]." ( ".$row["username"]." )"; ?>
+                            </li>
                         <?php endif ?>
                     <?php endwhile ?>
                     </ul>

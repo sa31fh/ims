@@ -18,6 +18,14 @@ $_SESSION["last_activity"] = time();
 <head>
     <meta charset="UTF-8">
     <title>Messages</title>
+    <meta id="vp" name="viewport" content="width=device-width">
+    <script>
+        if (screen.width < 700)
+        {
+            var vp = document.getElementById('vp');
+            vp.setAttribute('content','width=780');
+        }
+    </script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
