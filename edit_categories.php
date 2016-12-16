@@ -53,7 +53,6 @@ if(isset($_POST["delete_id"])) {
                 <?php $result = CategoryTable::get_categories($date = date('Y-m-d')) ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <li id="<?php echo $row['id']?>" class="list_category_li" onclick=categorySelect(this)>
-                        <div class="handle_delete"><img src="images/delete.png" alt="" width="30px" height="30px"></div>
                         <span><?php echo $row["name"]?></span>
                         <form action="edit_categories.php" method="post">
                             <input type="hidden" name="delete_id" value="<?php echo $row['id']?>" >
@@ -64,7 +63,8 @@ if(isset($_POST["delete_id"])) {
             </div>
             <input type="hidden" id="category_select">
             <div class="category_add" id="category_add">
-                <button class="button" onclick=slideDrawer()>Add</button>
+                <button class="button_flat entypo-trash float_left" onclick=deleteDrawer()>delete</button>
+                <button class="button_flat entypo-plus float_right" onclick=slideDrawer()>Add</button>
             </div>
             <div class="category_add_drawer">
                 <form action="edit_categories.php" method="post" >
@@ -74,8 +74,10 @@ if(isset($_POST["delete_id"])) {
                 <button class="button_cancel">cancel</button>
             </div>
             <div class="category_delete">
-            <span class="span_delete">DELETE</span>
-            <span class="span_hint"><div class="arrow_down"></div>DRAG HERE<div class="arrow_down"></div></span>
+                <button class="button_flat" onclick=closeDelete()>done</button>
+                <span class="span_delete">
+                    <span class="span_hint entypo-trash">drag here to delete</span>
+                </span>
             </div>
         </div>
 
@@ -111,7 +113,7 @@ if(isset($_POST["delete_id"])) {
 <script src="touch_punch.js"></script>
 <script>
     function categorySelect(obj) {
-        var categoryName = obj.children[1].innerHTML;
+        var categoryName = obj.children[0].innerHTML;
         document.getElementById("category_select").value = obj.children[1].innerHTML;
 
         $.post("jq_ajax.php", {getCategorizedItems: categoryName}, function(data,status){
@@ -156,6 +158,33 @@ if(isset($_POST["delete_id"])) {
         $(".category_add_drawer").slideToggle(180, "linear");
     }
 
+    function deleteDrawer() {
+        $(".category_delete").slideToggle(180, "linear");
+
+        $("#category_list li").draggable({
+            scroll: false,
+            revert: "invalid",
+            containment: ".div_list_category",
+            zIndex: 500,
+            helper: function(event, ui) {
+                var helper = $(this).clone()
+                helper.addClass("category_drag");
+                $(this).css("opacity", "0");
+                return helper;
+            },
+            start: function(event, ui) {
+            },
+            stop: function(event, ui) {
+                $(this).css("opacity", "1");
+            }
+        });
+    }
+
+    function closeDelete() {
+        $("#category_list li").draggable("destroy");
+        $(".category_delete").slideToggle(180, "linear");
+    }
+
     $(document).ready(function() {
 
         $(".list_category_li:first").each(function() {
@@ -196,11 +225,9 @@ if(isset($_POST["delete_id"])) {
             containment: "#category_list",
             start: function(event, ui) {
                 ui.item.addClass("category_drag");
-                $(".handle_delete", ui.item).css("display", "block");
             },
             stop: function (event, ui) {
                 ui.item.removeClass("category_drag");
-                $(".handle_delete", ui.item).css("display", "none");
             },
             update: function(event, ui) {
                 var ids = $(this).sortable("toArray");
@@ -208,28 +235,7 @@ if(isset($_POST["delete_id"])) {
             }
         });
 
-        $("#category_list li").draggable({
-            scroll: false,
-            revert: "invalid",
-            handle: ".handle_delete",
-            containment: ".div_list_category",
-            zIndex: 500,
-            helper: function(event, ui) {
-                var helper = $(this).clone()
-                helper.addClass("category_drag");
-                $(this).css("opacity", "0");
-                return helper;
-            },
-            start: function(event, ui) {
-                $(".category_delete").slideToggle(180, "linear");
-            },
-            stop: function(event, ui) {
-                $(this).css("opacity", "1");
-                $(".category_delete").slideToggle(180, "linear");
-            }
-        });
-
-        $(".category_delete").droppable({
+        $(".category_delete .span_delete").droppable({
             drop: function(event, ui) {
                 alertify.confirm("Delete Category '"+$(ui.draggable).children("span").html()+"' ?", function() {
                     $(ui.draggable).children("form").submit();
@@ -241,15 +247,6 @@ if(isset($_POST["delete_id"])) {
             $(".list_category_li").removeClass("active");
             $(this).addClass("active");
         });
-
-        $(".list_category_li").hover(
-            function() {
-                $(".handle_delete", this).css("display", "block");
-            },
-            function() {
-                $(".handle_delete", this).css("display", "none");
-            }
-        );
 
         $(".button_cancel").click(function() {
             $(".category_add_drawer").slideToggle(180, "linear");

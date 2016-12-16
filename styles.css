@@ -604,14 +604,13 @@ select{
 }
 .category_add{
     background: white;
-    padding: 5px 0px;
+    padding: 8px 0px;
     margin: 0;
     text-align: center;
     position: absolute;
     bottom: 0;
     width: 100%;
-    z-index: 2;
-    box-shadow: -24px -6px 10px 2px white
+    border-top: 1px solid #cecece;
 }
 .category_add_drawer{
     display: none;
@@ -626,15 +625,26 @@ select{
 }
 .category_delete{
     display: none;
-    background: #FF5334;
     width: 100%;
-    height: 70px;
     padding: 0;
     margin: 0;
     position: absolute;
     bottom: 0;
     text-align: center;
     z-index: 2;
+}
+.category_delete button{
+    display: block;
+    margin: auto;
+    font-size: 15px;
+}
+.category_delete button:before{
+    content: "\e815";
+    font-size: 21px;
+    font-family: "entypo";
+    position: relative;
+    right: 5px;
+    top: 2px;
 }
 .category_input{
     display: inline;
@@ -727,27 +737,31 @@ select{
     box-shadow: 0px 0px 10px -2px #777;
 }
 .list_container{
+    display: flex;
     margin: 0;
     padding: 0;
-    float: left;
-    width: 60%;
-    height: inherit;
+    flex: 2;
 }
 .span_hint{
-    background: white;
-    color: #777;
-    position: relative;
+    color: white;
     font-size: 13px;
-    top: -53px;
+    margin: auto;
+    text-transform: uppercase;
+    flex: 1;
+}
+.span_hint.entypo-trash:before{
+    font-size: 22px!important;
 }
 .span_delete{
-    display: block;
-    position: relative;
-    top: 30%;
+    display: flex;
+    width: 100%;
+    height: 70px;
     margin: 0;
+    margin-top: 5px;
     padding: 0;
     color: white;
     font-size: 25px;
+    background: #da3f23;
 }
 .handle_delete{
     display: none;
@@ -1588,7 +1602,18 @@ td.table_heading{
 #date_check_div{
     padding: 0;
 }
-
+.entypo-plus:before{
+    position: relative;
+    right: 5px;
+    top: 2px;
+    font-size: 24px!important;
+    line-height: 0;
+}
+.entypo-trash:before{
+    position: relative;
+    right: 6px;
+    font-size: 18px!important;
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .main_iframe#message_iframe{
     overflow: hidden;
@@ -1596,8 +1621,8 @@ td.table_heading{
 .message_table{
     margin-top: 41px;
     overflow: auto;
-    height: 93.9%;
     padding: 0;
+    flex: 1;
 }
 .message_row, .message_cell{
     padding: 2px 5px;
@@ -1605,7 +1630,7 @@ td.table_heading{
 }
 .message_row{
     border-bottom: 1px solid #cecece;
-    background: #f6fdf3;
+    background: #f1f1f1;
     cursor: pointer;
 }
 .message_row .div_left, .message_row .div_right{
