@@ -32,6 +32,8 @@ html{
     height: 100%;
 }
 body{
+    display: flex;
+    flex-direction: column;
     height: 100%;
     font-size: 18px;
     color: #333;
@@ -41,7 +43,7 @@ div{
 }
 iframe{
     width: 100%;
-    height: 99.4%;
+    height: 100%;
     overflow: auto;
 }
 label{
@@ -65,7 +67,7 @@ select{
     margin: 5px 0px;
     padding: 0px 10px;
 }
-.alertify-logs{
+.alertify, .alertify-logs{
     font-family: "Open Sans";
 }
 .relative{
@@ -74,6 +76,13 @@ select{
 .blur{
     -webkit-filter: blur(5px);
     filter: blur(5px);
+}
+.category_main{
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+    background: #f7f7f7;
 }
 .div_attachment{
     margin: 0;
@@ -129,31 +138,23 @@ select{
     position: relative;
     margin: 0;
     padding: 0px;
-    float: left;
     text-align: center;
     text-decoration: none;
-    vertical-align: top;
-    width: 30%;
-    max-width: 30%;
-    height: 99.6%;
-    border: 1px solid #cecece;
-    border-top: none;
-    border-left: none;
+    border-right: 1px solid #cecece;
     background: white;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 .div_item_list{
     margin: 0;
     padding: 0px;
-    float: left;
     text-align: center;
     text-decoration: none;
-    vertical-align: top;
-    width: 49.5%;
-    max-width: 49.5%;
-    height: 100%;
-    border: 1px solid #cecece;
-    border-top: none;
+    border-right: 1px solid #cecece;
     background: white;
+    box-sizing: border-box;
+    flex: 1;
 }
 .div_list{
     margin: 0;
@@ -165,11 +166,12 @@ select{
     padding: 0;
     overflow: hidden;
     height: 94%;
+    flex: 1;
 }
 .div_left_tabs{
     position: absolute;
     bottom: 100%;
-    left: 0;
+    left: 2px;
     padding: 0;
     margin: 0;
 }
@@ -194,11 +196,16 @@ select{
     background-color: rgba(4, 4, 4, 0.65);
     padding: 0;
     margin: 0;
+    z-index: 2;
+}
+#div_print_table{
+    padding: 0px 2px;
+    margin: 0;
 }
 .div_right_tabs{
     position: absolute;
     bottom: 100%;
-    right: 0;
+    right: 2px;
     padding: 0;
     margin: 0;
 }
@@ -221,21 +228,22 @@ select{
     float: right;
 }
 .main{
-    height: 93.4%;
+    display: flex;
+    flex: 1;
     margin: 0px;
     padding: 0px;
-    margin-bottom: 43px;
 }
 .main_top_side{
     margin: 0px;
     padding: 0px;
-    height: 93.4%;
-    margin-left: 150px;
+    display: block;
+    flex: 2;
 }
 .main_iframe{
+    display: flex;
     margin: 0px;
     padding: 0px;
-    height: 99.7%;
+    height: 100%;
     background: #f7f7f7;
 }
 .inline{
@@ -452,11 +460,11 @@ select{
     overflow: auto;
 }
 .popup_share{
-    width: 75%;
-    height: 85%;
+    width: 85%;
+    max-width: 950px;
+    height: 550px;
     padding: 0px;
-    bottom: 43px;
-    left: 100px;
+    background: transparent;
 }
 .print_preview{
     font-size: 14px;
@@ -515,31 +523,26 @@ select{
     transform: rotate(45deg);
     padding: 0;
 }
-.button{
-    background: #79bc4d;
+.button, .button_cancel{
     border: none;
     color: white;
     font-size: 14px;
     text-transform: uppercase;
     transition: background-color .1s, box-shadow .1s;
     text-align: center;
+    min-width: 80px;
+    font-family: "Open Sans";
+}
+.button{
+    background: #79bc4d;
     padding: 6px;
     margin: 0px;
-    min-width: 80px;
 }
 .button_cancel{
     background: #808080;
-    border: 0 none;
-    color: white;
-    font-size: 16px;
-    border-radius: 2px;
-    transition: background-color .1s, box-shadow .1s;
-    text-align: center;
     padding: 2px;
     margin: 2px;
-    min-width: 80px;
     height: 30px;
-    font-family: inherit;
 }
 .button:hover{
     background-color: #7bdd3a;
@@ -581,6 +584,7 @@ select{
 }
 #message_frame{
     width: 100%;
+    height: 100%;
 }
 .align_center{
     text-align: center;
@@ -855,6 +859,7 @@ select{
     margin: 50px 0px 0px 0px;
     padding: 0;
     display: block;
+    flex: 1;
 }
 .user_table {
     border:0;
@@ -914,7 +919,7 @@ select{
     padding: 0;
     border: 1px solid #cecece;
     background: #f1efef;
-    margin: auto;
+    margin: 0 auto;
     font-family: "Open Sans";
 }
 .table_view{
@@ -976,17 +981,7 @@ select{
     text-transform: uppercase;
     padding-bottom: 0;
 }
-.table_view th #add_item_button:before{
-    position: relative;
-    right: 5px;
-    top: 2px;
-    font-size: 24!important;
-}
-.table_view th #delete_item:before{
-    position: relative;
-    right: 6px;
-    font-size: 18px!important;
-}
+
 .table_view td{
     text-align: center;
     border: none;
@@ -1260,6 +1255,11 @@ td.table_heading{
     width: 0px;
     transition: width .25s;
     height: 100%;
+    flex: 0;
+    box-sizing: border-box;
+}
+#item_list_div h4{
+    border: none;
 }
 .popup_cancel{
     display: block;
@@ -1280,6 +1280,17 @@ td.table_heading{
     background: #6faf47;
     cursor: pointer;
 }
+.popup_close{
+    float: right;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+.popup_close:before{
+    content: "\e816";
+    font-family: "entypo";
+    font-size: 25px;
+    color: #79bc4d;
+}
 .popup_titlebar{
     background: #404040;
     text-align: left;
@@ -1289,7 +1300,7 @@ td.table_heading{
 }
 .popup_titlebar span{
     display: inline-block;
-    padding: 5px 15px;
+    padding: 8px 15px;
     font-size: 14px;
     text-transform: uppercase;
 }
@@ -1448,9 +1459,9 @@ td.table_heading{
 }
 #items_div_table{
     display: block;
-    float: right;
-    margin-right: 4px;
-    width: 99%;
+    width: 100%;
+    flex: 3;
+    padding: 0px 2px;
 }
 #toolbar_toggle{
     margin: 0px;
@@ -1466,19 +1477,19 @@ td.table_heading{
 .user_div_container{
     display: inline-block;
     padding: 0;
-    vertical-align: top;
-    height: 100%;
+    background: white;
 }
 .user_div_container.left{
-    float: left;
+    flex: 1;
     width: 15%;
     min-width: 150px;
+    border-right: 1px solid #cecece;
 }
 .user_div_container.right{
-    width: 81.5%;
     overflow: auto;
     overflow-x: hidden;
-    float: right;
+    flex: 5;
+    margin-left: 15px;
 }
 .user_div_container div{
     padding: 5px;
@@ -1488,7 +1499,6 @@ td.table_heading{
     height: 100%;
     width: 100%;
     background: #f4f4f4;
-    border-right: 1px solid #cecece;
     padding: 30px 0px 0px 0px;
 }
 .div_card.info span{
@@ -1694,7 +1704,7 @@ td.table_heading{
     margin: 0px;
 }
 .message_table .message_row:hover{
-    background-color: #f2f2f2;
+    background-color: #e6e6e6;
 }
 .message_row.unread {
     border-right: 6px solid #79bc4d;
@@ -1792,12 +1802,14 @@ td.table_heading{
     color: #79bc4d;
 }
 #popup_frame{
-    height: 95%;
+    height: 515px;
+    background: white;
 }
 /* ----------------------COMPOSE MESSAGE-------------------- */
 .compose_form{
     padding: 0px;
     height: inherit;
+    flex: 1;
 }
 .compose_recipient{
     position: relative;
@@ -1813,7 +1825,7 @@ td.table_heading{
     margin: 0;
     display: inline-block;
     margin-left: 10px;
-    padding: 8px 0px;
+    padding: 7px 0px;
     font-size: 13px;
     text-transform: uppercase;
     color: #777;
@@ -1876,7 +1888,7 @@ td.table_heading{
 .compose_title input{
     border: none;
     margin: 0px;
-    padding: 10px 0px 10px 10px;
+    padding: 5px 0px 6px 10px;
     outline: none;
     width: 98%;
     height: 100%;
@@ -1966,6 +1978,7 @@ td.table_heading{
     padding: 0;
     padding-bottom: 150px;
     background: #f7f7f7;
+    flex: 1;
 }
 .main_message_div{
     margin: 0px 0px 15px 0px;
@@ -2052,9 +2065,7 @@ td.table_heading{
     background: #242629;
     padding: 0;
     margin: 0;
-    position: fixed;
     width: 100%;
-    bottom: 0px;
     font-size: 17px;
     z-index: 1;
 }
@@ -2210,10 +2221,9 @@ td.table_heading{
 .sidenav{
     list-style-type: none;
     margin: 0;
-    padding:0;
-    width: 150px;
-    position: fixed;
-    height: 100%;
+    padding: 0;
+    max-width: 180px;
+    flex: 1;
     border-right: 1px solid #cecece;
 }
 .sidenav li{

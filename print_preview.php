@@ -88,7 +88,7 @@ $_SESSION["last_activity"] = time();
             <?php endwhile ?>
             </ul>
         </div>
-        <div class="none" id="div_print_table">
+        <div id="div_print_table">
             <table class="table_view" id="print">
                 <tr id="print_date" class="row">
                     <th colspan="5">

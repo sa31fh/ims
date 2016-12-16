@@ -38,8 +38,6 @@ if (isset($_POST["update_user"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="overflow_hidden">
-    <?php $page= "user account";
-    include_once "new_nav.php" ?>
 
     <div class="main font_open_sans">
         <?php $result = UserTable::get_user_details($_SESSION["username"]);
@@ -116,6 +114,8 @@ if (isset($_POST["update_user"])) {
         </div>
         <span class="version_dark">v3.2.0</span>
     </div>
+    <?php $page= "user account";
+    include_once "new_nav.php" ?>
 </body>
 </html>
 

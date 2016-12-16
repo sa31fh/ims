@@ -45,7 +45,7 @@ if(isset($_POST["delete_id"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe font_open_sans">
+    <div class="category_main font_open_sans">
         <div class="div_category">
             <h4 class="font_roboto">Categories</h4>
             <div class="div_list_category">
@@ -160,7 +160,6 @@ if(isset($_POST["delete_id"])) {
 
     function deleteDrawer() {
         $(".category_delete").slideToggle(180, "linear");
-
         $("#category_list li").draggable({
             scroll: false,
             revert: "invalid",

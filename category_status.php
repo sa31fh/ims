@@ -4,7 +4,6 @@ require_once "database/category_table.php";
 require_once "database/item_table.php";
 require_once "database/sales_table.php";
 
-
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
     exit();
@@ -41,8 +40,7 @@ $_SESSION["last_activity"] = time();
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="overflow_hidden">
-    <?php $page = "home";
-          include_once "new_nav.php"; ?>
+
     <div class="main">
         <div class="div_category " id="home_list">
             <?php $current_date = strtotime($_SESSION["date"]); ?>
@@ -127,6 +125,8 @@ $_SESSION["last_activity"] = time();
     </div>
     <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"]; ?>">
     <input type="hidden" id="date_check" value="<?php echo isset($_SESSION["date_check"]); ?>">
+     <?php $page = "home";
+          include_once "new_nav.php"; ?>
 </body>
 </html>
 
@@ -325,7 +325,7 @@ $_SESSION["last_activity"] = time();
         });
 
         $(".time_div").click(function() {
-            $(".ui-datepicker").css("display", "block");
+            $("#div_cal .ui-datepicker").css("display", "block");
             $("#div_cal").datepicker({
                 dateFormat: "yy-mm-dd",
                 defaultDate: $("#cal_date").val(),
@@ -345,7 +345,7 @@ $_SESSION["last_activity"] = time();
             if ($("#date_check").val() != "") {
                 if(!$(event.target).closest('.time_div').length && !$(event.target).is("a, span")) {
                     if($('.ui-datepicker').is(":visible")) {
-                        $('.ui-datepicker').css("display", "none");
+                        $('#div_cal .ui-datepicker').css("display", "none");
                     }
                 }
             }

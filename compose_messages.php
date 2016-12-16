@@ -37,7 +37,7 @@ if (isset($_POST["message"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="main_iframe font_open_sans">
+    <div class="main_iframe compose_frame font_open_sans">
         <form id="compose_form" class="compose_form" onsubmit=submitMessage() action="compose_messages.php" method="post">
             <div class="compose_recipient">
                 <span id="send_label">Send To</span>

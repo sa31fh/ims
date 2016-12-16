@@ -29,29 +29,31 @@ $_SESSION["last_activity"] = time();
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <ul class="sidenav font_roboto" id="sideNav">
-        <li id="compose_li"><button class="button_flat fa-edit" onclick=composeButton()>Compose</button></li>
-        <li><a id="inbox" class="active" href="received_messages.php" target="message_frame" >Inbox <span id="status_view"></span></a></li>
-        <li><a id="deleted" href="deleted_messages.php" target="message_frame">Deleted</a></li>
-    </ul>
-    <?php $page = "messages";
-          include_once "new_nav.php" ?>
+    <div class="main">
+        <ul class="sidenav font_roboto" id="sideNav">
+            <li id="compose_li"><button class="button_flat fa-edit" onclick=composeButton()>Compose</button></li>
+            <li><a id="inbox" class="active" href="received_messages.php" target="message_frame" >Inbox <span id="status_view"></span></a></li>
+            <li><a id="deleted" href="deleted_messages.php" target="message_frame">Deleted</a></li>
+        </ul>
 
-    <div class="main_top_side font_open_sans">
-        <iframe class="iframe" src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" onload="showUnreadCount(this);" ></iframe>
-    </div>
+        <div class="main_top_side font_open_sans">
+            <iframe class="iframe" src="received_messages.php" frameborder="0" name="message_frame" id="message_frame" onload="showUnreadCount(this);" ></iframe>
+        </div>
 
-     <div class="div_popup_back font_open_sans">
-        <div class="div_popup popup_share">
-            <input type="button" class="popup_cancel white" id="popup_cancel" value="&#9747;">
-            <div class="popup_titlebar">
-                <span>New Message</span>
+         <div class="div_popup_back font_open_sans">
+            <div class="div_popup popup_share">
+                <span class="popup_close" id="popup_close"></span>
+                <div class="popup_titlebar">
+                    <span>New Message</span>
+                </div>
+                <iframe id="popup_frame" name="popup_frame" frameborder="0"></iframe>
             </div>
-            <iframe id="popup_frame" name="popup_frame" frameborder="0"></iframe>
         </div>
     </div>
     <form id="popup_form" action="compose_messages.php" method="post" target="popup_frame"></form>
     <input type="hidden" id="session_name" value="<?php echo $_SESSION['username']; ?>">
+    <?php $page = "messages";
+          include_once "new_nav.php" ?>
 </body>
 </html>
 
@@ -77,7 +79,7 @@ $_SESSION["last_activity"] = time();
     }
 
     $(document).ready(function() {
-        $("#popup_cancel").click(function() {
+        $("#popup_close").click(function() {
             $(".div_popup_back").fadeOut(190, "linear");
         });
 

@@ -404,12 +404,12 @@ if (isset($_POST["base_sales"])) {
 
         $("#add_item_button").click(function() {
             if ($(this).html() == "Item List") {
-                $("#item_list_div").css("width", "25%");
-                $(".div_table").css("width", "73%");
+                $("#item_list_div").css("flex", "1");
             } else {
                 $("#add_div").slideDown(180, "linear", function() {
                     $(".div_fade").css("display", "block");
                     $("#drawer_tag_item").fadeIn(300, "linear");
+                    $("#drawer_tag_item").css("display", "inline-block");
                 });
             }
         });
@@ -461,8 +461,7 @@ if (isset($_POST["base_sales"])) {
         });
 
         $("#item_list_cancel").click(function() {
-            $("#item_list_div").css("width", "0px");
-            $(".div_table").css("width", "99%");
+            $("#item_list_div").css("flex", "0");
         });
 
         $("#select_all").change(function() {
