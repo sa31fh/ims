@@ -111,11 +111,14 @@ if (isset($_POST["checkbox"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function openMessage(obj){
-        var id = obj.parentNode.parentNode.children[3].value;
-        var receiver = obj.parentNode.parentNode.children[2].value;
-        document.getElementById("conversation_id").value = id;
-        document.getElementById("receiver_name").value = receiver;
-        document.getElementById("view_message").submit();
+        obj.parentNode.parentNode.className = "message_row read";
+        showUnreadCount(function() {
+            var id = obj.parentNode.parentNode.children[3].value;
+            var receiver = obj.parentNode.parentNode.children[2].value;
+            document.getElementById("conversation_id").value = id;
+            document.getElementById("receiver_name").value = receiver;
+            document.getElementById("view_message").submit();
+        });
     }
 
     $(document).ready(function(){
@@ -132,7 +135,7 @@ if (isset($_POST["checkbox"])) {
             } else if($("input[type='checkbox']").filter(':checked').length == 0) {
                 $("#button_div").fadeOut(200, "linear");
             }
-            countChecked();
+            showUnreadCount();
         });
 
         $("#select_all").change(function(){
@@ -170,7 +173,7 @@ if (isset($_POST["checkbox"])) {
         });
     });
 
-    function showUnreadCount(){
+    function showUnreadCount(callBack){
         var unreadCount = $(".unread").length;
         if (unreadCount > 0) {
             window.parent.document.getElementById("status_view").innerHTML =  unreadCount;
@@ -179,6 +182,9 @@ if (isset($_POST["checkbox"])) {
         } else {
             window.parent.document.getElementById("status_view").style.transform = "scale(0.1)";
             window.parent.document.getElementById("status_view").style.visibility = "hidden";
+        }
+        if (typeof callBack == "function") {
+            callBack();
         }
     }
 
