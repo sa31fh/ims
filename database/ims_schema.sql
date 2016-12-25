@@ -117,13 +117,14 @@ CREATE TABLE `Item` (
   `order_id` int(10) DEFAULT '0',
   `name` varchar(45) NOT NULL,
   `unit` varchar(45) NOT NULL,
+  `price` int(11) DEFAULT NULL,
   `deviation` int(11) DEFAULT '0',
   `rounding_option` varchar(45) DEFAULT 'none',
   `rounding_factor` float DEFAULT NULL,
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=76 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

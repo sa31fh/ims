@@ -91,7 +91,7 @@ $_SESSION["last_activity"] = time();
         <div id="div_print_table">
             <table class="table_view" id="print">
                 <tr id="print_date" class="row">
-                    <th colspan="5">
+                    <th colspan="6">
                         <span><?php echo date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'D, M d Y'); ?></span>
                         <div class="print_table_date"><?php echo "created on ".date('D, M d Y', strtotime($_SESSION["date"])); ?></div>
                     </th>
@@ -159,7 +159,7 @@ $_SESSION["last_activity"] = time();
     function printPdf() {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");
-        table.innerHTML += "<tr class='row'><th colspan='5' class='heading'> " +
+        table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
                             $(".tab_li.selected").children().html(); + "</th></tr>";
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {

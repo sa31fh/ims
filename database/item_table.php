@@ -100,7 +100,7 @@ class ItemTable extends DatabaseTable {
      */
     public static function get_items_categories() {
         $sql = "SELECT Item.name, unit, quantity, deviation, rounding_option, rounding_factor,
-                       Item.id, Category.name AS category_name, Item.order_id FROM Item
+                       Item.id, Item.price, Category.name AS category_name, Item.order_id FROM Item
                 LEFT JOIN Category ON Item.category_id = Category.id
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.deletion_date IS NULL
@@ -182,10 +182,11 @@ class ItemTable extends DatabaseTable {
      * @param  int      $new_unit   New unit value of the item.
      * @return boolean              Returns true on query success and false if it fails.
      */
-    public static function update_item_details($item_id, $new_name, $new_unit) {
+    public static function update_item_details($item_id, $new_name, $new_unit, $price) {
         $sql = "UPDATE Item
                 SET name='$new_name',
-                    unit='$new_unit'
+                    unit='$new_unit',
+                    price = '$price'
                 WHERE id='$item_id'";
 
         return parent::query($sql);

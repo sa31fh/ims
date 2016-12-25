@@ -130,13 +130,13 @@ if(isset($_POST["getItems"])) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="6" class="table_heading"><h4 class="none">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="7" class="table_heading"><h4 class="none">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="6" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="7" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
                 </tr>';
         }
         echo '
@@ -151,6 +151,7 @@ if(isset($_POST["getItems"])) {
                 <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>
                 <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
                 <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center number_view"></td>
+                <td><input type="number" name="item_price" step="any" min="0" value="'.$row["price"].'" onchange=updateItem(this) class="align_center number_view"></td>
                 <td><input type="number" name="item_deviation step="1" min="0" value="'.$row["deviation"].'" onchange=updateItemDeviation(this) class="align_center number_view">%</td>
                 <td id="round_tr">
                     <select name="" id="" onchange=updateRoundingOption(this)>
@@ -241,12 +242,13 @@ if (isset($_POST["getPrintPreview"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="5" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category"><td colspan="6" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
                     <tr id="category_columns">
                         <th>Item</th>
                         <th>Unit</th>
                         <th>Quantity Present</th>
                         <th>Quantity Required</th>
+                        <th>Cost</th>
                         <th>Notes</th>
                     </tr>';
         }
@@ -258,12 +260,18 @@ if (isset($_POST["getPrintPreview"])) {
                     } else if ($row["rounding_option"] == "down") {
                         $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
                     }
+                    if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
+                        $cost = round($quantity * $row["price"], 2);
+                    } else {
+                        $cost = "-";
+                    }
         echo  '     <td>'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
                     <td>'.$row["quantity"].'</td>
                     <td class="quantity_required">'.$quantity.'</td>
-                    <td>
-                        <textarea name="" id="" rows="2" onchange=updateNotes(this) value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                    <td>'.$cost.'</td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'">'.$row["notes"].'</textarea>
                         <input type="hidden" value="'.$row["item_id"].'">
                     </td>
                 </tr>';
@@ -391,7 +399,7 @@ if (isset($_POST["UpdateTimeslotFactor"])) {
 }
 
 if (isset($_POST["updateItems"])) {
-    echo ItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"]);
+    echo ItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"], $_POST["itemPrice"]);
 }
 
 if (isset($_POST["updateItemDeviation"])) {

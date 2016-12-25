@@ -98,10 +98,10 @@ class CategoryTable extends DatabaseTable {
      * @return object|false     returns mysqli_result object if data is retrieved or false if query fails.
      */
     public static function get_print_preview($date) {
-        $sql = "SELECT Category.name as category_name, Item.name as item_name, Item.id as item_id,
-                    IFNULL(unit, '-') as unit, IFNULL(quantity, '-') as quantity, Inv.notes as notes,
-                    Category.order_id as Cat_order, Item.order_id as Item_order,
-                    Item.rounding_option, Item.rounding_factor
+        $sql = "SELECT Category.name AS category_name, Item.name AS item_name, Item.id AS item_id,
+                    IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes AS notes,
+                    Category.order_id AS Cat_order, Item.order_id AS Item_order,
+                    Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
                 LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id

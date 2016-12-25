@@ -124,7 +124,7 @@ if (isset($_POST["base_sales"])) {
                         <div class="divider"></div>
                         <button class="button_flat entypo-trash" id="delete_item">Delete</button>
                     </th>
-                    <th colspan="3" id="th_sales">
+                    <th colspan="4" id="th_sales">
                         <div class="none" id="div_quantity_sales">
                             Quantity for sales
                             <form action="edit_items.php" method="post" class="inline middle">
@@ -133,7 +133,7 @@ if (isset($_POST["base_sales"])) {
                             </form>
                         </div>
                     </th>
-                    <th>
+                    <th >
                         <input class="search_bar" id="search_bar" type="search" placeholder="search" oninput=searchBar(this)>
                     </th>
                 </tr>
@@ -152,6 +152,7 @@ if (isset($_POST["base_sales"])) {
                     <th>Item</th>
                     <th>Unit</th>
                     <th id="th_quantity">Quantity</th>
+                    <th id="th_price">Price</th>
                     <th id="th_deviation">Deviation</th>
                     <th id="th_rounding">Rounding</th>
                 </tr>
@@ -198,10 +199,11 @@ if (isset($_POST["base_sales"])) {
                     var deleteButton = '<button id="delete_item" class="button_flat entypo-trash">Delete</button>';
                     $("#button_th").append(deleteButton);
                 }
-                $("#th_sales").attr("colspan", "3");
+                $("#th_sales").attr("colspan", "4");
                 $("#div_quantity_sales").css("display", "block");
                 $("#th_quantity").html("Quantity");
                 $("#th_deviation").css("display", "table-cell");
+                $("#th_price").css("display", "table-cell");
                 $("#th_rounding").css("display", "table-cell");
                 $(".divider").show();
             });
@@ -211,6 +213,7 @@ if (isset($_POST["base_sales"])) {
                 $("#div_quantity_sales").css("display", "none");
                 $("#th_sales").attr("colspan", "1");
                 $("#th_rounding").css("display", "none");
+                $("#th_price").css("display", "none");
                 $("#th_deviation").css("display", "none");
                 $("#delete_item").remove();
                 $("#add_item_button").html("Item List");
@@ -297,11 +300,12 @@ if (isset($_POST["base_sales"])) {
     }
 
     function updateItem(obj) {
-        var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemName = document.getElementById("table").rows[rowIndex].children[2].children[0].value;
-        var itemUnit  = document.getElementById("table").rows[rowIndex].children[3].children[0].value;
-        var itemId  = document.getElementById("table").rows[rowIndex].children[0].value;
-        $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId});
+        var row =document.getElementById("table").rows[obj.parentNode.parentNode.rowIndex];
+        var itemName = row.children[2].children[0].value;
+        var itemUnit  = row.children[3].children[0].value;
+        var itemPrice  = row.children[5].children[0].value;
+        var itemId  = row.children[0].value;
+        $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId, itemPrice: itemPrice});
     }
 
     function searchBar(obj) {
