@@ -191,7 +191,7 @@ $_SESSION["last_activity"] = time();
                 var total = $(this).find(".quantity_required").length;
                 var remove = 0;
                 $(this).find(".quantity_required").each(function() {
-                  if (this.innerHTML <=0 || this.innerHTML == "-") {
+                  if ((this.innerHTML <=0 || this.innerHTML == "-") && $(this).nextAll("#td_notes").children("textarea").val() == "") {
                     $(this).parent().hide();
                     remove++;
                   }
