@@ -77,5 +77,13 @@ class InventoryTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function get_inventory_quantity($date) {
+        $sql = "SELECT * FROM Inventory
+                WHERE date = '$date'
+                AND quantity IS NOT NULL";
+
+        return parent::query($sql);
+    }
 }
 ?>
