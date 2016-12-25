@@ -147,6 +147,37 @@ CREATE TABLE `Message` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `NotificationList`
+--
+
+DROP TABLE IF EXISTS `NotificationList`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `NotificationList` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `NotificationStatus`
+--
+
+DROP TABLE IF EXISTS `NotificationStatus`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `NotificationStatus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(45) NOT NULL,
+  `notification_id` varchar(45) NOT NULL,
+  `status` tinyint(1) NOT NULL,
+  PRIMARY KEY (`user_name`,`notification_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `Recipe`
 --
 
@@ -188,10 +219,42 @@ DROP TABLE IF EXISTS `Sales`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Sales` (
   `date` date NOT NULL,
-  `actual_sales` int(11) DEFAULT '0',
-  `expected_sales` int(11) DEFAULT '0',
+  `actual_sales` int(11) DEFAULT NULL,
+  `expected_sales` int(11) DEFAULT NULL,
   PRIMARY KEY (`date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `SubNotificationList`
+--
+
+DROP TABLE IF EXISTS `SubNotificationList`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `SubNotificationList` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `SubNotificationStatus`
+--
+
+DROP TABLE IF EXISTS `SubNotificationStatus`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `SubNotificationStatus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(45) NOT NULL,
+  `notification_id` int(11) NOT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `parent_noti_id` int(11) NOT NULL,
+  PRIMARY KEY (`notification_id`,`parent_noti_id`,`user_name`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,22 +304,13 @@ CREATE TABLE `User` (
   `last_name` varchar(45) DEFAULT NULL,
   `password_hash` text NOT NULL,
   `userrole_id` int(11) NOT NULL,
+  `email` varchar(45) DEFAULT NULL,
   `time_zone` varchar(45) DEFAULT NULL,
   `time_out` int(11) NOT NULL DEFAULT '60',
   PRIMARY KEY (`username`),
   UNIQUE KEY `username_UNIQUE` (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `User`
---
-
-LOCK TABLES `User` WRITE;
-/*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES ('atif','Atif','Hussain','$2y$10$okObY3TZpUmlHGMlOP8uX.618JISHnpsf/up8Xn9h3tsztlZvkGjS',1,'America/Toronto'),('test','test','1','$2y$10$tjaNFUINXjcKtkruBiyeYeZkaTaEWTbDG5v/w9bRy4DYNWyVzvztm',1,NULL),('user','user','3','$2y$10$Ou/slOrcgQiIUA7JlJslpu5giIXa0Fq8TL8QPWqDgrMgb8HL5hZNK',1,NULL),('wasif','Wasif','Hussain','$2y$10$JmULLgUnC/THK8iaueUmZeKQzKHFJdtIImi0OiYXhcoSYb2tT0L8a',1,'Asia/Karachi');
-/*!40000 ALTER TABLE `User` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;

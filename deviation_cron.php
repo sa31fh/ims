@@ -1,14 +1,14 @@
 <?php
     require_once "database/conversation_table.php";
     require_once "database/inventory_table.php";
-    require_once "database/user_table.php";
     require_once "database/variables_table.php";
     require_once "database/sales_table.php";
     require_once "database/base_quantity_table.php";
+    require_once "database/notification_status_table.php";
+    require_once "mpdf/vendor/autoload.php";
+    include_once 'phpmailer/PHPMailerAutoload.php';
 
     $inventory_data = InventoryTable::get_inventory_with_deviation(date("Y-m-d", strtotime("yesterday")));
-
-    $admin_users = UserTable::get_admin_users();
     $date = date("Y-m-d", strtotime("-2 days"));
     $expected_sales = SalesTable::get_expected_sale($date);
     $actual_sales = SalesTable::get_actual_sale(date("Y-m-d", strtotime("yesterday")));
@@ -16,6 +16,7 @@
     $current_category = null;
     $row_count = 0;
     $message = "Item Deviation Report for ".date('d F Y', strtotime("yesterday"));
+    $attachment_title = "Deviation Report (".date('d-m-Y', strtotime("yesterday")).").pdf";
     $attachment =
         '<table class="table_view" id="print">
             <tr class="row">
@@ -71,11 +72,46 @@
             }
         }
     }
+    $attachment .= '</table>';
+
 
     if ($row_count > 0) {
-        while ($user = $admin_users->fetch_assoc()) {
-            ConversationTable::create_conversation("System", $user["username"], "Daily Item Deviation Report",
-                    $message, gmdate("Y-m-d H:i:s"), $attachment, "Item Deviation Report", "read", "unread");
+        $result = NotificationStatusTable::get_alert_info("notify by message", "daily deviation report");
+        while ($row = $result->fetch_assoc()) {
+            if ($row["noti_status"] == 1 AND $row["sub_noti_status"] == 1 AND $row["role"] == "admin") {
+                ConversationTable::create_conversation("System", $row["user_name"], "Daily Item Deviation Report",
+                        $message, gmdate("Y-m-d H:i:s"), $attachment, "Item Deviation Report", "read", "unread");
+            }
+        }
+
+        $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
+        $stylesheet = file_get_contents("styles.css");
+        $mpdf->useSubstitutions=false;
+        $mpdf->simpleTables = true;
+        $mpdf->WriteHtml($stylesheet, 1);
+        $mpdf->WriteHtml($attachment, 2);
+        $content = $mpdf->Output('', 'S');
+
+        $mail = new PHPMailer;
+        $result = NotificationStatusTable::get_alert_info("notify by email", "daily deviation report");
+        $email_count = 0;
+        while ($row = $result->fetch_assoc()) {
+            if ($row["noti_status"] == 1 AND $row["sub_noti_status"] == 1) {
+            $mail->addAddress($row["email"]);
+            $email_count++;
+            }
+        }
+        $mail->setFrom('system@ims-test.auntyskitchen.ca', 'IMS System');
+        $mail->Subject  = "Daily Deviation Report";
+        $mail->Body     = $message;
+        $mail->addStringAttachment($content, $attachment_title);
+        if ($content != "" AND $email_count > 0) {
+            if(!$mail->send()) {
+              echo 'Message was not sent.';
+              echo 'Mailer error: ' . $mail->ErrorInfo;
+            } else {
+              echo 'Message has been sent.';
+            }
         }
     }
 

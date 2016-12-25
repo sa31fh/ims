@@ -141,6 +141,14 @@ class UserTable extends DatabaseTable{
         return parent::query($sql);
     }
 
+    public static function update_user_email($user_name, $email) {
+        $sql = "UPDATE User
+                SET email = '$email'
+                WHERE username = '$user_name'";
+
+        return parent::query($sql);
+    }
+
     /**
      * Set variables for a session for a given user.
      *

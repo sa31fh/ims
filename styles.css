@@ -175,6 +175,75 @@ select{
     padding: 0;
     margin: 0;
 }
+.div_manage{
+    background: #f4f4f5;
+    flex: 1;
+}
+.div_heading{
+    background: #f4f4f5;
+    border: 1px solid #cecece;
+    font-size: 16px;
+    text-transform: uppercase;
+    font-weight: 600;
+    width: 70%;
+    margin: auto;
+    color: #555;
+}
+.div_main_option{
+    background: white;
+    border: 1px solid #cecece;
+    width:40%;
+    margin: 5px;
+    overflow: hidden;
+}
+.div_main_option .container{
+    overflow: hidden;
+    padding: 5px 0px;
+}
+.div_main_option .container .noti_name{
+    font-size: 16px;
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #555;
+    margin-bottom: 5px;
+    padding-bottom: 2px;
+    vertical-align: -webkit-baseline-middle;
+}
+.div_main_option .switch{
+    float: right;
+    width: 70px;
+}
+.div_main_option .switch-input:checked ~ .switch-handle {
+    left: 45px!important;
+}
+.div_sub{
+    border-top: 1px solid #cecece;
+    display: none;
+}
+.div_sub .hint{
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #777;
+    display: block;
+}
+.div_sub .div_sub_option{
+    padding: 30px 50px;
+    overflow: hidden;
+}
+.div_sub .div_sub_option .noti_name{
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #555;
+}
+.div_sub .div_sub_option form{
+    display: inline-block;
+    margin-left: 20px;
+}
+.div_sub_option input{
+    border: none;
+    border-bottom: 1px solid #cecece;
+}
 .div_popup{
     display: inline-block;
     background: white;
@@ -951,15 +1020,20 @@ select{
     padding: 15px 0px!important;
     height: 0!important;
 }
+.tr_confirm .td_checkbox{
+    width: 50px;
+}
 .tr_confirm td:hover:not(.td_checkbox){
     background: #BBBBBB;
 }
 .td_checkbox{
-    min-width: 30px !important;
-    width: 30px;
+    min-width: 0px !important;
+}
+.td_checkbox .checkbox{
+    display: none;
+    width: 50px;
 }
 .item_checkbox{
-    display: none;
     width: 20px !important;
 }
 .table_view th{
@@ -974,7 +1048,7 @@ select{
     color: #555;
 }
 .table_view th#buffer{
-    width: 30px;
+    min-width: 0px;
 }
 .table_view th.heading{
     font-size: 20px;
@@ -2272,8 +2346,10 @@ td.table_heading{
 }
 .sidenav li a:before{
     position: relative;
-    right: 15px;
-    font-size: 20px!important
+    right: 12px;
+    line-height: 0px;
+    font-size: 20px!important;
+    vertical-align: middle;
 }
 .sidenav li:hover a{
     background-color: #f4f4f5;

@@ -13,6 +13,8 @@ require_once "database/timeslot_item_table.php";
 require_once "database/recipe_item_table.php";
 require_once "database/recipe_table.php";
 require_once "database/sales_table.php";
+require_once "database/notification_status_table.php";
+require_once "database/sub_notification_status_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -141,7 +143,10 @@ if(isset($_POST["getItems"])) {
             <tr>
                 <input type="hidden" name="item_id" value="'.$row["id"].'">
                 <td class="td_checkbox">
-                    <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
+                    <div class="checkbox">
+                        <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
+                        <span class="checkbox_style"></span>
+                    </div>
                 </td>
                 <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>
                 <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
@@ -423,6 +428,14 @@ if (isset($_POST["getRecipeItems"])) {
 
 if (isset($_POST["updateRecipeInventoryQuantity"])) {
     echo RecipeItemTable::update_recipe_inventory_quantity($_POST["recipeItemId"], $_POST["quantity"]);
+}
+
+if (isset($_POST["setNotiStatus"])) {
+    echo NotificationStatusTable::set_notification_status($_POST["user_name"], $_POST["notification_id"], $_POST["status"]);
+}
+
+if (isset($_POST["setSubNotiStatus"])) {
+    echo SubNotificationStatusTable::set_notification_status($_POST["user_name"], $_POST["notification_id"], $_POST["status"], $_POST["parent_noti_id"]);
 }
 
 ?>

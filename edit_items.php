@@ -138,7 +138,12 @@ if (isset($_POST["base_sales"])) {
                     </th>
                 </tr>
                 <tr class="tr_confirm">
-                    <td class="td_checkbox"><input type="checkbox" class="item_checkbox" id="select_all"></td>
+                    <td class="td_checkbox">
+                        <div class="checkbox">
+                            <input type="checkbox" class="item_checkbox" id="select_all">
+                            <span class="checkbox_style"></span>
+                        </div>
+                    </td>
                     <td id="td_cancel">Cancel
                     <td id="td_done">Done</th>
                 </tr>
@@ -442,7 +447,7 @@ if (isset($_POST["base_sales"])) {
 
         $(document).on("click", "#delete_item", function() {
             $(".tr_confirm").css("display", "table");
-            $(".item_checkbox").css("display", "initial");
+            $(".checkbox").css("display", "block");
             $(".tab_li:not(.selected)").addClass("disabled");
             $(".tab_li.selected").css("pointer-events", "none");
             $(".tab_add_button").addClass("disabled");
@@ -454,10 +459,10 @@ if (isset($_POST["base_sales"])) {
 
         $("#td_cancel").click(function() {
             $(".tr_confirm").css("display", "none");
-            $(".item_checkbox").css("display", "none");
+            $(".checkbox").css("display", "none");
             $(".tab_li").removeClass("disabled");
             $(".tab_add_button").removeClass("disabled");
-            $(".tab_li.selected").css("pointer-events", "initial");
+            $(".tab_li.selected").css("pointer-events", "block");
         });
 
         $("#item_list_cancel").click(function() {
