@@ -66,8 +66,11 @@ if (isset($_POST["reply"])) {
 
     <div class="div_popup_back font_open_sans">
         <div class="div_popup popup_print_table">
-        <div id="table_div"></div>
-        <input type="button" class="popup_cancel" id="popup_cancel" value="x">
+            <div class="popup_titlebar">
+                <span class="popup_close"></span>
+                <span id="title_name"><?php echo $row["attachment_title"] ?></span>
+            </div>
+            <div id="table_div"></div>
         </div>
     </div>
 </body>
@@ -80,12 +83,13 @@ if (isset($_POST["reply"])) {
     $(document).ready(function() {
         $(".div_attachment span").click(function() {
             var data = $(this).next().val();
+            $("#title_name").html($(this).html());
             $(".div_popup #table_div").append(data);
             $(".div_popup_back").css("display", "block");
             $(".main_iframe").addClass("blur");
         });
 
-        $("#popup_cancel").click(function() {
+         $(".popup_close").click(function() {
             $(".main_iframe").removeClass("blur");
             $(".div_popup_back").fadeOut(190, "linear");
             $(".div_popup #table_div").html("");

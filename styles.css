@@ -38,9 +38,6 @@ body{
     font-size: 18px;
     color: #333;
 }
-div{
-    padding: 10px;
-}
 iframe{
     width: 100%;
     height: 100%;
@@ -176,8 +173,8 @@ select{
     margin: 0;
 }
 .div_manage{
-    background: #f4f4f5;
     flex: 1;
+    padding-left: 15px;
 }
 .div_heading{
     background: #f4f4f5;
@@ -536,20 +533,23 @@ select{
     transition: background-color .2s;
 }
 .popup_add_timeslot{
-    width: 300px;
-    height: 5em;
+    width: 30%;
+    height: 20%;
+    padding: 0;
+}
+.popup_add_timeslot form{
+    padding: 10px;
+    text-align: center;
 }
 .popup_print_table{
     padding: 0px;
-    padding-top: 10px;
     width: 90%;
     height: 95%;
     top: 15px;
 }
 .popup_print_table #table_div{
-    height: 98%;
+    height: 100%;
     padding: 0px;
-    padding-left: 3px;
     overflow: auto;
 }
 .popup_share{
@@ -584,9 +584,8 @@ select{
 }
 .version_dark{
     position: absolute;
-    top: 0;
-    right: 10px;
-    margin: 20px;
+    bottom: 5px;
+    left: 13vw;
     font-size: 15px;
     color: #777;
 }
@@ -1304,6 +1303,10 @@ td.table_heading{
     padding: 0px 5px;
     overflow: hidden;
 }
+.add_div div{
+    padding: 10px;
+    vertical-align: top;
+}
 .add_div h4{
     text-transform: uppercase;
     font-family: "Open Sans";
@@ -1381,17 +1384,6 @@ td.table_heading{
     background: #6faf47;
     cursor: pointer;
 }
-.popup_close{
-    float: right;
-    margin-right: 10px;
-    margin-top: 5px;
-}
-.popup_close:before{
-    content: "\e816";
-    font-family: "entypo";
-    font-size: 25px;
-    color: #79bc4d;
-}
 .popup_titlebar{
     background: #404040;
     text-align: left;
@@ -1404,6 +1396,18 @@ td.table_heading{
     padding: 8px 15px;
     font-size: 14px;
     text-transform: uppercase;
+}
+.popup_close{
+    float: right;
+    padding: 0!important;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+.popup_close:before{
+    content: "\e816";
+    font-family: "entypo";
+    font-size: 25px;
+    color: #79bc4d;
 }
 .search_bar{
     background-image: url(images/search.png);
@@ -1729,6 +1733,7 @@ td.table_heading{
     margin: 0;
     display: inline-block;
     vertical-align: sub;
+    font-weight: normal;
 }
 .checkbox input{
     opacity: 0;
@@ -1874,6 +1879,10 @@ td.table_heading{
     border-right: 6px solid #79bc4d;
     border-bottom: 1px solid #79bc4d !important;
     background: white;
+    font-weight: 600;
+}
+.message_row.unread  * {
+    color: #444 !important;
 }
 .toolbar_conversation{
     display: block;
@@ -2143,6 +2152,9 @@ td.table_heading{
     padding-bottom: 150px;
     background: #f7f7f7;
     flex: 1;
+}
+.messages_div > div{
+    padding: 10px;
 }
 .main_message_div{
     margin: 0px 0px 15px 0px;
@@ -2590,6 +2602,9 @@ td.table_heading{
 .ui-datepicker-calendar{
     width: 100%;
 }
+.ui-datepicker-header{
+    padding: 10px;
+}
 .ui-datepicker-prev, .ui-datepicker-next {
     display: inline-block;
     width: 15px;
@@ -2638,6 +2653,7 @@ td.table_heading{
 }
 .ui-datepicker-title {
     text-align: center;
+    padding: 10px;
 }
 .ui-datepicker th {
   text-transform: uppercase;
@@ -2669,7 +2685,7 @@ td.table_heading{
   border: 1px solid transparent;
 }
 .ui-datepicker-buttonpane{
-    padding: 0;
+    padding: 10px;
 }
 .ui-datepicker-current{
     background: white;

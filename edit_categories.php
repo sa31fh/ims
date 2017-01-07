@@ -71,7 +71,7 @@ if(isset($_POST["delete_id"])) {
                     <input class="category_input" type="text" name="category" id="category_name" placeholder="Category Name">
                     <input type="submit" name="add_button" value="Add" class="button">
                 </form>
-                <button class="button_cancel">cancel</button>
+                <button class="button_cancel"  onclick=slideDrawer()>cancel</button>
             </div>
             <div class="category_delete">
                 <button class="button_flat" onclick=closeDelete()>done</button>
@@ -114,7 +114,7 @@ if(isset($_POST["delete_id"])) {
 <script>
     function categorySelect(obj) {
         var categoryName = obj.children[0].innerHTML;
-        document.getElementById("category_select").value = obj.children[1].innerHTML;
+        document.getElementById("category_select").value = obj.children[0].innerHTML;
 
         $.post("jq_ajax.php", {getCategorizedItems: categoryName}, function(data,status){
             document.getElementById("div").innerHTML = data;
@@ -245,10 +245,6 @@ if(isset($_POST["delete_id"])) {
         $(".list_category_li").click(function() {
             $(".list_category_li").removeClass("active");
             $(this).addClass("active");
-        });
-
-        $(".button_cancel").click(function() {
-            $(".category_add_drawer").slideToggle(180, "linear");
         });
 
         $("#uncategorized_list").on('click', 'li', function() {

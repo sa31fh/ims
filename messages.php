@@ -42,9 +42,9 @@ $_SESSION["last_activity"] = time();
 
          <div class="div_popup_back font_open_sans">
             <div class="div_popup popup_share">
-                <span class="popup_close" id="popup_close"></span>
                 <div class="popup_titlebar">
                     <span>New Message</span>
+                    <span class="popup_close" id="popup_close"></span>
                 </div>
                 <iframe id="popup_frame" name="popup_frame" frameborder="0"></iframe>
             </div>

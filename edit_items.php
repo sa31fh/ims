@@ -164,8 +164,10 @@ if (isset($_POST["base_sales"])) {
 
     <div class="div_popup_back">
         <div class="div_popup popup_add_timeslot">
-            <h4>New Timeslot
-            <input type="button" class="popup_cancel" id="popup_cancel" value="&#9747;"><hr></h4>
+             <div class="popup_titlebar">
+                <span class="popup_close"></span>
+                <span id="title_name">new timeslot</span>
+            </div>
             <form action="edit_items.php" method="post">
                 <input type="text" id="timeslot_name" name="timeslot_name" placeholder="Name">
                 <input type="submit" value="Add" class="button">
@@ -406,7 +408,7 @@ if (isset($_POST["base_sales"])) {
             }
         );
 
-        $("#popup_cancel").click(function() {
+        $(".popup_close").click(function() {
             $(".main_iframe").removeClass("blur");
             $(".div_popup_back").fadeOut(190, "linear");
         });

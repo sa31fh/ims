@@ -114,8 +114,8 @@ $_SESSION["last_activity"] = time();
                         <th>Actual Quantity</th>
                         <th>Notes</th>
                     </tr>
-                    <tbody class="font_open_sans" id="item_tbody"></tbody>
-                    <tbody class="font_open_sans" id="search_tbody"></tbody>
+                    <tbody class="font_roboto" id="item_tbody"></tbody>
+                    <tbody class="font_roboto" id="search_tbody"></tbody>
                 </table>
             </div>
         </div>

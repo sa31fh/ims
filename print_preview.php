@@ -104,7 +104,7 @@ $_SESSION["last_activity"] = time();
         <div class="div_popup popup_share">
             <div class="popup_titlebar">
                 <span>New Message</span>
-                <input type="button" class="popup_cancel white" id="popup_cancel" value="x">
+                <span class="popup_close" id="popup_close"></span>
             </div>
             <iframe id="popup_frame" name="popup_frame" src="" frameborder="0"></iframe>
         </div>
@@ -175,7 +175,7 @@ $_SESSION["last_activity"] = time();
     function sendPrint() {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");
-        table.innerHTML += "<tr class='row'><th colspan='5' class='heading'> " +
+        table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
                             $(".tab_li.selected").children().html(); + "</th></tr>";
         table.innerHTML += $(".table_view").html();
         document.getElementById("new_print_data").value = table.outerHTML;
@@ -220,9 +220,9 @@ $_SESSION["last_activity"] = time();
             $(this).addClass("selected");
         });
 
-        $("#popup_cancel").click(function() {
-            $(".main_iframe").removeClass("blur");
+        $("#popup_close").click(function() {
             $(".div_popup_back").fadeOut(190, "linear");
+            $(".main_iframe").removeClass("blur");
         });
     });
 </script>
