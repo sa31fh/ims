@@ -6,7 +6,7 @@ require_once "database/notification_status_table.php";
 include_once 'phpmailer/PHPMailerAutoload.php';
 
 $quantity = InventoryTable::get_inventory_quantity(date("Y-m-d", strtotime("yesterday")))->fetch_assoc();
-$message = "Inventory for \"<strong>".date("l, jS F Y", strtotime("yesterday"))."</strong>\" has not been completed.";
+$message = "Inventory for \"<strong>".date("l, jS F Y", strtotime("yesterday"))."</strong>\" has not been completed by 12:30AM.";
 
 if ($quantity == "") {
 
@@ -27,9 +27,9 @@ if ($quantity == "") {
             $email_count++;
             }
         }
-        $mail->setFrom('system@ims-test.auntyskitchen.ca', 'IMS System');
-        $mail->Subject  = "Incomplete Inventory Alert";
-        $mail->Body     = "Inventory for \"".date("l, jS F Y", strtotime("yesterday"))."\" has not been completed.";
+        $mail->setFrom('system@ims-test.auntyskitchen.ca', 'IMS System - Waterloo');
+        $mail->Subject  = "Incomplete Inventory Alert - ".date('d/m/y', strtotime("yesterday"));
+        $mail->Body     = "Inventory for \"".date("l, jS F Y", strtotime("yesterday"))."\" has not been completed by 12:30AM.";
         if ($email_count > 0) {
             if(!$mail->send()) {
               echo 'Message was not sent.';

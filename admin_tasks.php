@@ -46,6 +46,7 @@ $_SESSION["last_activity"] = time();
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     $(document).ready(function() {
+
         $('#sideNav li a').click(function() {
            $('#sideNav li a').removeClass("active");
            $(this).addClass('active');

@@ -190,24 +190,24 @@ select{
     color: #555;
 }
 .div_main_option{
-    background: white;
     border: 1px solid #cecece;
-    width:40%;
-    margin: 5px;
+    width: 70%;
+    margin: 30px auto;
     overflow: hidden;
 }
 .div_main_option .container{
     overflow: hidden;
-    padding: 5px 0px;
+    padding: 5px;
+    background: #f4f4f5;
 }
 .div_main_option .container .noti_name{
     font-size: 16px;
     text-transform: uppercase;
-    font-weight: normal;
+    font-weight: 600;
     color: #555;
     margin-bottom: 5px;
     padding-bottom: 2px;
-    vertical-align: -webkit-baseline-middle;
+    vertical-align: middle;
 }
 .div_main_option .switch{
     float: right;
@@ -218,16 +218,17 @@ select{
 }
 .div_sub{
     border-top: 1px solid #cecece;
-    display: none;
+    background: white;
+    padding: 3px 5px;
 }
 .div_sub .hint{
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     color: #777;
-    display: block;
+    display: inline-block;
 }
 .div_sub .div_sub_option{
-    padding: 30px 50px;
+    padding: 20px 50px;
     overflow: hidden;
 }
 .div_sub .div_sub_option .noti_name{
@@ -236,16 +237,38 @@ select{
     font-weight: 600;
     color: #555;
 }
-.div_sub .div_sub_option form{
-    display: inline-block;
-    margin-left: 20px;
+.div_sub_option .entypo-info:before{
+    font-size: 14px;
+    color: #555;
+    vertical-align: middle;
+    transition: color 0.25s;
+    cursor: pointer;
 }
-.div_sub_option input{
+.div_sub_option .entypo-info.active:before{
+    color: #79bc4d;
+}
+.div_sub_option .info_span{
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #555;
+    vertical-align: middle;
+    opacity: 0;
+}
+.container form{
+    float: right;
+}
+.container input{
+    background: inherit;
     border: none;
     border-bottom: 1px solid #cecece;
+    margin: 0;
+    text-align: center;
+    margin-right: 40px;
 }
 .div_popup{
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
     background: white;
     position: fixed;
     top: 0;
@@ -254,6 +277,7 @@ select{
     right: 0;
     margin: auto;
     padding: 10px;
+    font-family: "Open Sans";
 }
 .div_popup_back{
     display: none;
@@ -1552,31 +1576,31 @@ td.table_heading{
     left: 20%;
 }
 .user_div_container{
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
     padding: 0;
-    background: white;
 }
 .user_div_container.left{
+    position: relative;
     flex: 1;
     width: 15%;
-    min-width: 150px;
+    min-width: 180px;
     border-right: 1px solid #cecece;
+    background: #f4f4f4;
+    padding: 3vh 0px 0px 0px;
 }
 .user_div_container.right{
     overflow: auto;
     overflow-x: hidden;
     flex: 5;
-    margin-left: 15px;
-}
-.user_div_container div{
-    padding: 5px;
+    background: white;
 }
 .div_card.info{
     text-align: center;
-    height: 100%;
     width: 100%;
     background: #f4f4f4;
-    padding: 30px 0px 0px 0px;
+    padding: 0;
+    flex: 1;
 }
 .div_card.info span{
     display: block;
@@ -1592,6 +1616,63 @@ td.table_heading{
 }
 .div_card.info #display_user_role{
     font-size: 13px;
+}
+.div_card.settings{
+    flex: 2;
+    width: 100%;
+    padding: 20px 0px 0px 0px;
+    background: inherit;
+}
+.settings ul{
+    text-decoration: none;
+    list-style-type: none;
+}
+.settings ul li{
+
+}
+.settings #heading, .settings a{
+    text-transform: uppercase;
+    color: #555;
+    text-decoration: none;
+}
+.settings #heading{
+    position: relative;
+    background: #dedede;
+    padding: 5px 0px;
+    border: 1px solid #bfbfbf;
+    border-left: none;
+    border-right: none;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    color: #444;
+}
+.settings #heading:before{
+    position: relative;
+    right: 5px;
+    top: 3px;
+    font-size: 20px;
+    font-weight: normal;
+}
+.settings ul a{
+    font-size: 14px;
+    display: block;
+    padding: 10px 0px 10px 30px;
+    margin: 5px 0px;
+    cursor: pointer;
+}
+.settings a.active{
+    border-right: 3px solid #79bc4d;
+    color: #79bc4d;
+}
+.settings a:hover{
+    background: #e1e1e1;
+}
+.settings a:before{
+    position: relative;
+    right: 10px;
+    top: 2px;
+    font-size: 20px;
 }
 .div_card.edit{
     width: 700px;
@@ -2623,6 +2704,9 @@ td.table_heading{
     }
     .message_cell.body .conversation{
         padding-left: 0;
+    }
+    .div_sub_option{
+        padding: 20px 2vw;
     }
 }
 

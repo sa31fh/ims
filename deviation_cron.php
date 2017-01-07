@@ -15,7 +15,7 @@
     $base_sale = VariablesTable::get_base_sales();
     $current_category = null;
     $row_count = 0;
-    $message = "Item Deviation Report for ".date('d F Y', strtotime("yesterday"));
+    $message = "Item Deviation Report for ".date('jS F Y', strtotime("yesterday")).".";
     $attachment_title = "Deviation Report (".date('d-m-Y', strtotime("yesterday")).").pdf";
     $attachment =
         '<table class="table_view" id="print">
@@ -101,8 +101,8 @@
             $email_count++;
             }
         }
-        $mail->setFrom('system@ims-test.auntyskitchen.ca', 'IMS System');
-        $mail->Subject  = "Daily Deviation Report";
+        $mail->setFrom('system@ims-test.auntyskitchen.ca', 'IMS System - Waterloo');
+        $mail->Subject  = "Daily Deviation Report - ".date('d/m/y', strtotime("yesterday")) ;
         $mail->Body     = $message;
         $mail->addStringAttachment($content, $attachment_title);
         if ($content != "" AND $email_count > 0) {

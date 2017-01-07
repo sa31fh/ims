@@ -446,4 +446,8 @@ if (isset($_POST["setSubNotiStatus"])) {
     echo SubNotificationStatusTable::set_notification_status($_POST["user_name"], $_POST["notification_id"], $_POST["status"], $_POST["parent_noti_id"]);
 }
 
+if (isset($_POST["setUserEmail"])) {
+    echo UserTable::update_user_email($_POST["userName"], $_POST["email"]);
+}
+
 ?>
