@@ -79,7 +79,11 @@ if (isset($_POST["message"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function submitMessage() {
-        window.parent.location.href = window.parent.location.href;
+        if (window.parent.document.title == "Messages") {
+            window.parent.location.href = window.parent.location.href;
+        } else {
+            $(".div_popup_back", window.parent.document).fadeOut(190, "linear");
+        }
     }
 
     $(document).ready(function() {
