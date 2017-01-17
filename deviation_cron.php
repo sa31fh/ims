@@ -30,7 +30,7 @@
 
     while ($row = $inventory_data->fetch_assoc()) {
         if ($row["quantity"] != "") {
-            $quantity_factor = BaseQuantityTable::get_base_quantity($row["name"]) / $base_sale;
+            $quantity_factor = BaseQuantityTable::get_base_quantity($row["id"]) / $base_sale;
             $expected_quantity = $expected_sales * $quantity_factor;
             $actual_quantity = $actual_sales * $quantity_factor;
             $estimated_quantity = $expected_quantity - $actual_quantity;

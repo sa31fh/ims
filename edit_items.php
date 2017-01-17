@@ -298,7 +298,7 @@ if (isset($_POST["base_sales"])) {
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
 
-        $.post("jq_ajax.php", {itemId: itemId, quantity: quantity});
+        $.post("jq_ajax.php", {updateItemQuantity: "", itemId: itemId, quantity: quantity});
     }
 
     function updateItem(obj) {

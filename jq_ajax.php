@@ -27,7 +27,7 @@ if (isset($_POST["itemQuantity"])) {
     echo InventoryTable::update_inventory($_POST["itemDate"], $_POST["itemId"], $_POST["itemQuantity"], $_POST["itemNote"]);
 }
 /*--------------edit_items.php------------*/
-if (isset($_POST["quantity"])) {
+if (isset($_POST["updateItemQuantity"])) {
     BaseQuantityTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
 }
 
@@ -131,13 +131,13 @@ if(isset($_POST["getItems"])) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="7" class="table_heading"><h4 class="none">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="7" class="table_heading">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></td>
                 </tr>';
         } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="7" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="7" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
                 </tr>';
         }
         echo '
@@ -216,13 +216,13 @@ if(isset($_POST["getCategoryItemsTimeSlot"])) {
             $current_category = $row["cat_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="4" class="table_heading"><h4 class="none">'.$row["cat_name"].'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="4" class="table_heading">'.$row["cat_name"].'<span class="arrow_down float_right collapse_arrow"></span></td>
                 </tr>';
         } else if ($row["cat_name"] != $current_category AND $row["cat_name"] == null) {
             $current_category = $row["cat_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="4" class="table_heading"><h4 class="none">'."Uncategorized Items".'<span class="arrow_down float_right collapse_arrow"></span></h4></td>
+                    <td id="category" colspan="4" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
                 </tr>';
         }
     echo '
@@ -243,7 +243,7 @@ if (isset($_POST["getPrintPreview"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="6" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
                         <th>Item</th>
                         <th>Unit</th>
@@ -286,7 +286,7 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="5" class="table_heading"><h4 class="none">'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category"><td colspan="5" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
                         <th>Item</th>
                         <th>Unit</th>
@@ -368,7 +368,7 @@ if (isset($_POST["getInventory"])) {
         if (is_null($actual_sales) OR is_null($expected_sales)) {
             $estimated_quantity = "-";
         } else {
-            $quantity_factor = BaseQuantityTable::get_base_quantity($row["name"]) / $base_sale;
+            $quantity_factor = BaseQuantityTable::get_base_quantity($row["id"]) / $base_sale;
             $expected_quantity = $expected_sales * $quantity_factor;
             $actual_quantity = $actual_sales * $quantity_factor;
             $estimated_quantity = $expected_quantity - $actual_quantity;
@@ -404,7 +404,7 @@ if (isset($_POST["getSearchInventory"])) {
         if (is_null($actual_sales) OR is_null($expected_sales)) {
             $estimated_quantity = "-";
         } else {
-            $quantity_factor = BaseQuantityTable::get_base_quantity($row["name"]) / $base_sale;
+            $quantity_factor = BaseQuantityTable::get_base_quantity($row["id"]) / $base_sale;
             $expected_quantity = $expected_sales * $quantity_factor;
             $actual_quantity = $actual_sales * $quantity_factor;
             $estimated_quantity = $expected_quantity - $actual_quantity;

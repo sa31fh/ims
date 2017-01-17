@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "database_table.php";
 
 class NotificationStatusTable extends DatabaseTable{
@@ -22,7 +22,7 @@ class NotificationStatusTable extends DatabaseTable{
     }
 
     public static function get_all_status_for_notification($notification_name) {
-        $sql = "SELECT id FROM NotificationList 
+        $sql = "SELECT id FROM NotificationList
                 WHERE name = '$notification_name'";
 
         if ($result = parent::query($sql)) {
@@ -30,7 +30,7 @@ class NotificationStatusTable extends DatabaseTable{
         }
 
         $sql = "SELECT * FROM NotificationStatus
-                INNER JOIN User 
+                INNER JOIN User
                 ON username = user_name
                 WHERE notification_id = '$id'";
 
@@ -38,7 +38,7 @@ class NotificationStatusTable extends DatabaseTable{
     }
 
     public static function get_alert_info($noti_name, $sub_noti_name) {
-         $sql = "SELECT id FROM NotificationList 
+         $sql = "SELECT id FROM NotificationList
                 WHERE name = '$noti_name'";
 
         if ($result = parent::query($sql)) {
@@ -56,7 +56,7 @@ class NotificationStatusTable extends DatabaseTable{
                 SubNotificationStatus.status AS sub_noti_status FROM NotificationStatus
                 INNER JOIN User ON username = user_name
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
-                INNER JOIN SubNotificationStatus ON NotificationStatus.notification_id = parent_noti_id 
+                INNER JOIN SubNotificationStatus ON NotificationStatus.notification_id = parent_noti_id
                 AND NotificationStatus.user_name = SubNotificationStatus.user_name
                 WHERE NotificationStatus.notification_id = '$noti_id'
                 AND SubNotificationStatus.notification_id = '$sub_noti_id'";

@@ -68,8 +68,8 @@ if (isset($_POST["checkbox"])) {
         <div class="message_table">
             <?php $result = ConversationTable::get_received_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
-                <div class="message_row <?php if($row['sender'] == $_SESSION['username'] AND $row['sender_status'] == 'unread'
-                                        OR $row['receiver'] == $_SESSION['username'] AND $row['receiver_status'] == "unread" ) {
+                <div class="message_row <?php if(($row['sender'] == $_SESSION['username'] AND $row['sender_status'] == 'unread')
+                                        OR ($row['receiver'] == $_SESSION['username'] AND $row['receiver_status'] == 'unread')) {
                                         echo 'unread';} ?>">
                     <div class="div_left">
                         <div class="message_cell checkbox">
@@ -122,12 +122,6 @@ if (isset($_POST["checkbox"])) {
     }
 
     $(document).ready(function(){
-        $("table tr").hover(function(){
-            $(".delete", this).show();
-        }, function(){
-            $(".delete", this).hide();
-        });
-
         $(".message_row").change(function() {
             if($("input[type='checkbox']", this).prop('checked') == true){
                 $("#button_div").fadeIn(200, "linear");

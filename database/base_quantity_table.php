@@ -10,9 +10,9 @@ class BaseQuantityTable extends DatabaseTable {
      * @return float  $quantity  value if query is successful.
      * @throws Exception         if query fails.
      */
-    public static function get_base_quantity($item_name) {
+    public static function get_base_quantity($item_id) {
         $sql = "SELECT quantity FROM BaseQuantity
-                WHERE item_id = (SELECT id FROM Item WHERE name='$item_name')";
+                WHERE item_id = '$item_id'";
 
         if($result = parent::query($sql)) {
             return $result->fetch_assoc()['quantity'];
@@ -59,8 +59,8 @@ class BaseQuantityTable extends DatabaseTable {
      * @param  string $item_name    item name used to get the base quantity.
      * @return float                returns the rounded estimated quantity value upto two decimal points.
      */
-    public static function get_estimated_quantity($factor, $item_name) {
-        return round(self::get_base_quantity($item_name) * $factor, 2);
+    public static function get_estimated_quantity($factor, $item_id) {
+        return round(self::get_base_quantity($item_id) * $factor, 2);
     }
 }
 ?>

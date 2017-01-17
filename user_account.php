@@ -38,7 +38,7 @@ if (isset($_POST["update_user"])) {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="overflow_hidden">
-    <div class="main font_open_sans">
+    <div class="main font_open_sans overflow_hidden">
         <?php $result = UserTable::get_user_details($_SESSION["username"]);
               $row = $result->fetch_assoc(); ?>
         <div class="user_div_container left">
