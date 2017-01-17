@@ -100,7 +100,7 @@ class CategoryTable extends DatabaseTable {
     public static function get_print_preview($date) {
         $sql = "SELECT Category.name AS category_name, Item.name AS item_name, Item.id AS item_id,
                     IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes AS notes,
-                    Category.order_id AS Cat_order, Item.order_id AS Item_order,
+                    Inv.invoice_notes, Inv.quantity_delivered, Category.order_id AS Cat_order, Item.order_id AS Item_order,
                     Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id

@@ -33,8 +33,11 @@ if(isset($_SESSION["username"])) {
                 </div>
             </a>
         </li>
-        <li class=<?php if (isset($page) AND ($page == "email")) {echo "active";} ?>>
-            <a href="email_test.php">Email Test</a>
+        <li class=<?php if (isset($page) AND ($page == "invoice")) {echo "active";} ?> id="invoice">
+            <a href="invoice.php">
+                <span class="fa-file-text"></span>
+                <span class="home" id="text">Invoice</span>
+            </a>
         </li>
     </ul>
     <ul id="nav_right">
@@ -58,12 +61,6 @@ if(isset($_SESSION["username"])) {
             </a>
         </li>
         <?php endif ?>
-        <li class=<?php if (isset($page) AND ($page == "settings")) {echo "active";} ?>>
-            <a href="settings.php">
-                <span class="fa-cogs"></span>
-                <span class="home" id="text">settings</span>
-            </a>
-        </li>
         <li id="logout">
             <form action="new_nav.php" method="post" onclick="this.submit()">
                 <span class="fa-power-off logout_image"></span>

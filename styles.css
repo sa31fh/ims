@@ -307,6 +307,10 @@ select{
     width: 90%;
     transition: width .25s;
 }
+.div_invoice_table{
+    overflow: auto;
+    flex: 1;
+}
 .disabled{
     pointer-events: none;
     opacity: 0.4;
@@ -1180,52 +1184,39 @@ td.table_heading{
     color: #667;
     font-weight: normal;
 }
-#print_expected_div #div_left, #print_expected_div #div_right{
-    padding: 0;
-    margin: 0;
-    display: inline-block;
-    position: relative;
-}
-#print_expected_div #div_left span{
-    text-transform: uppercase;
-    font-size: 13px;
-    font-weight: 600;
-}
-#print_expected_div #div_right span{
-    font-size: 21px;
-    position: absolute;
-    left: 3px;
-}
-#print_expected_div #div_right input{
-    font-size: 18px;
-    vertical-align: middle;
-}
-.print_expected{
-    padding: 2px 0px;
-    margin: 0px;
-    width: 150px;
-    text-align: center;
+.toolbar_div .option:before{
+    margin: 0px 5px;
+    vertical-align: text-top;
 }
 #back:before{
     content: "\e885";
     font-family: "entypo";
-    margin: 0px 5px;
     font-size: 22px;
     vertical-align: sub;
+    line-height: 0;
 }
 #print_share:before{
     content: "\e858";
     font-family: entypo;
-    vertical-align: text-top;
-    margin: 0px 5px;
     font-size: 20px;
 }
 #print_pdf:before{
-    content: "\e84c";
-    vertical-align: text-top;
-    margin: 0px 5px;
-    font-family: "entypo";
+    content: "\f1c1";
+    font-family: "FontAwesome";
     font-size: 20px;
+}
+#invoice_div{
+    flex: 1.2;
+}
+#track_invoice{
+    text-transform: uppercase;
+    font-size: 13px;
+    vertical-align: middle;
+}
+#track_invoice:before{
+    font-size: 20px;
+    vertical-align: text-top;
+    padding: 0px 5px;
 }
 .user_add_div{
     margin: 0;
@@ -1793,6 +1784,45 @@ td.table_heading{
     margin: 0px 5px;
     vertical-align: middle;
 }
+#invoice_toolbar{
+    border: none;
+    display: initial;
+    border-bottom: 1px solid #cecece;
+}
+#invoice_table{
+    border: none;
+    border-bottom: 1px solid #cecece;
+}
+#invoice_table #quantity_delivered{
+    max-width: 90px;
+    min-width: 60px;
+    text-align: center;
+}
+.invoice_date{
+    text-align: center;
+    text-transform: none!important;
+    padding: 15px 25px!important;
+}
+.invoice_date div{
+    display: inline-block;
+    vertical-align: middle;
+}
+.invoice_date #left{
+    float: left;
+}
+.invoice_date #left span{
+    font-size: 24px;
+}
+.invoice_date #right #top{
+    display: block;
+    font-size: 16px;
+}
+.invoice_date #right #bottom{
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: "Open Sans";
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .main_iframe#message_iframe{
     overflow: hidden;
@@ -1911,6 +1941,23 @@ td.table_heading{
     padding: 8px 2px;
     display: inline-block;
     color: #555;
+}
+#totalcost_div{
+    margin-right: 1vw;
+}
+#totalcost_div #label{
+    font-size: 14px;
+    text-transform: uppercase;
+    padding: 10px 0px;
+    display: inline-block;
+    vertical-align: middle;
+}
+#totalcost_div #cost_span{
+    display: inline-block;
+    font-size: 20px;
+    color: #111;
+    padding: 5px;
+    vertical-align: middle;
 }
 #multi_delete_form{
     display: inline-block;

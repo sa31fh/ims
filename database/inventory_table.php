@@ -85,5 +85,26 @@ class InventoryTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function update_quantity_delivered($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (item_id, quantity_delivered, `date`)
+                VALUES ('$item_id', $quantity, '$date')
+                ON DUPLICATE KEY UPDATE
+                item_id = VALUES(item_id), quantity_delivered = VALUES(quantity_delivered), `date` = VALUES(`date`)";
+
+        return parent::query($sql);
+
+    }
+
+    public static function update_invoice_note($note, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (item_id, invoice_notes, `date`)
+                VALUES ('$item_id', '$note', '$date')
+                ON DUPLICATE KEY UPDATE
+                item_id = VALUES(item_id), invoice_notes = VALUES(invoice_notes), `date` = VALUES(`date`)";
+
+
+        return parent::query($sql);
+
+    }
 }
 ?>

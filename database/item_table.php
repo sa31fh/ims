@@ -265,6 +265,13 @@ class ItemTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function get_item_price($item_id) {
+        $sql = "SELECT price FROM Item
+                WHERE id = '$item_id'";
+
+        return parent::query($sql)->fetch_assoc()["price"];
+    }
+
     /**
      * Update the category a given item is assigned to.
      *

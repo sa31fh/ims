@@ -15,6 +15,7 @@ require_once "database/recipe_table.php";
 require_once "database/sales_table.php";
 require_once "database/notification_status_table.php";
 require_once "database/sub_notification_status_table.php";
+require_once "database/invoice_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -314,6 +315,49 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
     }
 }
 
+if (isset($_POST["getTrackedInvoice"])) {
+    $result = CategoryTable::get_print_preview($_POST["date"]);
+    $current_category = null;
+    while ($row = $result->fetch_assoc()) {
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Quantity Required</th>
+                        <th>Quantity Delivered</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        echo '<tr id="column_data" class="row">';
+                    $sales_factor = SalesTable::get_expected_sale($_POST['date']) / VariablesTable::get_base_sales();
+                    $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-");
+                    if ($row["rounding_option"] == "up") {
+                        $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                    } else if ($row["rounding_option"] == "down") {
+                        $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                    }
+                    if (($row["quantity_delivered"] != "-" AND $row["quantity_delivered"] > -1) AND $row["price"] != "-") {
+                        $cost = "$ ".round($row["quantity_delivered"] * $row["price"], 2);
+                    } else {
+                        $cost = "-";
+                    }
+        echo  '     <td>'.$row["item_name"].'</td>
+                    <td>'.$row["unit"].'</td>
+                    <td class="quantity_required">'.$quantity.'</td>
+                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'"></td>
+                    <td class="cost">'.$cost.'</td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["invoice_notes"].'">'.$row["invoice_notes"].'</textarea>
+                    </td>
+                    <input type="hidden" value="'.$row["item_id"].'">
+                </tr>';
+    }
+}
+
 if (isset($_POST["getInventory"])) {
     $result = InventoryTable::get_inventory($_POST["categoryId"], $_POST["date"]);
     $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
@@ -448,6 +492,26 @@ if (isset($_POST["setSubNotiStatus"])) {
 
 if (isset($_POST["setUserEmail"])) {
     echo UserTable::update_user_email($_POST["userName"], $_POST["email"]);
+}
+
+if (isset($_POST["trackInvoice"])) {
+    echo InvoiceTable::track_invoice($_POST["date"]);
+}
+
+if (isset($_POST["updateQuantityDelivered"])) {
+    echo InventoryTable::update_quantity_delivered($_POST["quantity"], $_POST["itemId"], $_POST["date"]);
+}
+
+if (isset($_POST["updateInvoiceNotes"])) {
+    echo InventoryTable::update_invoice_note($_POST["note"], $_POST["itemId"], $_POST["date"]);
+}
+
+if (isset($_POST["getItemPrice"])) {
+    echo ItemTable::get_item_price($_POST["itemId"]);
+}
+
+if (isset($_POST["removeInvoice"])) {
+    echo InvoiceTable::remove_invoice($_POST["date"]);
 }
 
 ?>

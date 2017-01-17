@@ -2,6 +2,8 @@
 session_start();
 require_once "database/timeslot_table.php";
 require_once "database/sales_table.php";
+require_once "database/invoice_table.php";
+require_once "database/sales_table.php";
 require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
@@ -42,33 +44,27 @@ $_SESSION["last_activity"] = time();
         <div class="toolbar_div">
             <a href="category_status.php" class="option" id="back">back</a>
         </div>
-        <div class="divider"></div>
-        <label class="switch" id="toolbar_toggle">
-            <input class="switch-input" type="checkbox" onclick=checkRequired() />
-            <span class="switch-label" data-on="Required" data-off="All"></span>
-            <span class="switch-handle"></span>
-        </label>
-        <div class="divider"></div>
-        <?php if ($_SESSION["userrole"] == "admin"): ?>
-        <div class="toolbar_div" id="print_expected_div">
-            <div id="div_left">
-                <span>Expected Sales</span>
-            </div>
-            <div id="div_right">
-                <form action="print_preview.php" method="post">
-                <span>$</span>
-                <input class="print_expected" type="number" name="expected_sales" value="<?php echo SalesTable::get_expected_sale($_SESSION['date']) ?>" onchange="this.form.submit()">
-                </form>
-            </div>
+        <div class="toolbar_div">
+            <label class="switch" id="toolbar_toggle">
+                <input class="switch-input" type="checkbox" onclick=checkRequired() />
+                <span class="switch-label" data-on="Required" data-off="All"></span>
+                <span class="switch-handle"></span>
+            </label>
         </div>
-        <div class="divider"></div>
-        <?php endif ?>
         <div class="toolbar_div">
             <a id="print_share" class="option" onclick=sendPrint()>Share</a>
         </div>
-        <div class="divider"></div>
         <div class="toolbar_div">
             <a id="print_pdf" class="option" onclick=printPdf()>PDF</a>
+        </div>
+        <div class="toolbar_div" id="invoice_div">
+            <?php $result = InvoiceTable::get_tracked($_SESSION["date"])->fetch_assoc();?>
+            <span id="track_invoice" class="fa-file-text-o">Invoice</span>
+            <label class="switch" id="toolbar_toggle">
+                <input class="switch-input" type="checkbox" <?php echo count($result) < 1 ? "" : "checked" ?> onclick=trackInvoice(this) />
+                <span class="switch-label" data-on="Tracking" data-off="off"></span>
+                <span class="switch-handle"></span>
+            </label>
         </div>
     </div>
 
@@ -170,6 +166,16 @@ $_SESSION["last_activity"] = time();
         document.getElementById("table_name").value = $(".tab_li.selected").children().html();
         document.getElementById("table_date").value = $("#print_date").children().children().html();
         $("#test_form").submit();
+
+    function trackInvoice(obj) {
+        var date = document.getElementById("session_date").value;
+
+        if ($(obj).prop("checked")) {
+            $.post("jq_ajax.php", {trackInvoice: "", date: date});
+        } else {
+            $.post("jq_ajax.php", {removeInvoice: "", date: date});
+        }
+
     }
 
     function sendPrint() {

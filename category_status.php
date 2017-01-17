@@ -65,7 +65,7 @@ $_SESSION["last_activity"] = time();
                 <div id="right">
                     <form  class="inline" action="category_status.php" method="post">
                         <span>$</span>
-                        <input type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="this.form.submit()">
+                        <input type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="updateTodaysSales(this);">
                     </form>
                 </div>
             </div>
@@ -151,32 +151,44 @@ $_SESSION["last_activity"] = time();
 
     function updateInventory(obj) {
         var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
-        var itemName = row.children[0].innerHTML;
-        var itemDate = document.getElementById("session_date").value;
-        var itemId = row.children[5].value;
         var itemQuantity = row.cells[3].children[0].value;
-        if (itemQuantity == "") {itemQuantity = 'NULL'};
-        var itemNote = row.cells[4].children[0].value;
-        $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote}, function(data, status) {
-            if (data) {
-                alertify
-                    .delay(2000)
-                    .success("Changes Saved");
-                if ($("#name").html() != "search result") {
-                    if ($(".switch-input").prop("checked")) { checkEmpty(); }
-                    updateCount();
+        if (itemQuantity < 0) {
+            row.cells[3].children[0].value = "";
+        } else {
+            var itemName = row.children[0].innerHTML;
+            var itemDate = document.getElementById("session_date").value;
+            var itemId = row.children[5].value;
+            itemQuantity = itemQuantity == "" ? 'NULL' : itemQuantity;
+            var itemNote = row.cells[4].children[0].value;
+            $.post("jq_ajax.php", {itemId: itemId, itemDate: itemDate, itemQuantity: itemQuantity, itemNote: itemNote}, function(data, status) {
+                if (data) {
+                    alertify
+                        .delay(2000)
+                        .success("Changes Saved");
+                    if ($("#name").html() != "search result") {
+                        if ($(".switch-input").prop("checked")) { checkEmpty(); }
+                        updateCount();
+                    }
                 }
-            }
-        })
-        .fail(function() {
-            alertify
-                .maxLogItems(10)
-                .delay(0)
-                .closeLogOnClick(true)
-                .error("Item '"+itemName+"' not saved. Click here to try again", function(event) {
-                    updateInventory(obj);
-                });
-        });
+            })
+            .fail(function() {
+                alertify
+                    .maxLogItems(10)
+                    .delay(0)
+                    .closeLogOnClick(true)
+                    .error("Item '"+itemName+"' not saved. Click here to try again", function(event) {
+                        updateInventory(obj);
+                    });
+            });
+        }
+    }
+
+    function updateTodaysSales(obj) {
+        if (obj.value < 0) {
+            obj.value = "";
+        } else {
+            obj.parentNode.submit();
+        }
     }
 
     function checkDeviation(obj, message, icon) {
