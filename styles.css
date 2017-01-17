@@ -39,8 +39,7 @@ body{
     color: #333;
 }
 iframe{
-    width: 100%;
-    height: 100%;
+    flex: 1;
     overflow: auto;
 }
 label{
@@ -144,6 +143,8 @@ select{
     flex-direction: column;
 }
 .div_item_list{
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: 0px;
     text-align: center;
@@ -156,13 +157,12 @@ select{
 .div_list{
     margin: 0;
     padding: 0;
-    height: 94%;
+    flex: 1;
 }
 .div_list_category{
     margin: 0;
     padding: 0;
     overflow: hidden;
-    height: 94%;
     flex: 1;
 }
 .div_left_tabs{
@@ -289,8 +289,13 @@ select{
     z-index: 2;
 }
 #div_print_table{
-    padding: 0px 2px;
+    padding: 0px;
     margin: 0;
+    overflow: auto;
+    border: 1px solid #cecece;
+}
+#div_print_table table{
+    border: none;
 }
 .div_right_tabs{
     position: absolute;
@@ -330,7 +335,8 @@ select{
 .main_top_side{
     margin: 0px;
     padding: 0px;
-    display: block;
+    display: flex;
+    flex-direction: column;
     flex: 2;
 }
 .main_iframe{
@@ -345,8 +351,7 @@ select{
 }
 .inventory_div{
     display: inline-block;
-    width: 79.9%;
-    height: 100%;
+    flex: 1;
     margin: 0;
     padding: 0;
     background: #f4f4f5;
@@ -678,10 +683,6 @@ select{
     height: 30px;
     margin: 5px 0px;
 }
-#message_frame{
-    width: 100%;
-    height: 100%;
-}
 .align_center{
     text-align: center;
 }
@@ -690,17 +691,11 @@ select{
 }
 .category_list{
     padding: 0px;
-    height: 100%;
     font-size: 20px;
     overflow: hidden;
     overflow-y: auto;
     list-style-type: none;
-}
-#category_list{
-    height: 90%;
-}
-.home_category_list{
-    height: 86%;
+    flex: 1;
 }
 .category_add{
     background: white;
@@ -924,7 +919,7 @@ select{
     text-transform: uppercase;
 }
 .div_category h4{
-    padding: 6px 0px;
+    padding: 10px 0px;
     font-size: 15px;
     text-transform: uppercase;
     font-weight: 600;
@@ -933,7 +928,7 @@ select{
     font-family: "Open Sans";
 }
 .div_item_list h4{
-    padding: 6px 0px;
+    padding: 10px 0px;
     font-size: 15px;
     text-transform: uppercase;
     font-weight: 600;
@@ -975,7 +970,7 @@ select{
 }
 .user_table th{
     text-align: center;
-    background: #F1EFEF;
+    background: #f4f4f5;
     border: 1px solid #cecece;
     border-left: none;
     border-right: none;
@@ -1011,11 +1006,10 @@ select{
     outline: none;
 }
 .toolbar_print{
-    width: 90%;
+    display: flex;
     padding: 0;
     border: 1px solid #cecece;
-    background: #f1efef;
-    margin: 0 auto;
+    background: #f4f4f5;
     font-family: "Open Sans";
 }
 .table_view{
@@ -1066,7 +1060,7 @@ select{
 .table_view th{
     min-width: 50px;
     text-align: center;
-    padding: 5px 0px;
+    padding: 10px 0px;
     border: none;
     text-transform: uppercase;
     font-family: "Open Sans";
@@ -1099,14 +1093,12 @@ select{
     content: "min";
 }
 td.table_heading{
-    background: #F1EFEF;
+    background: #f4f4f5;
     border: 1px solid #cecece !important;
     border-left: none !important;
     border-right: none !important;
     margin: 0;
     padding: 5px 0px !important;
-}
-.table_heading h4{
     font-size: 17px;
     text-transform: uppercase;
     font-weight: normal;
@@ -1546,12 +1538,13 @@ td.table_heading{
     max-width: 20%;
     text-align: initial;
     border-bottom: none;
-    height: 100%;
 }
 #div_table{
-    display: block;
-    margin: auto;
-    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 35px;
+    width: initial;
 }
 #items_div_table{
     display: block;
@@ -1560,7 +1553,7 @@ td.table_heading{
     padding: 0px 2px;
 }
 #toolbar_toggle{
-    margin: 0px;
+    margin: 5px;
 }
 .collapse_arrow{
     margin-right: 20px;
@@ -1906,7 +1899,6 @@ td.table_heading{
     transition:background-color .25s;
 }
 .message_cell.name{
-    width: 12%;
     font-size: 15px;
     min-width: 85px;
     overflow: hidden;
@@ -1980,6 +1972,7 @@ td.table_heading{
     color: #555;
     font-size: 15px;
     vertical-align: middle;
+    flex: 1;
 }
 
 .toolbar_div#print_expected_div{
@@ -2519,7 +2512,7 @@ td.table_heading{
 }
 .sidenav li#heading{
     text-align: center;
-    padding: 5px 0px;
+    padding: 9px 0px;
     border-bottom: 1px solid #cecece;
 }
 #heading h4{
@@ -2542,6 +2535,7 @@ td.table_heading{
     border: 1px solid transparent;
     border-left: none;
     border-right: none;
+    cursor: pointer;
 }
 .sidenav li a:before{
     position: relative;
@@ -2820,6 +2814,7 @@ td.table_heading{
     .div_sub_option{
         padding: 20px 2vw;
     }
+
 }
 
 
