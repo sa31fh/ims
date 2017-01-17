@@ -1823,6 +1823,55 @@ td.table_heading{
     text-transform: uppercase;
     font-family: "Open Sans";
 }
+.div_expected{
+    display: flex;
+    width: 60%;
+    margin: 0px auto;
+    padding: 0;
+}
+.div_expected div{
+    display: inline-block;
+    text-transform: uppercase;
+    text-align: center;
+    font-family: "Open Sans";
+    color: #555;
+    border: 1px solid #cecece;
+    border-top: none;
+    flex: 1;
+    padding-top: 5px;
+}
+.div_expected #left, .div_expected #right{
+    background: #f4f4f5;
+}
+.div_expected #center{
+    border-left: none;
+    border-right: none;
+}
+.div_expected span{
+    display: block;
+    padding: 5px;
+    font-size: 14px;
+}
+.div_expected #icon{
+    font-size: 21px;
+    display: inline-block;
+    padding: 0;
+}
+.div_expected #amount{
+    font-size: 20px;
+    color: #111;
+}
+.div_expected input{
+    border: none;
+    border-bottom: 1px solid #cecece;
+    margin: 5px 0px;
+    padding: 0px;
+    max-width: 150px;
+    min-width: 60px;
+    width: 10vw;
+    font-size: 20px;
+    text-align: center;
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .main_iframe#message_iframe{
     overflow: hidden;

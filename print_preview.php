@@ -15,7 +15,7 @@ if (isset($_POST["expected_sales"])) {
 }
 if (isset($_POST["table_data"])) {
     $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
-    $stylesheet = file_get_contents("styles.css");
+    $stylesheet = file_get_contents("css/pdf_styles.css");
     $mpdf->useSubstitutions=false;
     $mpdf->simpleTables = true;
     $mpdf->WriteHtml($stylesheet, 1);
@@ -67,6 +67,34 @@ $_SESSION["last_activity"] = time();
             </label>
         </div>
     </div>
+
+<?php if ($_SESSION["userrole"] == "admin"): ?>
+    <div class="div_expected">
+        <div id="left">
+            <span id="heading">Todays sales</span>
+            <span id="amount">
+            <?php $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
+            echo is_null($todays_sales) ? "-" :  "$ ".$todays_sales;?>
+            </span>
+        </div>
+        <div id="center">
+            <span id="heading">Expected Sales</span>
+            <form action="print_preview.php" method="post" id="expected_form">
+                <span id="icon">$</span>
+                <input class="print_expected" type="number" name="expected_sales" value="<?php echo SalesTable::get_expected_sale($_SESSION['date']) ?>" onchange=updateExpectedSales(this)>
+            </form>
+        </div>
+        <div id="right">
+            <?php $date =  date_sub(date_create($_SESSION["date"]), date_interval_create_from_date_string("6 days"));?>
+            <span id="heading"><?php echo "last ".date_format($date, "l")."s sales" ?></span>
+            <span id="amount">
+            <?php $last_week = date_format($date, "Y-m-d");
+            $sales = SalesTable::get_actual_sale($last_week);
+            echo is_null($sales) ? "-" : "$ ".$sales;?>
+            </span>
+        </div>
+    </div>
+<?php endif ?>
 
     <div class="div_table" id="div_table">
         <div class="div_left_tabs">
@@ -142,6 +170,14 @@ $_SESSION["last_activity"] = time();
         }
     }
 
+    function updateExpectedSales(obj) {
+        if (obj.value < 0) {
+            obj.value = "";
+        } else {
+            obj.parentNode.submit();
+        }
+    }
+
     function updateNotes(obj) {
         var itemNote = obj.value;
         var itemId = obj.parentNode.children[1].value;
@@ -153,19 +189,13 @@ $_SESSION["last_activity"] = time();
     }
 
     function printPdf() {
-        var table = document.createElement("table");
-        table.setAttribute("class", "table_view");
-        table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
-                            $(".tab_li.selected").children().html(); + "</th></tr>";
-        $(".table_view tr").each(function() {
-            if($(this).css('display') != 'none') {
-                table.innerHTML += this.outerHTML;
-            }
+        createTable(function(table) {
+            $("#table_data").val(table.outerHTML);
+            document.getElementById("table_name").value = $(".tab_li.selected").children().html();
+            document.getElementById("table_date").value = $("#print_date").children().children().html();
+            $("#test_form").submit();
         });
-        $("#table_data").val(table.outerHTML);
-        document.getElementById("table_name").value = $(".tab_li.selected").children().html();
-        document.getElementById("table_date").value = $("#print_date").children().children().html();
-        $("#test_form").submit();
+    }
 
     function trackInvoice(obj) {
         var date = document.getElementById("session_date").value;
@@ -179,20 +209,42 @@ $_SESSION["last_activity"] = time();
     }
 
     function sendPrint() {
+        createTable(function(table) {
+            document.getElementById("new_print_data").value = table.outerHTML;
+            document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
+            document.getElementById("print_table_date").value = $("#print_date").children().children().html();
+            $(".div_popup_back").css("display", "block");
+            $("#print_form").submit();
+        });
+    }
+
+    function createTable(callBack) {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");
         table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
                             $(".tab_li.selected").children().html(); + "</th></tr>";
-        table.innerHTML += $(".table_view").html();
-        document.getElementById("new_print_data").value = table.outerHTML;
-        document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
-        document.getElementById("print_table_date").value = $("#print_date").children().children().html();
-        $(".div_popup_back").css("display", "block");
-        $("#print_form").submit();
+        $(".table_view tr").each(function() {
+            if($(this).css('display') != 'none') {
+                var row = document.createElement("TR");
+                var cell = "";
+                $(this).children().each(function() {
+                    if ($(this).children("textarea").length > 0) {
+                        var td = document.createElement("TD");
+                        td.innerHTML = $(this).children().val();
+                        cell += td.outerHTML;
+                    } else {
+                        cell += this.outerHTML;
+                    }
+                });
+                row.innerHTML = cell;
+                table.innerHTML += row.outerHTML;
+            }
+        });
+        callBack(table);
     }
 
     function checkRequired() {
-        if ($(".switch-input").prop("checked")) {
+        if ($("#toolbar_toggle .switch-input").prop("checked")) {
             $(".print_tbody").each(function() {
                 var total = $(this).find(".quantity_required").length;
                 var remove = 0;
