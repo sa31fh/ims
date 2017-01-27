@@ -53,7 +53,7 @@
                     $current_category = $row["category_name"];
                 $attachment .=
                 '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="6" class="table_heading"><h4 class="none" >'.$row["category_name"].'</h4></td></tr>
+                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
                         <th>Item</th><th>Unit</th><th>Expected Quantity</th><th>Quantity Present</th><th>Accepted Deviation</th><th>Current Deviation</th>
                     </tr>';
@@ -85,7 +85,7 @@
         }
 
         $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
-        $stylesheet = file_get_contents("styles.css");
+        $stylesheet = file_get_contents("css/pdf_styles.css");
         $mpdf->useSubstitutions=false;
         $mpdf->simpleTables = true;
         $mpdf->WriteHtml($stylesheet, 1);

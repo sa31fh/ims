@@ -7,9 +7,6 @@
     border-radius: 2px;
     background: white;
 }
-.table_view tr{
-    min-width: 400px;
-}
 .table_view #category{
     padding: 5px 0px;
 }
@@ -19,8 +16,7 @@
     padding: 10px;
     border: none;
     text-transform: uppercase;
-    font-family: "Open Sans";
-    font-weight: 600;
+    font-weight: bold;
     font-size: 14px;
     color: #555;
 }
@@ -40,11 +36,11 @@
     word-wrap: break-word;
     font-size: 15px;
 }
-td.table_heading{
+.table_heading{
     background: #f4f4f5;
-    border: 1px solid #cecece !important;
-    border-left: none !important;
-    border-right: none !important;
+    border: 1px solid #cecece;
+    border-left: none;
+    border-right: none;
     margin: 0;
     padding: 5px 0px !important;
     font-size: 16px;
@@ -52,9 +48,11 @@ td.table_heading{
     font-weight: bold;
 }
 .print_table_date{
-    display: block;
     padding: 2px 0px 0px 0px;
-    font-size: 13px;
+    font-size: 11px;
     color: #667;
     font-weight: normal;
+}
+.expected_heading{
+    background: #ededed;
 }
