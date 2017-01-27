@@ -254,23 +254,33 @@ if (isset($_POST["getPrintPreview"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $sales_factor = SalesTable::get_expected_sale($_SESSION["date"]) / VariablesTable::get_base_sales();
-                    $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-");
-                    if ($row["rounding_option"] == "up") {
-                        $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                    } else if ($row["rounding_option"] == "down") {
-                        $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                    }
-                    if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
-                        $cost = "$ ".round($quantity * $row["price"], 2);
+                    $expected_sales = SalesTable::get_expected_sale($_SESSION["date"]);
+                    if (is_numeric($expected_sales)) {
+                        $sales_factor = $expected_sales / VariablesTable::get_base_sales();
+                        if (is_numeric($row["quantity"])) {
+                            $quantity = BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"];
+                            if ($row["rounding_option"] == "up") {
+                                $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                            } else if ($row["rounding_option"] == "down") {
+                                $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                            }
+                        } else {
+                            $quantity = "-";
+                        }
+                        if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
+                            $cost = "$ ".round($quantity * $row["price"], 2);
+                        } else {
+                            $cost = "-";
+                        }
                     } else {
+                        $quantity = "-";
                         $cost = "-";
                     }
         echo  '     <td>'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
                     <td>'.$row["quantity"].'</td>
                     <td class="quantity_required">'.$quantity.'</td>
-                    <td>'.$cost.'</td>
+                    <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
                         <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'">'.$row["notes"].'</textarea>
                         <input type="hidden" value="'.$row["item_id"].'">
@@ -297,7 +307,7 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
         }
         echo '<tr id="column_data" class="row">';
                     $sales_factor = SalesTable::get_expected_sale($_SESSION["date"]) / VariablesTable::get_base_sales();
-                    $quantity = (is_numeric($row["quantity"]) ? (BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"]): "-");
+                    $quantity = (is_numeric($row["quantity"]) ? (BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"]): "-");
                     if ($quantity != "-") {
                         $quantity = eval("return ".str_replace('x', $quantity, $row["factor"]).";");
                         if ($row["rounding_option"] == "up") {
@@ -333,16 +343,22 @@ if (isset($_POST["getTrackedInvoice"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $sales_factor = SalesTable::get_expected_sale($_POST['date']) / VariablesTable::get_base_sales();
-                    $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_name"]) - $row["quantity"] : "-");
-                    if ($row["rounding_option"] == "up") {
-                        $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                    } else if ($row["rounding_option"] == "down") {
-                        $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                    }
-                    if (($row["quantity_delivered"] != "-" AND $row["quantity_delivered"] > -1) AND $row["price"] != "-") {
-                        $cost = "$ ".round($row["quantity_delivered"] * $row["price"], 2);
+                    $expected_sales = SalesTable::get_expected_sale($_POST['date']);
+                    if (is_numeric($expected_sales)) {
+                        $sales_factor = $expected_sales / VariablesTable::get_base_sales();
+                        $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"] : "");
+                        if ($row["rounding_option"] == "up") {
+                            $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                        } else if ($row["rounding_option"] == "down") {
+                            $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                        }
+                        if (($row["quantity_delivered"] != "-" AND $row["quantity_delivered"] > -1) AND $row["price"] != "-") {
+                            $cost = "$ ".round($row["quantity_delivered"] * $row["price"], 2);
+                        } else {
+                            $cost = "-";
+                        }
                     } else {
+                        $quantity = "";
                         $cost = "-";
                     }
         echo  '     <td>'.$row["item_name"].'</td>

@@ -11,7 +11,8 @@ if (!isset($_SESSION["username"])) {
     exit();
 }
 if (isset($_POST["expected_sales"])) {
-    SalesTable::add_expected_sale($_POST["expected_sales"], $_SESSION["date"]);
+    $sales = empty($_POST["expected_sales"]) ? 'NULL' : $_POST["expected_sales"];
+    SalesTable::add_expected_sale($sales, $_SESSION["date"]);
 }
 if (isset($_POST["table_data"])) {
     $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
@@ -266,6 +267,17 @@ $_SESSION["last_activity"] = time();
             });
         }
     }
+
+    (function checkExpectedSales() {
+        if($(".print_expected").val() == "") {
+            $("#center").css("border", "1px solid red");
+            var div = document.createElement("div");
+            div.setAttribute("id", "warning");
+            div.innerHTML = "enter expected sales";
+            var parent = document.getElementById("center");
+            parent.appendChild(div);
+        }
+    })();
 
     $(document).ready(function() {
         $(".tab_li span:first").each(function() {

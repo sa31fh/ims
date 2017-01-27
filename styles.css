@@ -1543,7 +1543,7 @@ td.table_heading{
     display: flex;
     flex-direction: column;
     flex: 1;
-    margin-top: 35px;
+    margin-top: 50px;
     width: initial;
 }
 #items_div_table{
@@ -1837,8 +1837,21 @@ td.table_heading{
     background: #f4f4f5;
 }
 .div_expected #center{
+    position: relative;
     border-left: none;
     border-right: none;
+}
+.div_expected #center #warning{
+    position: absolute;
+    top: 100%;
+    font-size: 12px;
+    padding: 0;
+    margin: 5px;
+    border: none;
+    left: 0;
+    right: 0;
+    text-align: none;
+    color: #d22a2a;
 }
 .div_expected span{
     display: block;
