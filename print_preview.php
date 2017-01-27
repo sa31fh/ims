@@ -221,6 +221,7 @@ $_SESSION["last_activity"] = time();
 
     function createTable(callBack) {
         var table = document.createElement("table");
+        var row_count = 0;
         table.setAttribute("class", "table_view");
         table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
                             $(".tab_li.selected").children().html(); + "</th></tr>";
@@ -239,8 +240,19 @@ $_SESSION["last_activity"] = time();
                 });
                 row.innerHTML = cell;
                 table.innerHTML += row.outerHTML;
+                row_count == 0 ? table.innerHTML += "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>" +
+                                                    "<span> $"+ $(".print_expected").val() +"</span></th></tr>" : "";
+                row_count++;
             }
         });
+        var totalCost = "";
+        $(".cost").each(function() {
+            var value = $(this).html() != "-" ? $(this).html() : "";
+            totalCost = +totalCost + +value.replace('$ ', "");
+        });
+        totalCost != "" ? totalCost = "$" + totalCost  : totalCost = "-";
+        table.innerHTML += "<tr><td class='table_heading' colspan='3'><h4>Total Cost</h4></td>"+
+                           "<td class='table_heading' colspan='3'><h4>"+totalCost+"</h4></td></tr>";
         callBack(table);
     }
 
