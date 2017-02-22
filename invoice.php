@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "database/invoice_table.php";
+require_once "database/catering_order_table.php";
 require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
@@ -38,27 +39,60 @@ $_SESSION["last_activity"] = time();
 </head>
 <body class="overflow_hidden font_open_sans">
     <div class="main overflow_hidden">
-        <ul class="sidenav font_roboto" id="sideNav">
-            <li id="heading"><h4>Tracked Invoices</h4></li>
-            <?php $result = InvoiceTable::get_tracked_invoices();
-            while ($row = $result->fetch_assoc()) :
-            $date = date_add(date_create($row["date"]), date_interval_create_from_date_string("1 day")); ?>
-            <li>
-                <a class="invoice_date" onclick="showInvoice(this)">
-                    <div id="left">
-                        <span><?php echo date_format($date, "jS"); ?></span>
-                    </div>
-                    <div id="right">
-                        <span id="top"><?php echo date_format($date, "F"); ?></span>
-                        <span id="bottom"><?php echo date_format($date, "D Y"); ?></span>
-                    </div>
-                    <input type="hidden" id="selected_date" value="<?php echo date_format($date, "jS F Y") ?>">
-                    <input type="hidden" id="created_date" value="<?php echo date_format(date_create($row["date"]), "jS F Y") ?>">
-                </a>
-                <input type="hidden" value="<?php echo $row["date"] ?>">
-            </li>
-            <?php endwhile?>
-        </ul>
+        <div class="sidenav" id="invoice_sidenav">
+            <div id="heading"><h4>Tracked Invoices</h4></div>
+            <ul class="side_nav" id="invoice_ul">
+                <?php $result = InvoiceTable::get_tracked_invoices();
+                while ($row = $result->fetch_assoc()) :
+                $date = date_add(date_create($row["date"]), date_interval_create_from_date_string("1 day")); ?>
+                <li>
+                    <a class="invoice_date" onclick="showInvoice(this)">
+                        <div id="left">
+                            <span><?php echo date_format($date, "jS"); ?></span>
+                        </div>
+                        <div id="right">
+                            <span id="top"><?php echo date_format($date, "F"); ?></span>
+                            <span id="bottom"><?php echo date_format($date, "D Y"); ?></span>
+                        </div>
+                        <input type="hidden" id="selected_date" value="<?php echo date_format($date, "D, jS M Y") ?>">
+                        <input type="hidden" id="created_date" value="<?php echo date_format(date_create($row["date"]), "jS M Y") ?>">
+                    </a>
+                    <input type="hidden" value="<?php echo $row["date"] ?>">
+                </li>
+                <?php endwhile?>
+            </ul>
+            <ul class="display_none side_nav" id="catering_ul" >
+          <?php $result = CateringOrderTable::get_order_invoice();
+                $delivery_date = 1;
+                while ($row = $result->fetch_assoc()): ?>
+                <?php if ($row["date_delivery"] != $delivery_date): ?>
+                  <?php $delivery_date = $row["date_delivery"];?>
+                        <li class="heading">
+                            <span><?php echo date("jS M Y, l", strtotime($row["date_delivery"])); ?></span>
+                        </li>
+                <?php endif ?>
+                    <li id="order_li">
+                        <a onclick="getCateringInvoice(this)">
+                            <span id="order_name"><?php echo $row["name"] ?></span>
+                            <span id="order_date_created">created on <?php echo date("jS M Y", strtotime($row["date_created"]))?></span>
+                        </a>
+                        <input id="order_id" type="hidden" value="<?php echo $row["id"] ?>">
+                        <input id="order_date" type="hidden" value="<?php echo $row["date_delivery"] ?>">
+                        <input type="hidden" id="order_date_format" value="<?php echo date("D, jS M Y", strtotime($row["date_delivery"])); ?>">
+                    </li>
+                <?php endwhile ?>
+            </ul>
+            <div class="toolbar_print">
+                <div class="toolbar_div option selected" id="invoice_tab">
+                   <span class="icon_small fa-file-text"></span>
+                   <span class="icon_small_text">Inventory</span>
+                </div>
+                <div class="toolbar_div option" id="catering_tab">
+                    <span class="icon_small fa-cutlery"></span>
+                    <span class="icon_small_text">Catering</span>
+                </div>
+            </div>
+        </div>
 
         <div class="main_top_side">
             <div class="toolbar_print"  id="invoice_toolbar">
@@ -85,7 +119,8 @@ $_SESSION["last_activity"] = time();
                 <table class="table_view" id="invoice_table">
                     <tr id="print_date" class="row">
                         <th colspan="6">
-                            <span></span>
+                            <div id="table_date_heading"></div>
+                            <span id="table_date_span"></span>
                             <div class="print_table_date"></div>
                         </th>
                     </tr>
@@ -135,6 +170,17 @@ $_SESSION["last_activity"] = time();
         });
     }
 
+    function getCateringInvoice(obj) {
+        var orderId = obj.parentNode.children[1].value;
+
+        $.post("jq_ajax.php", {getCateringOrderInvoice: "", orderId: orderId}, function(data, status) {
+            $(".print_tbody").remove();
+            $("#invoice_table").append(data);
+            checkRequired();
+            totalCost();
+        });
+    }
+
     function updateQuantity(obj) {
         if (obj.value < 0 ) {
             obj.value = "";
@@ -146,7 +192,6 @@ $_SESSION["last_activity"] = time();
 
         $.post("jq_ajax.php", {updateQuantityDelivered: "", quantity: quantity, itemId: itemId, date: date});
         quantity != "NULL" ? updateCost(itemId, quantity, obj) : obj.parentNode.parentNode.children[4].innerHTML = "-";
-        checkRequired();
         }
     }
 
@@ -165,7 +210,23 @@ $_SESSION["last_activity"] = time();
         var note = obj.value;
 
         $.post("jq_ajax.php", {updateInvoiceNotes: "", note: note, itemId: itemId, date: date});
-        checkRequired();
+    }
+
+    function updateCateringNotes(obj) {
+        var itemNote = obj.value;
+        var itemId = obj.parentNode.parentNode.children[6].value;
+        var orderId = $(".active").parent().find("#order_id").val();
+
+        $.post("jq_ajax.php", {updateCateringInvoiceNotes: "", notes: itemNote, itemId: itemId, orderId: orderId });
+    }
+
+    function updateCateringQuantity(obj) {
+        var quantity = obj.value;
+        var itemId = obj.parentNode.parentNode.children[6].value;
+        var orderId = $(".active").parent().find("#order_id").val();
+
+        $.post("jq_ajax.php", {updateCateringInvoiceQuantity: "", quantity: quantity, itemId: itemId, orderId: orderId });
+        updateCost(itemId, quantity, obj)
     }
 
     function checkRequired() {
@@ -195,9 +256,11 @@ $_SESSION["last_activity"] = time();
 
     function sendPrint() {
         createTable(function(table) {
+            var name = $(".option.selected").find(".icon_small_text").html() == "Inventory"
+                       ? "Inventory Invoice" : "Catering Order Invoice - "+$(".active").find("#order_name").html();
             document.getElementById("new_print_data").value = table.outerHTML;
-            document.getElementById("print_table_name").value = "Invoice";
-            document.getElementById("print_table_date").value = $("#print_date").children().children().html();
+            document.getElementById("print_table_name").value = name;
+            document.getElementById("print_table_date").value = $("#print_date").children().find("#table_date_span").html();
             $(".div_popup_back").css("display", "block");
             $("#print_form").submit();
         });
@@ -205,9 +268,11 @@ $_SESSION["last_activity"] = time();
 
     function printPdf() {
         createTable(function(table) {
+            var name = $(".option.selected").find(".icon_small_text").html() == "Inventory"
+                       ? "Inventory Invoice" : "Catering Order Invoice - "+$(".active").find("#order_name").html();
             $("#table_data").val(table.outerHTML);
-            document.getElementById("table_name").value = "Invoice";
-            document.getElementById("table_date").value = $("#print_date").children().children().html();
+            document.getElementById("table_name").value = name;
+            document.getElementById("table_date").value = $("#print_date").children().find("#table_date_span").html();
             $("#test_form").submit();
         });
     }
@@ -215,7 +280,13 @@ $_SESSION["last_activity"] = time();
     function createTable(callBack) {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");
-        table.innerHTML += "<tr class='row'><th colspan='6' class='heading'>Invoice</th></tr>";
+        if ($(".option.selected").find(".icon_small_text").html() != "Inventory") {
+            var orderName = $(".active").find("#order_name").html();
+            table.innerHTML += "<tr class='row'><th colspan='6'>Catering Order</th></tr>";
+            table.innerHTML += "<tr class='row'><th colspan='6' class='heading'>"+orderName+"</th></tr>";
+        } else {
+            table.innerHTML += "<tr class='row'><th colspan='6' class='heading'>Invoice</th></tr>";
+        }
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
@@ -251,23 +322,62 @@ $_SESSION["last_activity"] = time();
 
     $(document).ready(function() {
 
-        $("#sideNav li:nth-child(2)").each(function() {
-            showInvoice($(this).children()[0]);
-            $(this).children().addClass("active");
+        $("#invoice_ul li:first a").each(function() {
+            showInvoice($(this)[0]);
+            $(this).addClass("active");
             $("#print_date span").html($(this).find("#selected_date").val());
-            $("#print_date div").html("created on " + $(this).find("#created_date").val());
+            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
         });
 
-        $('#sideNav li a').click(function() {
-            $('#sideNav li a').removeClass("active");
+        $('#invoice_ul li a').click(function() {
+            $('.side_nav li a').removeClass("active");
             $(this).addClass('active');
+            $("#table_date_heading").html("");
             $("#print_date span").html($(this).find("#selected_date").val());
-            $("#print_date div").html("created on " + $(this).find("#created_date").val());
+            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+        });
+
+        $('#catering_ul li a').click(function() {
+            $('.side_nav li a').removeClass("active");
+            $(this).addClass('active');
+            $("#table_date_heading").html("Delivery Date");
+            $("#print_date span").html($(this).parent().find("#order_date_format").val());
+            $("#print_date .print_table_date").html($(this).parent().find("#order_date_created").html());
         });
 
          $("#popup_close").click(function() {
             $(".div_popup_back").fadeOut(190, "linear");
             $(".main_iframe").removeClass("blur");
+        });
+
+        $("#catering_tab").click(function() {
+            $(".option").removeClass("selected");
+            $(this).addClass("selected");
+            $("#invoice_sidenav #heading h4").html("Tracked Orders");
+            $("#invoice_ul").css("display", "none");
+            $("#catering_ul").css("display", "block");
+            $("#catering_ul #order_li:first a").each(function() {
+                getCateringInvoice($(this)[0]);
+                $(this).addClass("active");
+                $("#table_date_heading").html("Delivery Date");
+                $("#print_date span").html($(this).parent().find("#order_date_format").val());
+                $("#print_date .print_table_date").html($(this).parent().find("#order_date_created").html());
+            });
+        });
+
+        $("#invoice_tab").click(function() {
+            $(".option").removeClass("selected");
+            $(this).addClass("selected");
+            $("#invoice_sidenav #heading h4").html("Tracked Invoices");
+            $("#catering_ul").css("display", "none");
+            $("#invoice_ul").css("display", "block");
+            $("#invoice_ul li:first").each(function() {
+                showInvoice($(this).children()[0]);
+                $(this).children().addClass("active");
+                $("#table_date_heading").html("");
+                $("#print_date span").html($(this).find("#selected_date").val());
+                $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+            });
         });
 
      });
