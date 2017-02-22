@@ -259,16 +259,16 @@ $_SESSION["last_activity"] = time();
             date_check_holder.appendChild(date_check_div);
 
             $("#date_check_div").datepicker({
-                    dateFormat: "yy-mm-dd",
-                    defaultDate: $("#cal_date").val(),
-                    dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
-                    currentText: "close",
-                    prevText: "previous",
-                    onSelect: function(dateText) {
-                        $("#cal_date").val(dateText);
-                        $("#cal_form").submit();
-                    }
-                });
+                dateFormat: "yy-mm-dd",
+                defaultDate: $("#cal_date").val(),
+                dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                currentText: "close",
+                prevText: "previous",
+                onSelect: function(dateText) {
+                    $("#cal_date").val(dateText);
+                    $("#cal_form").submit();
+                }
+            });
         }
     })();
 

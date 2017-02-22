@@ -82,7 +82,7 @@ if (isset($_POST["message"])) {
         if (window.parent.document.title == "Messages") {
             window.parent.location.href = window.parent.location.href;
         } else {
-            $(".div_popup_back", window.parent.document).fadeOut(190, "linear");
+            $(".div_popup_back", window.parent.document).css("display", "none");
         }
     }
 

@@ -43,7 +43,7 @@ if (isset($_POST["base_sales"])) {
 <head>
     <meta charset="UTF-8">
     <title>Time Slots</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?38">
 </head>
 <body>
     <div class="main_iframe">
@@ -72,10 +72,12 @@ if (isset($_POST["base_sales"])) {
         </div>
         <div class="div_fade"></div>
 
-        <div class="div_category font_open_sans" id="item_list_div">
+       <div class="div_category font_open_sans" id="item_list_div">
+            <div class="popup_titlebar">
+                <span class="popup_close" id="item_list_cancel"></span>
+            </div>
+            <div><h4>All Items</h4></div>
             <ul class="category_list">
-                <button class="button_flat inline" id="item_list_cancel">Close</button>
-                <h4 class="inline">ALL ITEMS</h4><hr>
                 <?php $result = ItemTable::get_items_categories(); ?>
                 <?php $current_category = 1; ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
@@ -99,66 +101,69 @@ if (isset($_POST["base_sales"])) {
         </div>
 
         <div class="div_table font_roboto" id="items_div_table">
-            <div class="div_left_tabs">
-                <ul class="tab_ul">
-                    <li class="tab_li"><span id="day_tab" onclick=getTab(this)><?php echo "Full Day" ?></span></li>
-                </ul>
-            </div>
-            <div class="div_right_tabs">
-                <ul class="tab_ul inline" id="timeslot_ul">
-                <?php $result = TimeslotTable::get_timeslots(); ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <div class="tab_div" timeslot-name="<?php echo $row['name'] ?>">
-                        <li class="tab_li" ><span><?php echo $row["name"] ?></span></li>
-                    </div>
-                <?php endwhile ?>
-                </ul>
-                <button class="tab_delete_button" onclick=tabDelete()><img src="images/delete.png" alt="" width="25px" height="25px"></button>
-                <input type="submit" class="tab_add_button" value="+">
-            </div>
-
-            <table class="table_view" id="table" border="1px" >
-                <tr class="option_bar">
-                    <th colspan="2" id="button_th">
-                        <button class="button_flat entypo-plus" id="add_item_button">Add</button>
-                        <div class="divider"></div>
-                        <button class="button_flat entypo-trash" id="delete_item">Delete</button>
-                    </th>
-                    <th colspan="4" id="th_sales">
-                        <div class="none" id="div_quantity_sales">
-                            Quantity for sales
-                            <form action="edit_items.php" method="post" class="inline middle">
-                            <span>$</span>
-                                <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center">
-                            </form>
+            <div class="div_child" id="inventory_tabs">
+                <div class="div_left_tabs">
+                    <ul class="tab_ul">
+                        <li class="tab_li"><span id="day_tab" onclick=getTab(this)><?php echo "Full Day" ?></span></li>
+                    </ul>
+                </div>
+                <div class="div_right_tabs">
+                    <ul class="tab_ul inline" id="timeslot_ul">
+                    <?php $result = TimeslotTable::get_timeslots(); ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <div class="tab_div" timeslot-name="<?php echo $row['name'] ?>">
+                            <li class="tab_li" ><span onclick=getTab(this)><?php echo $row["name"] ?></span></li>
                         </div>
-                    </th>
-                    <th >
-                        <input class="search_bar" id="search_bar" type="search" placeholder="search" oninput=searchBar(this)>
-                    </th>
-                </tr>
-                <tr class="tr_confirm">
-                    <td class="td_checkbox">
-                        <div class="checkbox">
-                            <input type="checkbox" class="item_checkbox" id="select_all">
-                            <span class="checkbox_style"></span>
-                        </div>
-                    </td>
-                    <td id="td_cancel">Cancel
-                    <td id="td_done">Done</th>
-                </tr>
-                <tr>
-                    <th id="buffer"></th>
-                    <th>Item</th>
-                    <th>Unit</th>
-                    <th id="th_quantity">Quantity</th>
-                    <th id="th_price">Price</th>
-                    <th id="th_deviation">Deviation</th>
-                    <th id="th_rounding">Rounding</th>
-                </tr>
-                <tbody id="item_tbody">
-                </tbody>
-            </table>
+                    <?php endwhile ?>
+                    </ul>
+                    <button class="tab_delete_button entypo-trash" onclick=tabDelete()></button>
+                    <button class="tab_add_button entypo-plus"></button>
+                </div>
+            </div>
+            <div id="div_print_table">
+                <table class="table_view" id="item_table_view" border="1px" >
+                    <tr class="option_bar">
+                        <th colspan="2" id="button_th">
+                            <button class="button_flat entypo-plus" id="add_item_button">Add</button>
+                            <div class="divider"></div>
+                            <button class="button_flat entypo-trash" id="delete_item">Delete</button>
+                        </th>
+                        <th colspan="4" id="th_sales">
+                            <div class="none" id="div_quantity_sales">
+                                Quantity for sales
+                                <form action="edit_items.php" method="post" class="inline middle">
+                                <span>$</span>
+                                    <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center">
+                                </form>
+                            </div>
+                        </th>
+                        <th >
+                            <input class="search_bar" id="search_bar" type="search" placeholder="search" oninput=searchBar(this)>
+                        </th>
+                    </tr>
+                    <tr class="tr_confirm">
+                        <td class="td_checkbox">
+                            <div class="checkbox">
+                                <input type="checkbox" class="item_checkbox" id="select_all">
+                                <span class="checkbox_style"></span>
+                            </div>
+                        </td>
+                        <td id="td_cancel">Cancel
+                        <td id="td_done">Done</th>
+                    </tr>
+                    <tr>
+                        <th id="buffer"></th>
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th id="th_quantity">Quantity</th>
+                        <th id="th_price">Price</th>
+                        <th id="th_deviation">Deviation</th>
+                        <th id="th_rounding">Rounding</th>
+                    </tr>
+                    <tbody id="item_tbody">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -236,7 +241,7 @@ if (isset($_POST["base_sales"])) {
     function updateRoundingOption(obj) {
         var option = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
 
         $.post("jq_ajax.php", {updateRoundingOption: "", roundingOption: option, itemId: itemId});
 
@@ -250,7 +255,7 @@ if (isset($_POST["base_sales"])) {
     function updateRoundingFactor(obj) {
         var factor = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
 
         $.post("jq_ajax.php", {updateRoundingFactor: "", roundingFactor: factor, itemId: itemId});
     }
@@ -262,7 +267,7 @@ if (isset($_POST["base_sales"])) {
             obj.value = deviation;
         }
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
 
         $.post("jq_ajax.php", {updateItemDeviation: "", deviation: deviation, itemId: itemId});
     }
@@ -284,7 +289,7 @@ if (isset($_POST["base_sales"])) {
             eval(eqTest);
             factor = factor.toLowerCase();
             var rowIndex = obj.parentNode.parentNode.rowIndex;
-            var tsiId = document.getElementById("table").rows[rowIndex].children[4].value;
+            var tsiId = document.getElementById("item_table_view").rows[rowIndex].children[4].value;
             $.post("jq_ajax.php", {UpdateTimeslotFactor: "", tsiId: tsiId, factor: factor});
         } catch (e) {
             var erMessage = "<div class='error'> Incorrect Equation </div>";
@@ -296,13 +301,13 @@ if (isset($_POST["base_sales"])) {
     function quantityChange(obj) {
         var quantity = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("table").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
 
         $.post("jq_ajax.php", {updateItemQuantity: "", itemId: itemId, quantity: quantity});
     }
 
     function updateItem(obj) {
-        var row =document.getElementById("table").rows[obj.parentNode.parentNode.rowIndex];
+        var row =document.getElementById("item_table_view").rows[obj.parentNode.parentNode.rowIndex];
         var itemName = row.children[2].children[0].value;
         var itemUnit  = row.children[3].children[0].value;
         var itemPrice  = row.children[5].children[0].value;
@@ -391,22 +396,6 @@ if (isset($_POST["base_sales"])) {
             $(".div_popup_back").css("display", "block");
             $(".main_iframe").addClass("blur");
         });
-
-        $(".tab_add_button").hover(
-            function() {
-                $(".tab_delete_button").css({opacity: "1",
-                                             transform: "translateY(30px)",
-                                             border: "1px solid #F44336", "border-top": "none"});
-            },  function() {
-                if ($(".tab_delete_button").is(":hover")) {
-                    $(".tab_delete_button").mouseleave(function() {
-                        $(".tab_delete_button").css({transform: "translateY(0px)", border: "1px solid transparent", opacity: "0"});
-                    });
-                } else {
-                    $(".tab_delete_button").css({transform: "translateY(0px)", border: "1px solid transparent", opacity: "0"});
-                }
-            }
-        );
 
         $(".popup_close").click(function() {
             $(".main_iframe").removeClass("blur");

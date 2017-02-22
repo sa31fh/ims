@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once "database_table.php";
 
 class SalesTable extends DatabaseTable {
