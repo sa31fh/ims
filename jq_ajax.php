@@ -16,6 +16,8 @@ require_once "database/sales_table.php";
 require_once "database/notification_status_table.php";
 require_once "database/sub_notification_status_table.php";
 require_once "database/invoice_table.php";
+require_once "database/catering_item_table.php";
+require_once "database/catering_order_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -446,6 +448,103 @@ if (isset($_POST["getSearchInventory"])) {
     }
 }
 
+if (isset($_POST["getCateringItems"])) {
+    $result = CateringItemTable::get_items($_POST["orderId"]);
+    $current_category = null;
+    while ($row = $result->fetch_assoc()) {
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="4" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Quantity</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        echo '<tr id="column_data" class="row">';
+        echo  '     <td class="item_name">'.$row["item_name"].'</td>
+                    <td>'.$row["unit"].'</td>
+                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_required"].'"></td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                    </td>
+                    <input type="hidden" value="'.$row["item_id"].'">
+                </tr>';
+    }
+}
+
+if (isset($_POST["getCateringItemTable"])) {
+    $result = CateringItemTable::get_items($_POST["orderId"]);
+    $current_category = null;
+    while ($row = $result->fetch_assoc()) {
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="5" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Quantity Required</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        echo '<tr id="column_data" class="row">';
+                    if (($row["quantity_required"] != "-" AND $row["quantity_required"] > -1) AND $row["price"] != "-") {
+                        $cost = "$ ".round($row["quantity_required"] * $row["price"], 2);
+                    } else {
+                        $cost = "-";
+                    }
+        echo  '     <td>'.$row["item_name"].'</td>
+                    <td>'.$row["unit"].'</td>
+                    <td class="quantity_required">'.$row["quantity_required"].'</td>
+                    <td class="cost">'.$cost.'</td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this); " value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                        <input type="hidden" value="'.$row["item_id"].'">
+                    </td>
+                </tr>';
+    }
+}
+
+if (isset($_POST["getCateringOrderInvoice"])) {
+    $result = CateringItemTable::get_items($_POST["orderId"]);
+    $current_category = null;
+    while ($row = $result->fetch_assoc()) {
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Quantity Required</th>
+                        <th>Quantity Delivered</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        echo '<tr id="column_data" class="row">';
+                    if (($row["quantity_delivered"] != "-" AND $row["quantity_delivered"] > -1) AND $row["price"] != "-") {
+                        $cost = "$ ".round($row["quantity_delivered"] * $row["price"], 2);
+                    } else {
+                        $cost = "-";
+                    }
+        echo  '     <td>'.$row["item_name"].'</td>
+                    <td>'.$row["unit"].'</td>
+                    <td class="quantity_required">'.$row["quantity_required"].'</td>
+                    <td><input  onchange="updateCateringQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'"></td>
+                    <td class="cost">'.$cost.'</td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$row["invoice_notes"].'">'.$row["invoice_notes"].'</textarea>
+                    </td>
+                    <input type="hidden" value="'.$row["item_id"].'">
+                </tr>';
+    }
+}
+
 if (isset($_POST["AddTimeslotItem"])) {
    echo TimeslotItemTable::add_timeslot_item($_POST["itemName"], $_POST["timeslotName"]);
 }
@@ -528,6 +627,34 @@ if (isset($_POST["getItemPrice"])) {
 
 if (isset($_POST["removeInvoice"])) {
     echo InvoiceTable::remove_invoice($_POST["date"]);
+}
+
+if (isset($_POST["addCateringItem"])) {
+    echo CateringItemTable::add_item($_POST["itemId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["removeCateringItem"])) {
+    echo CateringItemTable::remove_item($_POST["itemId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateCateringQuantity"])) {
+    echo CateringItemTable::update_quantity($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateCateringNotes"])) {
+    echo CateringItemTable::update_notes($_POST["notes"], $_POST["itemId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateCateringInvoiceNotes"])) {
+    echo CateringItemTable::update_invoice_notes($_POST["notes"], $_POST["itemId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateCateringInvoiceQuantity"])) {
+    echo CateringItemTable::update_quantity_delivered($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateOrderInvoiceDate"])) {
+    echo CateringOrderTable::update_order_invoice($_POST["orderId"], $_POST["date"]);
 }
 
 ?>

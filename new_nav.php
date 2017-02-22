@@ -39,6 +39,12 @@ if(isset($_SESSION["username"])) {
                 <span class="home" id="text">Invoice</span>
             </a>
         </li>
+        <li class=<?php if (isset($page) AND ($page == "catering")) {echo "active";} ?> id="catering">
+            <a href="catering.php">
+                <span class="fa-cutlery"></span>
+                <span class="home" id="text">catering</span>
+            </a>
+        </li>
     </ul>
     <ul id="nav_right">
         <li id="userinfo" >

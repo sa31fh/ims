@@ -568,6 +568,13 @@ select{
     padding: 0px;
     background: transparent;
 }
+.popup_order{
+    width: 60vw;
+    max-width: 950px;
+    min-width: 700px;
+    height: 550px;
+    padding: 0px;
+}
 .print_preview{
     font-size: 14px;
     text-transform: uppercase;
@@ -624,7 +631,7 @@ select{
     transform: rotate(45deg);
     padding: 0;
 }
-.button, .button_cancel{
+.button, .button_cancel, .button_round{
     border: none;
     color: white;
     font-size: 14px;
@@ -633,6 +640,8 @@ select{
     text-align: center;
     min-width: 80px;
     font-family: "Open Sans";
+    outline: none;
+    cursor: pointer;
 }
 .button{
     background: #79bc4d;
@@ -675,6 +684,18 @@ select{
 }
 .button_flat:hover{
     color: #79bc4d;
+}
+.button_round{
+    background: #79bc4d;
+    border-radius: 100px;
+    min-width: initial;
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    margin: auto;
 }
 .role_select{
     display: block;
@@ -820,13 +841,19 @@ select{
     max-width: 60px;
 }
 .list_li_category{
-    margin: 5px 1px;
+    margin: 5px 0px;
     padding: 5px 0px;
-    background: rgba(234, 234, 234, 0.76);
-    border: 1px solid #cecece;
+    background: #f4f4f5;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
     cursor: pointer;
+    box-sizing: border-box;
+    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 600;
+    color: #555;
 }
-.selected{
+.list_li.selected{
     background: rgba(255, 255, 255, 0.76)!important;
     border:1px solid #79bc4d!important;
     box-shadow: 0px 0px 10px -2px #777;
@@ -1405,83 +1432,68 @@ td.table_heading{
     margin: 0;
     list-style-type: none;
     vertical-align: bottom;
+    overflow: hidden;
 }
-.tab_li {
-    background: white;
-    color: #444;
+.div_main .tab_li, .div_child .tab_li{
+    display: inline-block;
+    background: #eeeeee;
+    padding: 4px;
+    color: #656565;
     text-align: center;
-    padding: 0;
-    margin : 0;
     min-width: 120px;
-    border: 1px solid #cecece;
+    border-right: 1px solid #cecece;
     border-bottom: none;
-    border-top-right-radius: 8px;
-    border-top-left-radius: 8px;
-    transition: background-color .25s, color .25s;
-    box-shadow: none;
     outline: none;
-}
-.tab_li span{
-    width: 100%;
-    display: block;
-    padding: 7px 0px;
-    margin: auto;
-    text-transform: uppercase;
     cursor: pointer;
+}
+.div_main .tab_li{
+    font-size: 14px;
+    float: left;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #eeeeee;
+}
+.div_child .tab_li{
     font-size: 12px;
 }
-.tab_li.selected{
-    background: #79bc4d!important;
+.tab_li span{
+    display: block;
+    padding: 7px 0px;
+    text-transform: uppercase;
+}
+.div_main .tab_li.selected{
+    background: white;
+    color: #79bc4d;
+    border: 1px solid #79bc4d;
+}
+.div_child .tab_li.selected{
+    background: #79bc4d;
     color: white;
 }
-.tab_add_button{
-    position: relative;
-    float: right;
-    background: white;
-    font-size: 20px;
-    color: #51A918;
-    transition: background-color .25s, color .25s;
-    text-align: center;
-    padding: 2px;
-    margin : 0;
-    min-width: 35px;
-    height: 30px;
-    border: 1px solid #79BC4D;
-    border-bottom: none;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
-    outline: none;
-    box-shadow: none;
-    z-index: 2;
+#catering_tabs{
+    display: none;
 }
-.tab_add_button:hover{
-    background: rgba(234, 234, 234, 0.76);
+.tab_add_button, .tab_delete_button{
+    background: white;
+    text-align: center;
+    padding: 8px 12px;
+    margin: 0;
+    border: none;
+    outline: none;
+    border-right: 1px solid #cecece;
+    color: #777;
+    cursor: pointer;
+}
+.tab_add_button{
+    float: left;
 }
 .tab_delete_button{
-    opacity: 0;
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: white;
-    font-size: 20px;
-    color: #51A918;
-    transition: background-color .25s, color .25s;
-    text-align: center;
-    padding: 2px;
-    margin : 0;
-    min-width: 35px;
-    height: 30px;
-    border: none;
-    border-left: none;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    outline: none;
-    box-shadow: none;
-    transition: transform .25s, border .25s, background .25s, opacity .25s;
-    z-index: 1
+    float: right;
 }
-.tab_delete_button:hover{
-    background: rgba(255, 65, 65, 0.75);
+.tab_add_button:before{
+    font-size: 22px!important;
+}
+.tab_delete_button:before{
+    font-size: 16px!important;
 }
 .tab_div{
     float: left;
@@ -1877,6 +1889,118 @@ td.table_heading{
     width: 10vw;
     font-size: 20px;
     text-align: center;
+}
+.div_catering input{
+    width: 100%;
+    margin: 0px;
+    padding: 7px 0px;
+    font-size: 18px;
+    border: 1px solid #cecece;
+    text-align: center;
+    text-transform: uppercase;
+    font-family: "Open Sans";
+    box-sizing: border-box;
+}
+.div_catering .div_add{
+    text-align: center;
+    padding: 7px;
+}
+.div_order_items{
+    display: flex;
+    flex: 1;
+    font-family: "Open Sans";
+}
+#order_item_list{
+    display: none;
+    position: absolute;
+    left: 0;
+    height: 100%;
+    width: 20vw;
+    max-width: 231px;
+    min-width: 201px;
+    box-sizing: border-box;
+    z-index: 2;
+}
+#catering_sidenav{
+    flex: initial;
+    max-width: 230px;
+    min-width: 200px;
+    width: 20vw;
+}
+.side_nav{
+    flex: 1;
+    padding-bottom: 10px;
+    overflow: auto;
+    list-style-type: none;
+}
+.side_nav .heading{
+    margin-top: -1px;
+    padding: 10px 0px;
+    background: #f4f4f5;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
+    text-align: center;
+    font-size: 14px;
+    color: #111;
+    text-transform: uppercase;
+}
+.side_nav li a{
+    padding: 10px!important;
+    margin: 5px 0px!important;
+}
+.side_nav #catering_option{
+    display: flex;
+    padding: 0px 0px 0px 5px!important;
+}
+.side_nav #catering_option.active{
+    border-right: none!important;
+}
+.side_nav #catering_option #left{
+    line-height: 40px;
+    margin-right: 5px;
+}
+.side_nav #catering_option #right{
+    flex: 1;
+    display: inline-block;
+    padding: 8px 0px;
+    vertical-align: middle;
+    font-size: 20px;
+    text-align: center;
+    border: 1px solid #cecece;
+    border-right: none;
+    background: #f1f1f1;
+}
+.side_nav #catering_option.active #right{
+    background: #79bc4d;
+    color: white;
+    border: 1px solid transparent;
+}
+.side_nav li:hover #catering_option #right{
+    border: 1px solid transparent!important;
+    border-left: 1px solid #cecece!important;
+}
+#order_date_created{
+    display: block;
+    font-size: 10px;
+}
+#order_name{
+    font-size: 14px;
+    font-weight: 600;
+}
+.icon_small:before{
+    font-size: 19px!important;
+    display: block;
+    padding: 0px 0px 2px 0px;
+    line-height: initial;
+}
+.icon_small_text{
+    font-size: 11px;
+    display: block;
+}
+#invoice_sidenav{
+    max-width: 210px;
+    width: 15vw;
+    min-width: 190px;
 }
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .main_iframe#message_iframe{
@@ -2523,7 +2647,7 @@ td.table_heading{
     top: 2px;
     right: 5px;
 }
-.sidenav li#heading{
+.sidenav #heading{
     text-align: center;
     padding: 9px 0px;
     border-bottom: 1px solid #cecece;
