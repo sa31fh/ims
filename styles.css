@@ -115,6 +115,9 @@ select{
 .div_attachment span:hover{
     background: #e6e6e6;
 }
+.div_child{
+    border-top: 1px solid #cecece;
+}
 .div_login{
     text-align: center;
     margin: 100px 0px;
@@ -158,6 +161,7 @@ select{
     margin: 0;
     padding: 0;
     flex: 1;
+    display: flex;
 }
 .div_list_category{
     margin: 0;
@@ -166,11 +170,11 @@ select{
     flex: 1;
 }
 .div_left_tabs{
-    position: absolute;
-    bottom: 100%;
-    left: 2px;
-    padding: 0;
-    margin: 0;
+    float : left;
+}
+.div_right_tabs{
+    float: right;
+    border-left: 1px solid #cecece;
 }
 .div_manage{
     flex: 1;
@@ -178,13 +182,12 @@ select{
 }
 .div_heading{
     background: #f4f4f5;
-    border: 1px solid #cecece;
     font-size: 16px;
     text-transform: uppercase;
     font-weight: 600;
-    width: 70%;
-    margin: auto;
     color: #555;
+    padding: 5px 0px;
+    text-align: center;
 }
 .div_main_option{
     border: 1px solid #cecece;
@@ -292,25 +295,17 @@ select{
     padding: 0px;
     margin: 0;
     overflow: auto;
-    border: 1px solid #cecece;
+    border-top: 1px solid #cecece;
 }
 #div_print_table table{
     border: none;
 }
-.div_right_tabs{
-    position: absolute;
-    bottom: 100%;
-    right: 2px;
-    padding: 0;
-    margin: 0;
-}
 .div_table{
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
+    flex: 3;
     position: relative;
-    margin-top: 50px;
     padding: 0;
-    width: 90%;
-    transition: width .25s;
 }
 .div_invoice_table{
     overflow: auto;
@@ -326,8 +321,22 @@ select{
 .float_right{
     float: right;
 }
+.flex_row{
+    display: flex;
+}
+.flex_col{
+    display: flex;
+    flex-direction: column;
+}
+.flex_1{
+    flex: 1;
+}
+.flex_2{
+    flex: 2;
+}
 .main{
     display: flex;
+    position: relative;
     flex: 1;
     margin: 0px;
     padding: 0px;
@@ -348,6 +357,9 @@ select{
 }
 .inline{
     display: inline-block;
+}
+.display_none{
+    display: none;
 }
 .inventory_div{
     display: inline-block;
@@ -949,8 +961,8 @@ select{
     padding: 10px 0px;
     font-size: 15px;
     text-transform: uppercase;
-    font-weight: 600;
     border-bottom: 1px solid #cecece;
+    font-weight: 600;
     color: #555;
     font-family: "Open Sans";
 }
@@ -1035,7 +1047,7 @@ select{
 .toolbar_print{
     display: flex;
     padding: 0;
-    border: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
     background: #f4f4f5;
     font-family: "Open Sans";
 }
@@ -1372,9 +1384,6 @@ td.table_heading{
     flex: 0;
     box-sizing: border-box;
 }
-#item_list_div h4{
-    border: none;
-}
 .popup_cancel{
     display: block;
     position: absolute;
@@ -1410,8 +1419,7 @@ td.table_heading{
 .popup_close{
     float: right;
     padding: 0!important;
-    margin-right: 10px;
-    margin-top: 5px;
+    margin: 4px 10px 4px 0px;
 }
 .popup_close:before{
     content: "\e816";
@@ -1552,17 +1560,8 @@ td.table_heading{
     border-bottom: none;
 }
 #div_table{
-    display: flex;
-    flex-direction: column;
     flex: 1;
-    margin-top: 50px;
-    width: initial;
-}
-#items_div_table{
-    display: block;
-    width: 100%;
-    flex: 3;
-    padding: 0px 2px;
+    margin-top: 35px;
 }
 #toolbar_toggle{
     margin: 5px;
@@ -1774,14 +1773,14 @@ td.table_heading{
 .entypo-plus:before{
     display: block;
     padding: 10px 0px;
-    font-size: 26px!important;
+    font-size: 26px;
     line-height: 0;
 }
 .entypo-trash:before{
     display: block;
     padding: 10px 0px;
     line-height: 0;
-    font-size: 19px!important;
+    font-size: 19px;
 }
 #add_item_button, #delete_item{
     font-size: 11px;
@@ -1804,16 +1803,13 @@ td.table_heading{
     text-align: center;
 }
 .invoice_date{
+    display: flex!important;
     text-align: center;
     text-transform: none!important;
-    padding: 15px 25px!important;
+    padding: 12px 15px!important;
 }
 .invoice_date div{
-    display: inline-block;
-    vertical-align: middle;
-}
-.invoice_date #left{
-    float: left;
+    flex: 1;
 }
 .invoice_date #left span{
     font-size: 24px;
@@ -2168,6 +2164,7 @@ td.table_heading{
 }
 .option{
     display: inline-block;
+    position: relative;
     margin: 0px;
     padding: 10px 10px;
     border: none;
@@ -2177,12 +2174,17 @@ td.table_heading{
     background-color: transparent;
     outline: none;
     cursor: pointer;
+    text-align: center;
     text-decoration: none;
     font-family: "Open Sans";
 }
 .option:hover{
    color: #79bc4d;
 
+}
+.option.selected{
+    background: #79BC4D;
+    color: white;
 }
 .dropdown_content{
     display: block;
@@ -2621,6 +2623,8 @@ td.table_heading{
 }
 /* ----------------------SIDE NAVIGATION BAR STYLE------------------- */
 .sidenav{
+    display: flex;
+    flex-direction: column;
     list-style-type: none;
     margin: 0;
     padding: 0;
