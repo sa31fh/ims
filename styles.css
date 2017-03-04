@@ -299,6 +299,7 @@ select{
 }
 #div_print_table table{
     border: none;
+    border-bottom: 1px solid #cecece;
 }
 .div_table{
     display: flex;
@@ -1100,7 +1101,6 @@ select{
     min-width: 50px;
     text-align: center;
     padding: 10px 0px;
-    border: none;
     text-transform: uppercase;
     font-family: "Open Sans";
     font-weight: 600;
@@ -1118,7 +1118,6 @@ select{
 
 .table_view td{
     text-align: center;
-    border: none;
     color: #444;
     height: 30px;
     padding: 15px 0px;
@@ -1126,21 +1125,29 @@ select{
     max-width: 200px;
     word-wrap: break-word;
     font-size: 15px;
-
 }
 .table_view.td_expected > input:after {
     content: "min";
 }
 td.table_heading{
     background: #f4f4f5;
-    border: 1px solid #cecece !important;
-    border-left: none !important;
-    border-right: none !important;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
     margin: 0;
     padding: 5px 0px !important;
     font-size: 17px;
     text-transform: uppercase;
     font-weight: normal;
+}
+.table_title{
+    background: #ededed;
+    margin: 0;
+    padding: 5px 0px !important;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
+    font-size: 18px;
+    text-transform: uppercase;
+    font-weight: bold;
 }
 .table_view .option_bar{
     position: relative;
@@ -1998,6 +2005,40 @@ td.table_heading{
     width: 15vw;
     min-width: 190px;
 }
+.note_heading{
+    display: block;
+    text-transform: uppercase;
+    font-size: 15px;
+    margin-top: 10px;
+    font-weight: 600;
+    padding: 10px 5px;
+    background: #f4f4f5;
+    border-bottom: 1px solid #cecece;
+    border-top: 1px solid #cecece;
+    color: #555;
+}
+.note_heading:before{
+    padding: 0px 5px;
+    vertical-align: middle;
+    line-height: 0;
+}
+.note_text{
+    width: 99%;
+    height: 200px;
+    border: none;
+    outline: none;
+    padding: 5px;
+    font-family: "Open Sans";
+    font-size: 16px;
+    resize: none;
+    border-bottom: 1px solid #cecece;
+}
+#order_note_div{
+    display: none;
+}
+#print_all:before{
+    font-size: 20px;
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .main_iframe#message_iframe{
     overflow: hidden;
@@ -2294,12 +2335,10 @@ td.table_heading{
     width: 98%;
     height: 100%;
 }
-.compose_title input::-webkit-input-placeholder,
-.compose_text textarea::-webkit-input-placeholder{
+*::-webkit-input-placeholder{
     font-size: 13px;
     text-transform: uppercase;
-    color: #777;
-    font-weight: 600;
+    color: #999;
     font-family: "Open Sans";
 }
 .compose_title input::-moz-placeholder{

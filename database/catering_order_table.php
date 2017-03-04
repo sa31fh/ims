@@ -67,6 +67,14 @@ class CateringOrderTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function update_order_note($note, $order_id) {
+        $sql = "UPDATE CateringOrder
+                SET notes = '$note'
+                WHERE id = $order_id";
+
+        return parent::query($sql);
+    }
 }
 
 ?>

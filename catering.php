@@ -64,6 +64,7 @@ if (isset($_POST["delete_order_id"])) {
                     <input id="order_id" type="hidden" value="<?php echo $row["id"] ?>">
                     <input id="order_date" type="hidden" value="<?php echo $row["date_delivery"] ?>">
                     <input type="hidden" id="order_date_format" value="<?php echo date("D, jS M Y", strtotime($row["date_delivery"])); ?>">
+                    <input id="order_note" type="hidden" value="<?php echo $row["notes"] ?>">
                 </li>
             <?php endwhile ?>
             </ul>
@@ -144,6 +145,10 @@ if (isset($_POST["delete_order_id"])) {
                         </th>
                     </tr>
                 </table>
+                <div>
+                    <span class="note_heading entypo-pencil">Special Instructions</span>
+                    <textarea  id="note_text" class="note_text" onchange=updateOrderNote(this) placeholder="Add Special Instructions to Order"></textarea>
+                </div>
             </div>
         </div>
     </div>
@@ -257,6 +262,14 @@ if (isset($_POST["delete_order_id"])) {
         $.post("jq_ajax.php", {updateCateringNotes: "", notes: notes, itemId: itemId, orderId: orderId});
     }
 
+    function updateOrderNote(obj) {
+        var note = obj.value;
+        var orderId = $(".active").next().val();
+        $(".active").parent().find("#order_note").val(note);
+
+        $.post("jq_ajax.php", {updateOrderNote: "", note: note, orderId: orderId});
+    }
+
     function checkRequired() {
         if ($(".switch-input").prop("checked")) {
             $(".print_tbody").each(function() {
@@ -305,7 +318,7 @@ if (isset($_POST["delete_order_id"])) {
         var table = document.createElement("table");
         var orderName = $(".active").find("#order_name").html();
         table.setAttribute("class", "table_view");
-        table.innerHTML += "<tr class='row'><th colspan='4'>Catering Order</th></tr>";
+        table.innerHTML += "<tr class='row'><th colspan='4' class='table_title'>Catering Order</th></tr>";
         table.innerHTML += "<tr class='row'><th colspan='4' class=:heading>"+orderName+"</th></tr>";
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
@@ -324,17 +337,23 @@ if (isset($_POST["delete_order_id"])) {
                 table.innerHTML += row.outerHTML;
             }
         });
+        var note = $(".active").parent().find("#order_note").val() == "" ? "No Special Instructions Added" : $(".active").parent().find("#order_note").val();
+        table.innerHTML += '<tr id="category"><td colspan="4" class="table_title">Special Instructions</td></tr>';
+        table.innerHTML +=  '<tr id="column_data" class="row" colspan="4"><td class="order_note" colspan="4">'+note+'</td>'
         callBack(table);
     }
 
     $(document).ready(function() {
 
         $(".side_nav #order_li:first").each(function() {
+            $("#note_text").html($(this).find("#order_note").val());
             getCateringItems($(this).children()[0]);
             $(this).children("a").addClass("active");
         });
 
         $('.side_nav li a').click(function() {
+            $("#note_text").html($(this).parent().find("#order_note").val());
+            $("#note_text").val($(this).parent().find("#order_note").val());
             $('.side_nav li a').removeClass("active");
             $(this).addClass('active');
         });

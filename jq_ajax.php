@@ -360,7 +360,7 @@ if (isset($_POST["getTrackedInvoice"])) {
                             $cost = "-";
                         }
                     } else {
-                        $quantity = "";
+                        $quantity = "-";
                         $cost = "-";
                     }
         echo  '     <td>'.$row["item_name"].'</td>
@@ -492,20 +492,21 @@ if (isset($_POST["getCateringItemTable"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    if (($row["quantity_required"] != "-" AND $row["quantity_required"] > -1) AND $row["price"] != "-") {
-                        $cost = "$ ".round($row["quantity_required"] * $row["price"], 2);
-                    } else {
-                        $cost = "-";
-                    }
-        echo  '     <td>'.$row["item_name"].'</td>
-                    <td>'.$row["unit"].'</td>
-                    <td class="quantity_required">'.$row["quantity_required"].'</td>
-                    <td class="cost">'.$cost.'</td>
-                    <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateNotes(this); " value="'.$row["notes"].'">'.$row["notes"].'</textarea>
-                        <input type="hidden" value="'.$row["item_id"].'">
-                    </td>
-                </tr>';
+                $quantity = is_numeric($row["quantity_required"]) ? $row["quantity_required"] : "-";
+                if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
+                    $cost = "$ ".round($quantity * $row["price"], 2);
+                } else {
+                    $cost = "-";
+                }
+        echo  ' <td>'.$row["item_name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td class="quantity_required">'.$quantity.'</td>
+                <td class="cost">'.$cost.'</td>
+                <td id="td_notes">
+                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this); " value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                    <input type="hidden" value="'.$row["item_id"].'">
+                </td>
+            </tr>';
     }
 }
 
@@ -783,6 +784,10 @@ if (isset($_POST["updateCateringInvoiceQuantity"])) {
 
 if (isset($_POST["updateOrderInvoiceDate"])) {
     echo CateringOrderTable::update_order_invoice($_POST["orderId"], $_POST["date"]);
+}
+
+if (isset($_POST["updateOrderNote"])) {
+    echo CateringOrderTable::update_order_note($_POST["note"], $_POST["orderId"]);
 }
 
 ?>
