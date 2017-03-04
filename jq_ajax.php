@@ -527,21 +527,149 @@ if (isset($_POST["getCateringOrderInvoice"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    if (($row["quantity_delivered"] != "-" AND $row["quantity_delivered"] > -1) AND $row["price"] != "-") {
-                        $cost = "$ ".round($row["quantity_delivered"] * $row["price"], 2);
-                    } else {
-                        $cost = "-";
-                    }
-        echo  '     <td>'.$row["item_name"].'</td>
-                    <td>'.$row["unit"].'</td>
-                    <td class="quantity_required">'.$row["quantity_required"].'</td>
-                    <td><input  onchange="updateCateringQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'"></td>
-                    <td class="cost">'.$cost.'</td>
-                    <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$row["invoice_notes"].'">'.$row["invoice_notes"].'</textarea>
-                    </td>
-                    <input type="hidden" value="'.$row["item_id"].'">
-                </tr>';
+                $quantity_required = is_numeric($row["quantity_required"]) ? $row["quantity_required"] : "-";
+                $quantity = is_numeric($row["quantity_delivered"]) ? $row["quantity_delivered"] : "-";
+                if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
+                    $cost = "$ ".round($quantity * $row["price"], 2);
+                } else {
+                    $cost = "-";
+                }
+        echo  ' <td>'.$row["item_name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td class="quantity_required">'.$quantity_required.'</td>
+                <td><input  onchange="updateCateringQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'"></td>
+                <td class="cost">'.$cost.'</td>
+                <td id="td_notes">
+                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$row["invoice_notes"].'">'.$row["invoice_notes"].'</textarea>
+                </td>
+                <input type="hidden" value="'.$row["item_id"].'">
+            </tr>';
+    }
+}
+
+if (isset($_POST["printAll"])) {
+    $result = CategoryTable::get_print_preview($_POST["date"]);
+    $current_category = null;
+    $total_cost = "";
+    echo '<table class="table_view"><tr class="row"><th class="table_title" colspan="6">Inventory</th></tr>
+    <tr class="row"><th colspan="6" class="heading">Full Day</th></tr><tbody class="print_tbody" id="print_tbody">
+            <tr id="print_date" class="row">
+                <th colspan="6">
+                    <span id="table_date_span">'.date_format((date_add(date_create($_POST["date"]), date_interval_create_from_date_string("1 day"))), 'D, jS M Y').'</span>
+                    <div class="print_table_date">'."created on ".date('jS M Y', strtotime($_POST["date"])).'</div>
+                </th>
+            </tr>';
+    echo $exp = $_POST["expectedSales"] != "" ? "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>
+                                            <span> $".$_POST["expectedSales"]."</span></th></tr>" : "";
+    while ($row = $result->fetch_assoc()) {
+        $expected_sales = SalesTable::get_expected_sale($_SESSION["date"]);
+        if (is_numeric($expected_sales)) {
+            $sales_factor = $expected_sales / VariablesTable::get_base_sales();
+            if (is_numeric($row["quantity"])) {
+                $quantity = BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"];
+                if ($row["rounding_option"] == "up") {
+                    $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                } else if ($row["rounding_option"] == "down") {
+                    $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                }
+            } else {
+                $quantity = "-";
+            }
+            if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
+                $cost = "$ ".round($quantity * $row["price"], 2);
+                $total_cost += round($quantity * $row["price"], 2);
+            } else {
+                $cost = "-";
+            }
+        } else {
+            $quantity = "-";
+            $cost = "-";
+        }
+        if ($_POST["required"] == "true") {
+            if (($quantity <= 0 OR $quantity == "-") AND $row["notes"] == "") {
+              continue;
+            }
+        }
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '
+                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Quantity Present</th>
+                        <th>Quantity Required</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        echo '<tr id="column_data" class="row">
+                <td>'.$row["item_name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td>'.$row["quantity"].'</td>
+                <td class="quantity_required">'.$quantity.'</td>
+                <td class="cost">'.$cost.'</td>
+                <td id="td_notes">'.$row["notes"].'</td>
+            </tr>';
+    }
+    $total_cost = $total_cost > 0 ? $total_cost : "-";
+    echo '<tr><td class="table_heading" colspan="3"><h4>Total Cost</h4></td>
+            <td class="table_heading" colspan="3"><h4>'.$total_cost.'</h4></td></tr></tbody></table>';
+    $future_date = date_format((date_add(date_create($_POST["date"]), date_interval_create_from_date_string("2 day"))), 'Y-m-d');
+    $orders = CateringOrderTable::get_orders_by_date($_POST["date"], $future_date);
+    while ($row = $orders->fetch_assoc()) {
+        $items = CateringItemTable::get_items($row["id"]);
+        $current_category = null;
+        $total_cost = "";
+        $order_note = $row["notes"];
+        echo '<pagebreak><table class="table_view"><tr class="row"><th class="table_title" colspan="6">Catering Order</th></tr>
+        <tr class="row"><th colspan="6" class="heading">'.$row["name"].'</th></tr><tbody class="print_tbody" id="print_tbody">
+        <tr id="print_date" class="row">
+            <th colspan="6">
+                <div id="table_date_heading">Delivery Date</div>
+                <span id="table_date_span">'.date('D, jS M Y', strtotime($row["date_delivery"])).'</span>
+                <div class="print_table_date">'."created on ".date('jS M Y', strtotime($row["date_created"])).'</div>
+            </th>
+        </tr>';
+        while ($row = $items->fetch_assoc()) {
+            $quantity = is_numeric($row["quantity_required"]) ? $row["quantity_required"] : "-";
+            if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
+                $cost = "$ ".round($quantity * $row["price"], 2);
+                $total_cost += round($quantity * $row["price"], 2);
+            } else {
+                $cost = "-";
+            }
+            if ($_POST["required"] == "true") {
+                if (($quantity <= 0 OR $quantity == "-") AND $row["notes"] == "") {
+                  continue;
+                }
+            }
+            if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+                $current_category = $row["category_name"];
+                echo '<tr id="category"><td colspan="5" class="table_heading">'.$row["category_name"].'</td></tr>
+                        <tr id="category_columns">
+                            <th>Item</th>
+                            <th>Unit</th>
+                            <th>Quantity Required</th>
+                            <th>Cost</th>
+                            <th>Notes</th>
+                        </tr>';
+            }
+            echo '<tr id="column_data" class="row">';
+            echo  '     <td>'.$row["item_name"].'</td>
+                        <td>'.$row["unit"].'</td>
+                        <td class="quantity_required">'.$quantity.'</td>
+                        <td class="cost">'.$cost.'</td>
+                        <td id="td_notes">'.$row["notes"].'</td>
+                    </tr>';
+        }
+        $total_cost = $total_cost > 0 ? $total_cost : "-";
+        echo '<tr><td class="table_heading" colspan="3"><h4>Total Cost</h4></td>
+            <td class="table_heading" colspan="3"><h4>'.$total_cost.'</h4></td></tr>';
+        $order_note = $order_note == "" ? "No Special Instructions Added" : $order_note;
+        echo '<tr id="category"><td colspan="6" class="table_title">Special Instructions</td></tr>
+        <tr id="column_data" class="row" colspan="6"><td class="order_note" colspan="6">'.$order_note.'</td>
+        </tbody></table>';
     }
 }
 

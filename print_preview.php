@@ -76,6 +76,9 @@ $inventory_invoice = count($result);
                 <div class="toolbar_div">
                     <a id="print_pdf" class="option" onclick=printPdf()>PDF</a>
                 </div>
+                <div class="toolbar_div">
+                    <a id="print_all" class="fa-print option" onclick=printAll()>Print All</a>
+                </div>
                 <div class="toolbar_div" id="invoice_div">
                     <?php $result = InvoiceTable::get_tracked($_SESSION["date"])->fetch_assoc();?>
                     <span id="track_invoice" class="fa-file-text-o">Invoice</span>
@@ -144,6 +147,7 @@ $inventory_invoice = count($result);
                                         <span><?php echo $row["name"] ?></span>
                                         <input type="hidden" id="order_date" value="<?php echo date('D, jS M Y', strtotime($row["date_delivery"])) ?>">
                                         <input type="hidden" id="order_invoice" value="<?php echo $row['date_invoice']?>">
+                                        <input type="hidden" id="order_note" value="<?php echo $row["notes"] ?>">
                                     </li>
                                 </div>
                             <?php endwhile ?>
@@ -160,6 +164,10 @@ $inventory_invoice = count($result);
                             </th>
                         </tr>
                     </table>
+                    <div id="order_note_div">
+                        <span class="note_heading entypo-pencil">Special Instructions</span>
+                        <textarea  id="note_text" class="note_text" onchange=updateOrderNote(this) placeholder="Add Special Instructions to Order"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -203,6 +211,7 @@ $inventory_invoice = count($result);
                 $("#print").append(data);
                 $("#table_date_span").html($("#formatted_date").val());
                 $(".print_table_date").css("display", "block");
+                checkRequired();
             });
         } else {
             $.post("jq_ajax.php", {getPrintPreviewTimeslots: "", date: date, timeSlotName: timeSlotName}, function(data, status) {
@@ -210,9 +219,9 @@ $inventory_invoice = count($result);
                 $("#print").append(data);
                 $(".print_table_date").css("display", "block");
                 $("#table_date_span").html($("#formatted_date").val());
+                checkRequired();
             });
         }
-        checkRequired();
     }
 
     function getOrderTab(obj) {
@@ -251,11 +260,31 @@ $inventory_invoice = count($result);
         $.post("jq_ajax.php", {updateCateringNotes: "", notes: itemNote, itemId: itemId, orderId: orderId });
     }
 
+    function updateOrderNote(obj) {
+        var note = obj.value;
+        var orderId = $(".tab_li.selected").attr("id");
+        $(".selected").find("#order_note").val(note);
+
+        $.post("jq_ajax.php", {updateOrderNote: "", note: note, orderId: orderId});
+    }
+
     function printPdf() {
         createTable(function(table) {
             $("#table_data").val(table.outerHTML);
             document.getElementById("table_name").value = $(".tab_li.selected").children().html();
             document.getElementById("table_date").value = $("#print_date").children().find("#table_date_span").html();
+            $("#test_form").submit();
+        });
+    }
+
+    function printAll() {
+        var date = document.getElementById("session_date").value;
+        var expectedSales = $(".print_expected").val();
+        var required = $("#toolbar_toggle .switch-input").prop("checked") ? "true" : "false";
+        $.post("jq_ajax.php", {printAll: "", date: date, expectedSales: expectedSales, required: required}, function(data, status) {
+            $("#table_data").val(data);
+            document.getElementById("table_name").value = "Print All";
+            document.getElementById("table_date").value = document.getElementById("session_date").value;
             $("#test_form").submit();
         });
     }
@@ -314,7 +343,7 @@ $inventory_invoice = count($result);
         var row_count = 0;
         table.setAttribute("class", "table_view");
         if ($(".side_nav li .active").html() != "Inventory") {
-           table.innerHTML += "<tr class='row'><th colspan='6'>Catering Order</th></tr>";
+           table.innerHTML += "<tr class='row'><th colspan='6' class='table_title'>Catering Order</th></tr>";
         }
         table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
                             $(".tab_li.selected").children().html(); + "</th></tr>";
@@ -337,7 +366,7 @@ $inventory_invoice = count($result);
                     row_count == 0 ? table.innerHTML += "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>" +
                                                         "<span> $"+ $(".print_expected").val() +"</span></th></tr>" : "";
                     row_count++;
-                }
+                } 
             }
         });
         var totalCost = "";
@@ -348,6 +377,11 @@ $inventory_invoice = count($result);
         totalCost != "" ? totalCost = "$" + totalCost  : totalCost = "-";
         table.innerHTML += "<tr><td class='table_heading' colspan='3'><h4>Total Cost</h4></td>"+
                            "<td class='table_heading' colspan='3'><h4>"+totalCost+"</h4></td></tr>";
+        if ($(".side_nav li .active").html() != "Inventory") {
+            var note = $(".selected").find("#order_note").val() == "" ? "No Special Instructions Added" : $(".selected").find("#order_note").val();
+            table.innerHTML += '<tr id="category"><td colspan="5" class="table_title">Special Instructions</td></tr>';
+            table.innerHTML +=  '<tr id="column_data" class="row" colspan="5"><td class="order_note" colspan="5">'+note+'</td>'
+        }
         callBack(table);
     }
 
@@ -406,6 +440,7 @@ $inventory_invoice = count($result);
                 $("#inventory_tabs").css("display", "block");
                 $(".div_expected").css("display", "flex");
                 $("#table_date_heading").html("");
+                $("#order_note_div").css("display", "none");
                 $("#inventory_tabs .tab_li span:first").each(function() {
                    getTab($(this)[0]);
                    $(".div_child .tab_li").removeClass("selected");
@@ -421,10 +456,13 @@ $inventory_invoice = count($result);
                     $("#catering_tabs").css("display", "block");
                     $("#table_date_heading").html("delivery date");
                     $("#catering_tabs .tab_li:first").each(function() {
-                       getOrderTab($(this)[0]);
-                       $(".div_child .tab_li").removeClass("selected");
-                       $(this).addClass("selected");
-                       checkInvoice();
+                        getOrderTab($(this)[0]);
+                        $(".div_child .tab_li").removeClass("selected");
+                        $(this).addClass("selected");
+                        $("#order_note_div").css("display", "block");
+                        $("#note_text").html($(".selected").find("#order_note").val());
+                        $("#note_text").val($(".selected").find("#order_note").val());
+                        checkInvoice();
                     });
                 } else {
                     $("#table_date_heading").html("No Upcoming Catering Orders.");
@@ -439,6 +477,8 @@ $inventory_invoice = count($result);
         $(".div_child .tab_li").click(function() {
             $(".div_child .tab_li").removeClass("selected");
             $(this).addClass("selected");
+            $("#note_text").html($(".selected").find("#order_note").val());
+            $("#note_text").val($(".selected").find("#order_note").val());
             checkInvoice();
         });
 
