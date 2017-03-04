@@ -191,17 +191,21 @@ $_SESSION["last_activity"] = time();
         quantity == "" ? quantity = "NULL" : quantity;
 
         $.post("jq_ajax.php", {updateQuantityDelivered: "", quantity: quantity, itemId: itemId, date: date});
-        quantity != "NULL" ? updateCost(itemId, quantity, obj) : obj.parentNode.parentNode.children[4].innerHTML = "-";
+        updateCost(itemId, quantity, obj);
         }
     }
 
     function updateCost(itemId, quantity, obj) {
-        $.post("jq_ajax.php", {getItemPrice: "", itemId: itemId}, function(data) {
-            var price = data;
-            var cost = quantity * price;
-            obj.parentNode.parentNode.children[4].innerHTML = "$ " + cost;
-            totalCost();
-        });
+        if (quantity != "NULL") {
+            $.post("jq_ajax.php", {getItemPrice: "", itemId: itemId}, function(data) {
+                var price = data;
+                var cost = quantity * price;
+                obj.parentNode.parentNode.children[4].innerHTML = "$ " + cost;
+                totalCost();
+            });
+        } else {
+            obj.parentNode.parentNode.children[4].innerHTML = "-";
+        }
     }
 
     function updateNotes(obj) {
@@ -215,18 +219,24 @@ $_SESSION["last_activity"] = time();
     function updateCateringNotes(obj) {
         var itemNote = obj.value;
         var itemId = obj.parentNode.parentNode.children[6].value;
+        var recipeId = obj.parentNode.parentNode.children[7].value;
         var orderId = $(".active").parent().find("#order_id").val();
 
-        $.post("jq_ajax.php", {updateCateringInvoiceNotes: "", notes: itemNote, itemId: itemId, orderId: orderId });
+        $.post("jq_ajax.php", {updateCateringInvoiceNotes: "", notes: itemNote, itemId: itemId, recipeId: recipeId, orderId: orderId });
     }
 
     function updateCateringQuantity(obj) {
-        var quantity = obj.value;
-        var itemId = obj.parentNode.parentNode.children[6].value;
-        var orderId = $(".active").parent().find("#order_id").val();
+        if (obj.value < 0) {
+            obj.value = "";
+        } else {
+            var quantity = obj.value  == "" ? "NULL" : obj.value;
+            var itemId = obj.parentNode.parentNode.children[6].value;
+            var recipeId = obj.parentNode.parentNode.children[7].value;
+            var orderId = $(".active").parent().find("#order_id").val();
 
-        $.post("jq_ajax.php", {updateCateringInvoiceQuantity: "", quantity: quantity, itemId: itemId, orderId: orderId });
-        updateCost(itemId, quantity, obj)
+            $.post("jq_ajax.php", {updateCateringInvoiceQuantity: "", quantity: quantity, itemId: itemId, recipeId: recipeId, orderId: orderId });
+            updateCost(itemId, quantity, obj);
+        }
     }
 
     function checkRequired() {
@@ -291,7 +301,7 @@ $_SESSION["last_activity"] = time();
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
                 var cell = "";
-                $(this).children().each(function() {
+                $(this).children(":lt(6)").each(function() {
                     if ($(this).children().attr("id") == "quantity_delivered" || $(this).children("textarea").length > 0) {
                         var td = document.createElement("TD");
                         td.innerHTML = $(this).children().val();

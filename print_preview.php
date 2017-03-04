@@ -255,9 +255,10 @@ $inventory_invoice = count($result);
     function updateCateringNotes(obj) {
         var itemNote = obj.value;
         var itemId = obj.parentNode.children[1].value;
+        var recipeId = obj.parentNode.children[2].value;
         var orderId = $(".tab_li.selected").attr("id");
 
-        $.post("jq_ajax.php", {updateCateringNotes: "", notes: itemNote, itemId: itemId, orderId: orderId });
+        $.post("jq_ajax.php", {updateCateringNotes: "", notes: itemNote, itemId: itemId, recipeId: recipeId, orderId: orderId });
     }
 
     function updateOrderNote(obj) {
@@ -363,8 +364,9 @@ $inventory_invoice = count($result);
                 row.innerHTML = cell;
                 table.innerHTML += row.outerHTML;
                 if ($(".side_nav li .active").html() == "Inventory") {
+                    var expectedSales = $(".print_expected").val() == "" ? "   -" : "$ " + $(".print_expected").val();
                     row_count == 0 ? table.innerHTML += "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>" +
-                                                        "<span> $"+ $(".print_expected").val() +"</span></th></tr>" : "";
+                                                        "<span>"+ expectedSales +"</span></th></tr>" : "";
                     row_count++;
                 } 
             }

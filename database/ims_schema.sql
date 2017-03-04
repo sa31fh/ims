@@ -81,9 +81,48 @@ CREATE TABLE `CateringOrder` (
   `date_delivery` date NOT NULL,
   `date_created` date DEFAULT NULL,
   `date_invoice` date DEFAULT NULL,
+  `notes` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`name`,`date_delivery`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `CateringRecipeItems`
+--
+
+DROP TABLE IF EXISTS `CateringRecipeItems`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `CateringRecipeItems` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_id` int(11) NOT NULL,
+  `recipe_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `quantity_delivered` int(11) DEFAULT NULL,
+  `notes` varchar(45) DEFAULT NULL,
+  `invoice_notes` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`item_id`,`recipe_id`,`order_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `CateringRecipes`
+--
+
+DROP TABLE IF EXISTS `CateringRecipes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `CateringRecipes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recipe_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `quantity_required` int(11) DEFAULT NULL,
+  `notes` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`recipe_id`,`order_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

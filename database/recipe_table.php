@@ -70,7 +70,7 @@ class RecipeTable extends DatabaseTable {
      public static function get_recipes($date) {
         $sql = "SELECT * FROM Recipe
                 WHERE creation_date <= '{$date}' AND (deletion_date > '{$date}' OR deletion_date IS NULL)
-                ORDER BY order_id ASC";
+                ORDER BY name";
 
         return parent::query($sql);
     }

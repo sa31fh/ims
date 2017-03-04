@@ -4,6 +4,7 @@ require_once "mpdf/vendor/autoload.php";
 require_once "database/catering_order_table.php";
 require_once "database/catering_item_table.php";
 require_once "database/item_table.php";
+require_once "database/recipe_table.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -87,8 +88,8 @@ if (isset($_POST["delete_order_id"])) {
             <div class="popup_titlebar">
                 <span class="popup_close" id="item_list_cancel"></span>
             </div>
-            <div><h4>All Items</h4></div>
-            <ul class="category_list">
+            <div id="add_heading"><h4></h4></div>
+            <ul class="category_list display_none" id="order_items">
                 <?php $result = ItemTable::get_items_categories(); ?>
                 <?php $current_category = 1; ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
@@ -112,12 +113,28 @@ if (isset($_POST["delete_order_id"])) {
                     </li>
                 <?php endwhile ?>
             </ul>
+            <ul class="category_list display_none" id="order_recipes">
+                <li class="list_li_category">
+                    <span>Recipes</span>
+                </li>
+                <?php $result = RecipeTable::get_recipes($_SESSION["date"]); ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <li class="list_li" id="item_list">
+                        <span><?php echo $row["name"]; ?></span>
+                        <input type="hidden" id="item_id" value="<?php echo $row["id"]; ?>">
+                    </li>
+                <?php endwhile ?>
+            </ul>
         </div>
 
         <div class="main_top_side">
             <div class="toolbar_print"  id="invoice_toolbar">
                 <div class="toolbar_div">
                     <a class="option" onclick=addItems()>Add Items</a>
+                </div>
+                <div class="divider"></div> 
+                <div class="toolbar_div">
+                    <a class="option" onclick=addRecipes()>Add Recipes</a>
                 </div>
                 <div class="divider"></div>
                 <label class="switch">
@@ -206,7 +223,17 @@ if (isset($_POST["delete_order_id"])) {
     }
 
     function addItems() {
+        $("#add_heading").children().html("add items");
         $("#order_item_list").css("display", "flex");
+        $("#order_recipes").css("display", "none");
+        $("#order_items").css("display", "block");
+    }
+
+    function addRecipes() {
+        $("#add_heading").children().html("add recipes");
+        $("#order_item_list").css("display", "flex");
+        $("#order_items").css("display", "none");
+        $("#order_recipes").css("display", "block");
     }
 
     function editOrder() {
@@ -227,6 +254,7 @@ if (isset($_POST["delete_order_id"])) {
 
     function getCateringItems(obj) {
         var orderId = obj.parentNode.children[1].value;
+        var heading = "";
 
         $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
             $(".print_tbody").remove();
@@ -234,6 +262,8 @@ if (isset($_POST["delete_order_id"])) {
             $(".delivery_date").html($(".active").parent().find("#order_date_format").val());
             $("#created_date").html($(".active").find("#order_date_created").html());
             $(".list_li").removeClass("selected");
+            $("#deleted_heading").remove();
+            $("#deleted_li").remove();
             $(".item_name").each(function() {
                 var itemName = $(this).html();
                 $(".list_li").each(function() {
@@ -242,16 +272,50 @@ if (isset($_POST["delete_order_id"])) {
                     }
                 });
             });
+            $(".recipe_item").each(function() {
+                var recipeName = $(this).html();
+                var recipeId = $(this).parent().find(":nth-child(5)").val();
+                var exists = false;
+                $("#order_recipes .list_li").each(function() {
+                    if ($(this).children().html() == recipeName) {
+                        exists = true;
+                    }
+                });
+                if (!exists) {
+                    if (heading == "") {
+                        $("#order_recipes").append('<li class="list_li_category" id="deleted_heading"><span>Deleted Recipes</span></li>');
+                    }
+                    var recipe = '<li class="list_li selected" id="deleted_li">'+
+                                '<span>'+recipeName+'</span>'+'<input type="hidden" id="item_id" value='+recipeId+'></li>';
+                    $("#order_recipes").append(recipe);
+                }
+            });
             checkRequired();
         });
     }
 
     function updateQuantity(obj) {
-        var quantity = obj.value;
-        var itemId = obj.parentNode.parentNode.children[4].value;
-        var orderId = $(".active").next().val();
+        if (obj.value < 0) {
+            obj.value = "";
+        } else {
+            var quantity = obj.value == "" ? "NULL" : obj.value;
+            var itemId = obj.parentNode.parentNode.children[4].value;
+            var orderId = $(".active").next().val();
 
-        $.post("jq_ajax.php", {updateCateringQuantity: "", quantity: quantity, itemId: itemId, orderId: orderId});
+            $.post("jq_ajax.php", {updateCateringQuantity: "", quantity: quantity, itemId: itemId, orderId: orderId});
+        }
+    }
+
+    function updateRecipeQuantity(obj) {
+        if (obj.value < 0) {
+            obj.value = "";
+        } else {
+            var quantity = obj.value == "" ? "NULL" : obj.value;
+            var recipeId = obj.parentNode.parentNode.children[4].value;
+            var orderId = $(".active").next().val();
+
+            $.post("jq_ajax.php", {updateCateringRecipeQuantity: "", quantity: quantity, recipeId: recipeId, orderId: orderId});
+        }
     }
 
     function updateNotes(obj) {
@@ -260,6 +324,14 @@ if (isset($_POST["delete_order_id"])) {
         var orderId = $(".active").next().val();
 
         $.post("jq_ajax.php", {updateCateringNotes: "", notes: notes, itemId: itemId, orderId: orderId});
+    }
+
+    function updateRecipeNotes(obj) {
+        var notes = obj.value;
+        var recipeId = obj.parentNode.parentNode.children[4].value;
+        var orderId = $(".active").next().val();
+
+        $.post("jq_ajax.php", {updateCateringRecipeNotes: "", notes: notes, recipeId: recipeId, orderId: orderId});
     }
 
     function updateOrderNote(obj) {
@@ -324,7 +396,7 @@ if (isset($_POST["delete_order_id"])) {
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
                 var cell = "";
-                $(this).children().each(function() {
+                $(this).children(":lt(4)").each(function() {
                     if ($(this).children().attr("id") == "quantity_delivered" || $(this).children("textarea").length > 0) {
                         var td = document.createElement("TD");
                         td.innerHTML = $(this).children().val();
@@ -364,21 +436,36 @@ if (isset($_POST["delete_order_id"])) {
             $("#popup_frame").contents().find("body").html('');
         });
 
-        $(".list_li").click(function() {
+        $(document).on("click", ".list_li", function() {
             orderId = $(".active").next().val();
             itemId = $(this).find("#item_id").val();
-            $(this).toggleClass(function() {
-                if ($(this).hasClass("selected")) {
-                    $.post("jq_ajax.php", {removeCateringItem: "", itemId: itemId, orderId: orderId});
-                } else {
-                    $.post("jq_ajax.php", {addCateringItem: "", itemId: itemId, orderId: orderId});
-                }
-                $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
-                    $(".print_tbody").remove();
-                    $("#invoice_table").append(data);
+            if ($(this).parent().attr("id") == "order_items") {
+                $(this).toggleClass(function() {
+                    if ($(this).hasClass("selected")) {
+                        $.post("jq_ajax.php", {removeCateringItem: "", itemId: itemId, orderId: orderId});
+                    } else {
+                        $.post("jq_ajax.php", {addCateringItem: "", itemId: itemId, orderId: orderId});
+                    }
+                    $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
+                        $(".print_tbody").remove();
+                        $("#invoice_table").append(data);
+                    });
+                    return "selected";
                 });
-                return "selected";
-            });
+            } else {
+                $(this).toggleClass(function() {
+                    if ($(this).hasClass("selected")) {
+                        $.post("jq_ajax.php", {removeCateringRecipe: "", itemId: itemId, orderId: orderId});
+                    } else {
+                        $.post("jq_ajax.php", {addCateringRecipe: "", itemId: itemId, orderId: orderId});
+                    }
+                    $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
+                        $(".print_tbody").remove();
+                        $("#invoice_table").append(data);
+                    });
+                    return "selected";
+                });
+            }
         });
 
         $(".list_li_category").click(function() {
