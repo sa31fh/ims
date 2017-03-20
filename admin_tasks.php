@@ -32,6 +32,7 @@ $_SESSION["last_activity"] = time();
             <li><a class="entypo-basket" href="edit_items.php" target="task_frame" >Items</a></li>
             <li><a class="entypo-book-open" href="recipes.php" target="task_frame" >Recipes</a></li>
             <li><a class="entypo-users" href="manage_users.php" target="task_frame">Users</a></li>
+            <li><a class="fa-calculator" href="cash_closing.php" target="task_frame">Cash Closing</a></li>
         </ul>
 
         <div class="main_top_side">
