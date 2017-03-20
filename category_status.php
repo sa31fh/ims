@@ -3,6 +3,7 @@ session_start();
 require_once "database/category_table.php";
 require_once "database/item_table.php";
 require_once "database/sales_table.php";
+require_once "database/cash_closing_table.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -22,6 +23,7 @@ if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION[
     exit();
 }
 $_SESSION["last_activity"] = time();
+$todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
 ?>
 
 <!DOCTYPE html>
@@ -63,10 +65,8 @@ $_SESSION["last_activity"] = time();
                     <span >Todays Sales</span>
                 </div>
                 <div id="right">
-                    <form  class="inline" action="category_status.php" method="post">
-                        <span>$</span>
-                        <input type="number" name="actual_sale" value="<?php echo SalesTable::get_actual_sale($_SESSION["date"]) ?>" onchange="updateTodaysSales(this);">
-                    </form>
+                    <div id="dollar_sign"><?php echo $todays_sales == "" ? "" : "$";?></div>
+                    <div id="amount"><?php echo $todays_sales == "" ? "-" : $todays_sales;?></div>
                 </div>
             </div>
             <ul class="category_list home_category_list font_roboto" >
@@ -120,13 +120,55 @@ $_SESSION["last_activity"] = time();
             </div>
         </div>
     </div>
+
     <div class="div_popup_back" id="date_check_popup">
         <div id="date_check_holder"></div>
     </div>
+
+    <div class="div_popup_back" id="sales_popup">
+        <div class="div_popup popup_todays_sales">
+            <div class="popup_titlebar">
+                <span>Calculate Todays Sales</span>
+                <span class="popup_close" id="popup_close"></span>
+            </div>
+            <div class="div_sales">
+                <?php $result = CashClosingTable::get_row_data($_SESSION["date"]) ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <div class="flex_row div_cell">
+                        <div  class="flex_1">
+                            <span><?php echo $row["name"] ?></span>
+                        </div>
+                        <input class="flex_1 row_amount" type="number" value="<?php echo $row["quantity"] ?>" onchange="updateTodaysSales(this)" placeholder="enter amount">
+                        <input type="hidden" id="type" value="<?php echo $row["type"] ?>">
+                        <input type="hidden" id="row_id" value="<?php echo $row["id"] ?>">
+                    </div>
+                <?php endwhile ?>
+            </div>
+            <div class="flex_row total_bar">
+                <span class="flex_1">Total</span>
+                <span>$</span>
+                <span class="flex_1" id="total_sales"></span>
+            </div>
+             <div class="toolbar_print" id="sales_tabs">
+                <div class="toolbar_div option " id="calculated">Calculated</div>
+                <div class="toolbar_div option" id="custom">Custom</div>
+            </div>
+            <div class="flex_row todays_sales">
+                <span class="flex_1">Todays Sales</span>
+                <span>$</span>
+                <input class="flex_1" type="number" id="total_input" placeholder="enter amount" value="<?php echo $todays_sales == "" ? "-" : $todays_sales;?>">
+            </div>
+            <div class="div_save">
+                <button class="button" onclick=saveSales()>Save</button>
+            </div>
+        </div>
+    </div>
+
+
     <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"]; ?>">
     <input type="hidden" id="date_check" value="<?php echo isset($_SESSION["date_check"]); ?>">
      <?php $page = "home";
-          include_once "new_nav.php"; ?>
+           include_once "new_nav.php"; ?>
 </body>
 </html>
 
@@ -184,10 +226,40 @@ $_SESSION["last_activity"] = time();
     }
 
     function updateTodaysSales(obj) {
-        if (obj.value < 0) {
-            obj.value = "";
-        } else {
-            obj.parentNode.submit();
+        var rowId = $(obj).parent().find("#row_id").val();
+        var date = $("#session_date").val();
+        var note = 'NULL';
+        var quantity = obj.value == "" ? 'NULL' : obj.value;
+        calculateTotal();
+        $.post("jq_ajax.php", {updateCashClosingRow: "", rowId: rowId, date: date, quantity: quantity, note: note});
+    }
+
+    function saveSales() {
+        var sales = $("#total_input").val() == "" ? 'NULL' : $("#total_input").val();
+        $("#right #amount").html(sales == 'NULL' ? '-' : sales);
+        $("#right #dollar_sign").html(sales == 'NULL' ? '' : "$");
+        $("#sales_popup").css("display", "none");
+        $.post("jq_ajax.php", {saveTodaysSales: "", sales: sales});
+    }
+
+    function calculateTotal() {
+        var total_sales = 0;
+        $(".div_sales .row_amount").each(function() {
+            var quantity = $(this).val();
+            var type = $(this).next().val();
+            if (quantity != "") {
+                quantity = parseFloat(quantity);
+                if (type == 0) {
+                    total_sales = total_sales + quantity;
+                } else if (type == 1) {
+                    total_sales = total_sales - quantity;
+                }
+                total_sales = +total_sales.toFixed(2);
+            }
+        });
+        $("#total_sales").html(total_sales);
+        if ($("#sales_tabs .selected").html() == "Calculated") {
+            $("#total_input").val(total_sales);
         }
     }
 
@@ -361,6 +433,45 @@ $_SESSION["last_activity"] = time();
                     }
                 }
             }
+        });
+
+        $(".div_actual_sales").click(function() {
+            calculateTotal();
+            $("#sales_popup").css("display", "block");
+            $("#sales_tabs .toolbar_div").removeClass("selected");
+            if ($("#total_input").val() == $("#total_sales").html() || $("#total_input").val() == "" ) {
+                $("#calculated").addClass("selected");
+                $("#total_input").prop("disabled", true);
+            } else {
+                $("#custom").addClass("selected");
+                $("#total_input").prop("disabled", false);
+                $("#total_input").val($("#right #amount").html());
+            }
+        });
+
+        $("#sales_tabs .toolbar_div").click(function() {
+            $("#sales_tabs .toolbar_div").removeClass("selected");
+            $(this).addClass("selected");
+
+            if ($(this).html() == "Calculated") {
+                $("#total_input").val($("#total_sales").html());
+                $("#total_input").prop("disabled", true);
+            } else {
+                $("#total_input").prop("disabled", false);
+                $("#total_input").val($("#right #amount").html());
+            }
+        });
+
+        $("input[type=number]").on("keypress" , function(event) {
+            if ((event.which < 46 || event.which > 57) && (event.which != 8 &&
+                event.which != 0 && event.which != 13)) {
+                event.preventDefault();
+            }
+        });
+
+        $("#popup_close").click(function() {
+            $("#sales_popup").css("display", "none");
+            $("#total_input").val($("#right #amount").html());
         });
     });
 </script>

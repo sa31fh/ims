@@ -31,6 +31,42 @@ CREATE TABLE `BaseQuantity` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `CashClosing`
+--
+
+DROP TABLE IF EXISTS `CashClosing`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `CashClosing` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) DEFAULT NULL,
+  `type` binary(1) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `creation_date` date DEFAULT NULL,
+  `deletion_date` date DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `CashClosingData`
+--
+
+DROP TABLE IF EXISTS `CashClosingData`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `CashClosingData` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `quantity` int(11) DEFAULT NULL,
+  `notes` varchar(45) DEFAULT NULL,
+  `row_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  PRIMARY KEY (`date`,`row_id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `Category`
 --
 

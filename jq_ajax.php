@@ -20,6 +20,8 @@ require_once "database/catering_item_table.php";
 require_once "database/catering_order_table.php";
 require_once "database/catering_recipe_table.php";
 require_once "database/catering_recipe_item_table.php";
+require_once "database/cash_closing_table.php";
+require_once "database/cash_closing_data_table.php";
 
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
@@ -841,6 +843,30 @@ if (isset($_POST["updateOrderInvoiceDate"])) {
 
 if (isset($_POST["updateOrderNote"])) {
     echo CateringOrderTable::update_order_note($_POST["note"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateCashRowName"])) {
+    echo CashClosingTable::update_name($_POST["id"], $_POST["name"]);
+}
+
+if (isset($_POST["updateCashRowType"])) {
+    echo CashClosingTable::update_type($_POST["id"], $_POST["type"]);
+}
+
+if (isset($_POST["updateCashClosingRow"])) {
+    echo CashClosingDataTable::update_row($_POST["rowId"], $_POST["date"], $_POST["quantity"], $_POST["note"]);
+}
+
+if (isset($_POST["saveTodaysSales"])) {
+    echo SalesTable::add_actual_sale($_POST["sales"], $_SESSION["date"]);
+}
+
+if (isset($_POST["UpdateCashClosingOrder"])) {
+    $order_number = 0;
+    foreach ($_POST["rowIds"] as $value) {
+        CashClosingTable::update_row_order($value, $order_number);
+        $order_number++;
+    }
 }
 
 ?>

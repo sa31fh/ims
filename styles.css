@@ -791,6 +791,16 @@ select{
     font-weight: normal!important;
     font-size: 22px;
 }
+.dragging{
+    background: white;
+    border-top: 1px solid #79bc4d!important;
+    border-bottom: 1px solid #79bc4d!important;
+}
+.not_dragging{
+    background: #f6f6f6;
+    border-top: 1px solid #cecece!important;
+    border-bottom: 1px solid #cecece!important;
+}
 .list_category_li{
     position: relative;
     width: 100%;
@@ -2039,6 +2049,115 @@ td.table_heading{
 #print_all:before{
     font-size: 20px;
 }
+.div_table_heading{
+    background: #f4f4f5;
+    border-bottom: 1px solid #cecece;
+    margin: 0;
+    padding: 8.5px 0px;
+    font-size: 17px;
+    text-transform: uppercase;
+    text-align: center;
+}
+.div_table .side_option{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 70px;
+    min-width: 70px;
+}
+.div_table .div_cell{
+    text-align: center;
+    margin: 10px 0px;
+}
+.div_table #div_rows{
+    flex: 1;
+    background: white;
+    overflow: auto;
+}
+#div_rows li{
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    transition: background 0.2s, border 0.2s;
+    cursor: pointer;
+    min-height: 60px;
+}
+.div_cell input{
+    background: none;
+    padding: 0px;
+    margin: 0;
+    font-size: 18px;
+    border: none;
+    border-bottom: 1px solid rgb(206, 206, 206);
+    outline: none;
+    text-align: center;
+    color: #444!important;
+    font-family: 'Open Sans';
+}
+.div_cell select{
+    background: transparent;
+}
+.div_table .toolbar_print{
+    border: 0;
+    border-top: 1px solid #cecece;
+}
+.div_table .option{
+    padding: 5px;
+} 
+.popup_todays_sales{
+    width: 50%;
+    max-width: 700px;
+    height: 80%;
+    padding: 0px;
+    text-align: center;
+}
+.popup_todays_sales .div_sales{
+    flex: 1;
+    padding: 10px;
+    overflow: auto;
+}
+.total_bar, .todays_sales{
+    padding: 10px 0px;
+    border-bottom: 1px solid #cecece;
+    border-top: 1px solid #cecece;
+}
+.total_bar{
+    margin-bottom: 20px;
+}
+.todays_sales{
+    border-top: none;
+}
+#sales_tabs{
+    border-top: 1px solid #cecece;
+}
+.popup_todays_sales input{
+    background: none;
+    padding: 0px;
+    margin: 0;
+    font-size: 18px;
+    border: none;
+    border-bottom: 1px solid rgb(206, 206, 206);
+    outline: none;
+    text-align: center;
+    color: #444!important;
+    font-family: 'Open Sans';
+}
+.popup_todays_sales .div_save{
+    padding: 10px 0px;
+}
+.div_sales div{
+    margin: 5px 0px;
+    justify-content: center;
+    align-items: center;
+}
+.reorder {
+    display: none;
+    padding: 10px 15px;
+    border: 1px solid #cecece;
+}
+.reorder span:before{
+    font-size: 17px;
+    color: #777;
+}
 /* --------------------------MESSAGES TABLE STYLE--------------------- */
 .main_iframe#message_iframe{
     overflow: hidden;
@@ -2147,6 +2266,7 @@ td.table_heading{
     font-size: 15px;
     vertical-align: middle;
     flex: 1;
+    text-align: center;
 }
 
 .toolbar_div#print_expected_div{
