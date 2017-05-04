@@ -118,7 +118,8 @@ if(isset($_POST["getItemCount"])) {
 
 if(isset($_POST["addItem"])) {
      try {
-        if(!ItemTable::add_new_item($_POST["itemName"], $_POST["itemUnit"])) {
+        if(!ItemTable::add_new_item($_POST["itemName"], $_POST["itemUnit"], $_SESSION["date"], $_POST["itemPrice"],
+                                    $_POST["itemDeviation"])) {
             echo '<div class="error">Item already exists</div>';
         } else {
             if (!empty($_POST["itemQuant"])) {

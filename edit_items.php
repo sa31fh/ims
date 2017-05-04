@@ -64,6 +64,14 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                         <label for="new_item_quantity">Quantity</label>
                         <input class="userinput" type="text" id="new_item_quantity" placeholder="Item Quantity">
                     </div>
+                    <div class="inline">
+                        <label for="new_item_price">Price</label>
+                        <input class="userinput" type="text" id="new_item_price" placeholder="Item Price">
+                    </div>
+                    <div class="inline">
+                        <label for="new_item_deviation">Deviation</label>
+                        <input class="userinput" type="text" id="new_item_deviation" placeholder="Item Deviation">
+                    </div>
                     <div class="block" id="item_add_div" >
                         <input type="submit" value="Add Item" class="button button_add_drawer" id="item_add_button">
                     </div>
@@ -464,9 +472,12 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             var itemName = $("#new_item_name").val();
             var itemUnit = $("#new_item_unit").val();
             var itemQuantity = $("#new_item_quantity").val();
+            var itemPrice = $("#new_item_price").val() == "" ? 'NULL' : $("#new_item_price").val();
+            var itemDeviation = $("#new_item_deviation").val() == "" ? 'NULL' : $("#new_item_deviation").val();
 
             if (itemName) {
-                $.post("jq_ajax.php", {addItem: "", itemName: itemName, itemUnit: itemUnit, itemQuant: itemQuantity}, function(data, status) {
+                $.post("jq_ajax.php", {addItem: "", itemName: itemName, itemUnit: itemUnit, itemQuant: itemQuantity,
+                                       itemPrice: itemPrice, itemDeviation: itemDeviation}, function(data, status) {
                     $("body").append(data);
                     getTab(document.getElementById("day_tab"));
                     $("userinput").trigger("reset");
