@@ -23,9 +23,9 @@ exit();
 }
 $_SESSION["last_activity"] = time();
 
-if (isset($_POST["add_button"]) AND !empty($_POST["category"])) {
+if (isset($_POST["new_name"]) AND !empty($_POST["new_name"])) {
     try {
-        if (!CategoryTable::add_category($_POST["category"])) {
+        if (!CategoryTable::add_category($_POST["new_name"], $_SESSION["date"])) {
             echo '<div class="error">Category already exists</div>';
         }
     } catch (Exception $e) {
@@ -33,7 +33,7 @@ if (isset($_POST["add_button"]) AND !empty($_POST["category"])) {
     }
 }
 if(isset($_POST["delete_id"])) {
-    CategoryTable::remove_category($_POST["delete_id"]);
+    CategoryTable::remove_category($_POST["delete_id"], $_SESSION["date"]);
 }
 ?>
 
@@ -49,8 +49,8 @@ if(isset($_POST["delete_id"])) {
         <div class="div_category">
             <h4 class="font_roboto">Categories</h4>
             <div class="div_list_category">
-            <ul class="category_list" id="category_list" >
-                <?php $result = CategoryTable::get_categories($date = date('Y-m-d')) ?>
+            <ul class="category_list" id="category_list">
+                <?php $result = CategoryTable::get_categories($_SESSION["date"]) ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <li id="<?php echo $row['id']?>" class="list_category_li" onclick=categorySelect(this)>
                         <span><?php echo $row["name"]?></span>
@@ -63,14 +63,12 @@ if(isset($_POST["delete_id"])) {
             </div>
             <input type="hidden" id="category_select">
             <div class="category_add" id="category_add">
-                <button class="button_flat entypo-trash float_left" onclick=deleteDrawer()>delete</button>
+                <button class="button_flat entypo-trash float_left" onclick=deleteCategory()>delete</button>
                 <button class="button_flat entypo-plus float_right" onclick=slideDrawer()>Add</button>
             </div>
             <div class="category_add_drawer">
-                <form action="edit_categories.php" method="post" >
-                    <input class="category_input" type="text" name="category" id="category_name" placeholder="Category Name">
-                    <input type="submit" name="add_button" value="Add" class="button">
-                </form>
+                <input class="category_input" type="text" name="category" id="category_name" placeholder="Category Name">
+                <button name="add_button" class="button" onclick=addCategory()>Add</button>
                 <button class="button_cancel"  onclick=slideDrawer()>cancel</button>
             </div>
             <div class="category_delete">
@@ -101,6 +99,10 @@ if(isset($_POST["delete_id"])) {
             </div>
         </div>
     </div>
+
+    <form action="edit_categories.php" method="post" id="add_form">
+        <input type="hidden" name="new_name" id="new_name">
+    </form>
 </body>
 </html>
 
@@ -158,30 +160,20 @@ if(isset($_POST["delete_id"])) {
         $(".category_add_drawer").slideToggle(180, "linear");
     }
 
-    function deleteDrawer() {
-        $(".category_delete").slideToggle(180, "linear");
-        $("#category_list li").draggable({
-            scroll: false,
-            revert: "invalid",
-            containment: ".div_list_category",
-            zIndex: 500,
-            helper: function(event, ui) {
-                var helper = $(this).clone()
-                helper.addClass("category_drag");
-                $(this).css("opacity", "0");
-                return helper;
-            },
-            start: function(event, ui) {
-            },
-            stop: function(event, ui) {
-                $(this).css("opacity", "1");
-            }
+    function deleteCategory() {
+        alertify.confirm("Delete Category '"+$(".active").children("span").html()+"' ?", function() {
+            $(".active").children("form").submit();
         });
     }
 
-    function closeDelete() {
-        $("#category_list li").draggable("destroy");
-        $(".category_delete").slideToggle(180, "linear");
+    function addCategory() {
+        var ids = $(".list_category_li")
+                    .map(function() {
+                        return this.id;
+                    }).get();
+       $.post("jq_ajax.php", {UpdateCategoryOrder: "", categoryIds: ids});
+       $("#new_name").val($("#category_name").val());
+       $("#add_form").submit();
     }
 
     $(document).ready(function() {
@@ -231,14 +223,6 @@ if(isset($_POST["delete_id"])) {
             update: function(event, ui) {
                 var ids = $(this).sortable("toArray");
                 $.post("jq_ajax.php", {UpdateCategoryOrder: "", categoryIds: ids});
-            }
-        });
-
-        $(".category_delete .span_delete").droppable({
-            drop: function(event, ui) {
-                alertify.confirm("Delete Category '"+$(ui.draggable).children("span").html()+"' ?", function() {
-                    $(ui.draggable).children("form").submit();
-                });
             }
         });
 

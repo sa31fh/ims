@@ -45,7 +45,7 @@ CREATE TABLE `CashClosing` (
   `creation_date` date DEFAULT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,7 +63,7 @@ CREATE TABLE `CashClosingData` (
   `date` date NOT NULL,
   PRIMARY KEY (`date`,`row_id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=67 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -81,7 +81,7 @@ CREATE TABLE `Category` (
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,9 +99,10 @@ CREATE TABLE `CateringItems` (
   `notes` varchar(45) DEFAULT NULL,
   `quantity_delivered` int(11) DEFAULT NULL,
   `invoice_notes` varchar(45) DEFAULT NULL,
+  `price` int(11) DEFAULT NULL,
   PRIMARY KEY (`item_id`,`order_id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,12 +136,15 @@ CREATE TABLE `CateringRecipeItems` (
   `item_id` int(11) NOT NULL,
   `recipe_id` int(11) NOT NULL,
   `order_id` int(11) NOT NULL,
+  `base_quantity` int(11) DEFAULT NULL,
+  `quantity_required` int(11) DEFAULT NULL,
   `quantity_delivered` int(11) DEFAULT NULL,
   `notes` varchar(45) DEFAULT NULL,
   `invoice_notes` varchar(45) DEFAULT NULL,
+  `price` int(11) DEFAULT NULL,
   PRIMARY KEY (`item_id`,`recipe_id`,`order_id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +162,7 @@ CREATE TABLE `CateringRecipes` (
   `notes` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`recipe_id`,`order_id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,7 +188,7 @@ CREATE TABLE `Conversation` (
   KEY `FK_receiver_idx` (`receiver`),
   KEY `FK_senderConversationId_idx` (`sender_conversationStatusId`),
   KEY `FK_receiverConversationId_idx` (`receiver_conversationStatusId`)
-) ENGINE=MyISAM AUTO_INCREMENT=592 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=636 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -212,9 +216,14 @@ CREATE TABLE `Inventory` (
   `date` date NOT NULL,
   `item_id` int(11) NOT NULL,
   `quantity` decimal(11,2) DEFAULT NULL,
+  `expected_quantity` int(11) DEFAULT NULL,
+  `quantity_required` int(11) DEFAULT NULL,
   `quantity_delivered` int(11) DEFAULT NULL,
   `notes` text,
   `invoice_notes` text,
+  `has_deviation` binary(1) NOT NULL DEFAULT '0',
+  `cost_required` int(11) DEFAULT NULL,
+  `cost_delivered` int(11) DEFAULT NULL,
   PRIMARY KEY (`date`,`item_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -231,7 +240,7 @@ CREATE TABLE `Invoice` (
   `date` date NOT NULL,
   PRIMARY KEY (`date`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -254,7 +263,7 @@ CREATE TABLE `Item` (
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=116 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -274,7 +283,7 @@ CREATE TABLE `Message` (
   `attachment_title` varchar(45) DEFAULT NULL,
   `conversation_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=676 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=720 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -322,7 +331,7 @@ CREATE TABLE `Recipe` (
   `creation_date` date NOT NULL,
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -338,7 +347,7 @@ CREATE TABLE `RecipeItems` (
   `item_id` int(10) NOT NULL,
   `quantity` int(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -511,4 +520,4 @@ CREATE TABLE `Variables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-22 11:02:34
+-- Dump completed on 2017-04-29 10:44:42

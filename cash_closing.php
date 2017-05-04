@@ -25,10 +25,10 @@ exit();
 $_SESSION["last_activity"] = time();
 
 if (isset($_POST["add_row"])) {
-    CashClosingTable::add_row($_SESSION["date"]);
+    CashClosingTable::add_row(date('Y-m-d'));
 }
 if (isset($_POST["checkbox"])) {
-    CashClosingTable::delete_rows($_POST["checkbox"], $_SESSION["date"]);
+    CashClosingTable::delete_rows($_POST["checkbox"],date('Y-m-d'));
 }
 
 ?>
@@ -54,7 +54,7 @@ if (isset($_POST["checkbox"])) {
                 <div class="flex_2 ">type</div>
             </div>
             <ul class="flex_col" id="div_rows">
-                <?php $result = CashClosingTable::get_rows($_SESSION["date"]); ?>
+                <?php $result = CashClosingTable::get_rows(date('Y-m-d')); ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <li class="flex_row" id="<?php echo $row['id'] ?>">
                         <div class="flex_1 side_option">
@@ -156,12 +156,6 @@ if (isset($_POST["checkbox"])) {
 
         $("#select_all").change(function(){
             $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
-            // if ($("#select_all").prop("checked")) {
-            //     $("#button_div").fadeIn(200, "linear");
-            //     $("#button_div").css("display", "inline-block");
-            // } else {
-            //     $("#button_div").fadeOut(200, "linear");
-            // }
         });
 
         $("#div_rows").sortable({

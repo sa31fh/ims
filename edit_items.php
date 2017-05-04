@@ -31,11 +31,12 @@ if (isset($_POST["tab_name"])) {
     TimeslotTable::delete_timeslot($_POST["tab_name"]);
 }
 if (isset($_POST["checkbox"])) {
-    ItemTable::delete_multiple_items($_POST["checkbox"]);
+    ItemTable::delete_multiple_items($_POST["checkbox"], $_SESSION["date"]);
 }
 if (isset($_POST["base_sales"])) {
     VariablesTable::update_base_sales($_POST["base_sales"]);
 }
+$item_table = ItemTable::get_items_categories($_SESSION["date"]);
 ?>
 
 <!DOCTYPE html>
@@ -78,9 +79,8 @@ if (isset($_POST["base_sales"])) {
             </div>
             <div><h4>All Items</h4></div>
             <ul class="category_list">
-                <?php $result = ItemTable::get_items_categories(); ?>
                 <?php $current_category = 1; ?>
-                <?php while ($row = $result->fetch_assoc()): ?>
+                <?php while ($row = $item_table->fetch_assoc()): ?>
                     <?php if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
                        <?php $current_category = $row["category_name"];?>
                         <li class="list_li_category">
@@ -104,7 +104,7 @@ if (isset($_POST["base_sales"])) {
             <div class="div_child" id="inventory_tabs">
                 <div class="div_left_tabs">
                     <ul class="tab_ul">
-                        <li class="tab_li"><span id="day_tab" onclick=getTab(this)><?php echo "Full Day" ?></span></li>
+                        <li class="tab_li selected"><span id="day_tab" onclick=getTab(this)><?php echo "Full Day" ?></span></li>
                     </ul>
                 </div>
                 <div class="div_right_tabs">
@@ -161,6 +161,44 @@ if (isset($_POST["base_sales"])) {
                         <th id="th_rounding">Rounding</th>
                     </tr>
                     <tbody id="item_tbody">
+                    <?php  $current_category = 1;?>
+                    <?php mysqli_data_seek($item_table, 0); ?>
+                    <?php  while($row = $item_table->fetch_assoc()): ?>
+                    <?php  if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
+                            <?php $current_category = $row["category_name"];?>
+                            <tr class="item_category_tr">
+                                <td id="category" colspan="7" class="table_heading"><?php echo $row["category_name"]?><span class="arrow_down float_right collapse_arrow"></span></td>
+                            </tr>
+                    <?php elseif ($row["category_name"] != $current_category AND $row["category_name"] == null): ?>
+                    <?php  $current_category = $row["category_name"];?>
+                            <tr class="item_category_tr">
+                                <td id="category" colspan="7" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
+                            </tr>
+                    <?php endif ?>
+                        <tr>
+                            <input type="hidden" name="item_id" value="<?php echo $row["id"]?>">
+                            <td class="td_checkbox">
+                                <div class="checkbox">
+                                    <input type="checkbox" class="item_checkbox" name="checkbox[]" value="<?php echo $row["id"]?>" form="checkbox_form">
+                                    <span class="checkbox_style"></span>
+                                </div>
+                            </td>
+                            <td><input type="text" name="item_name" value="<?php echo $row["name"]?>" onchange=updateItem(this) class="align_center item_name"></td>
+                            <td><input type="text" name="item_unit" value="<?php echo $row["unit"]?>" onchange=updateItem(this) class="align_center"></td>
+                            <td><input type="number" name="item_quantity" step="any" min="0" value="<?php echo $row["quantity"]?>" onchange=quantityChange(this) class="align_center number_view"></td>
+                            <td>$<input type="number" name="item_price" step="any" min="0" value="<?php echo $row["price"]?>" onchange=updateItem(this) class="align_center number_view"></td>
+                            <td><input type="number" name="item_deviation step="1" min="0" value="<?php echo $row["deviation"]?>" onchange=updateItemDeviation(this) class="align_center number_view">%</td>
+                            <td id="round_tr">
+                                <select name="" id="" onchange=updateRoundingOption(this)>
+                                    <option value="none" <?php echo $row["rounding_option"] == "none" ? "selected" : ""?> >none</option>
+                                    <option value="up" <?php echo $row["rounding_option"] == "up" ? "selected" : "" ?> >up</option>
+                                    <option value="down" <?php echo $row["rounding_option"] == "down" ? "selected" : ""?> >down</option>
+                                </select>
+                                <input id="round_input" type="number" step="any" value="<?php echo $row["rounding_factor"]?>" onchange=updateRoundingFactor(this)
+                                        class="align_center" <?php echo $row["rounding_option"] == "none" ? "disabled" : ""?> >
+                            </td>
+                        </tr>
+                    <?php endwhile ?>
                     </tbody>
                 </table>
             </div>
@@ -331,10 +369,6 @@ if (isset($_POST["base_sales"])) {
     }
 
     $(document).ready(function() {
-        $(".tab_li span:first").each(function() {
-           getTab($(this)[0]);
-           $(this).parent().addClass("selected");
-        });
 
         $("#timeslot_ul").sortable({
             delay: 200,
@@ -404,7 +438,7 @@ if (isset($_POST["base_sales"])) {
 
         $("#add_item_button").click(function() {
             if ($(this).html() == "Item List") {
-                $("#item_list_div").css("flex", "1");
+                $("#item_list_div").css({"flex": "1","max-width": "initial"});
             } else {
                 $("#add_div").slideDown(180, "linear", function() {
                     $(".div_fade").css("display", "block");
@@ -461,7 +495,7 @@ if (isset($_POST["base_sales"])) {
         });
 
         $("#item_list_cancel").click(function() {
-            $("#item_list_div").css("flex", "0");
+            $("#item_list_div").css({"flex": "0","max-width": "0"});
         });
 
         $("#select_all").change(function() {

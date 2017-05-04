@@ -15,6 +15,11 @@ if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION[
     exit();
 }
 $_SESSION["last_activity"] = time();
+
+if(isset($_POST["new_date"])) {
+    $_SESSION["date"] = $_POST["new_date"];
+    $_SESSION["date_check"] = "checked";
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,11 +33,59 @@ $_SESSION["last_activity"] = time();
     <div class="main">
         <ul class="sidenav font_roboto" id="sideNav">
             <li id="heading"><h4>Admin Tasks</h4></li>
-            <li><a class="entypo-archive active" href="edit_categories.php" target="task_frame" >Categories</a></li>
-            <li><a class="entypo-basket" href="edit_items.php" target="task_frame" >Items</a></li>
-            <li><a class="entypo-book-open" href="recipes.php" target="task_frame" >Recipes</a></li>
-            <li><a class="entypo-users" href="manage_users.php" target="task_frame">Users</a></li>
-            <li><a class="fa-calculator" href="cash_closing.php" target="task_frame">Cash Closing</a></li>
+            <div class="flex_col flex_1">
+                <div class="flex_row">
+                    <div class="side_date flex_1 left">
+                        <?php $date = date_create($_SESSION["date"]) ?>
+                        <span id="date"><?php echo date_format($date, "jS") ?></span>
+                        <span id="month"><?php echo date_format($date, "M") ?></span>
+                        <span id="year"><?php echo date_format($date, "Y") ?></span>
+                        <div id="div_cal"></div>
+                    </div>
+                    <div class="flex_2 right">
+                        <li>
+                            <a class="active" href="edit_categories.php" target="task_frame" >
+                                <span class="image entypo-archive" ></span>
+                                <span class="text">Categories</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="edit_items.php" target="task_frame" >
+                                <span class="image entypo-basket"></span>
+                                <span class="text">Items</span>
+                            </a>
+                        </li>
+                    </div>
+                </div>
+                <div class="flex_row flex_1">
+                    <div class="flex_1 left" id="dateless">
+                        <span>dateless</span>
+                    </div>
+                    <div class="flex_2">
+                        <li>
+                        <a href="recipes.php" target="task_frame" >
+                            <span class="image entypo-book-open"></span>
+                            <span class="text">Recipes</span>
+                        </a>
+                        </li>
+                        <li>
+                            <a href="manage_users.php" target="task_frame">
+                                <span class="image entypo-users"></span>
+                                <span class="text">Users</span>
+                            </a></li>
+                        <li>
+                            <a href="cash_closing.php" target="task_frame">
+                                <span class="image fa-calculator"></span>
+                                <span class="text">Cash Closing</span>
+                            </a>
+                        </li>
+                        <li><a href="admin_settings.php" target="task_frame">
+                            <span class="image fa-cog"></span>
+                            <span class="text">Settings</span>
+                        </a></li>
+                    </div>
+                </div>
+            </div>
         </ul>
 
         <div class="main_top_side">
@@ -41,10 +94,18 @@ $_SESSION["last_activity"] = time();
     </div>
     <?php $page = "admin tasks";
     include_once "new_nav.php" ?>
+
+    <form action="admin_tasks.php" method="post" id="cal_form">
+        <input type="hidden" id="cal_date" name="new_date" value="<?php echo $_SESSION["date"] ?>">
+    </form>
 </body>
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script
+      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"></script>
 <script>
     $(document).ready(function() {
 
@@ -52,5 +113,38 @@ $_SESSION["last_activity"] = time();
            $('#sideNav li a').removeClass("active");
            $(this).addClass('active');
         });
+
+        $(".side_date").click(function() {
+            $("#div_cal .ui-datepicker").css("display", "block");
+            $("#div_cal").datepicker({
+                dateFormat: "yy-mm-dd",
+                defaultDate: $("#cal_date").val(),
+                dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                showButtonPanel: true,
+                currentText: "close",
+                prevText: "previous",
+                onSelect: function(dateText) {
+                    $(".ui-datepicker").css("display", "none");
+                    $("#cal_date").val(dateText);
+                    $("#cal_form").submit();
+                }
+            });
+        });
+
+        $(document).click(function(event) {
+            if ($("#date_check").val() != "") {
+                if(!$(event.target).closest('.side_date', window.parent.document).length && !$(event.target).is("a, span")) {
+                    if($('.ui-datepicker').is(":visible")) {
+                        $('#div_cal .ui-datepicker').css("display", "none");
+                    }
+                }
+            }
+        });
+
+        $(document).on("click", ".ui-datepicker-current", function(event) {
+            event.preventDefault();
+            $('#div_cal .ui-datepicker').css("display", "none");
+        });
+
      });
 </script>

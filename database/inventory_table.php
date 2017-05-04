@@ -15,15 +15,15 @@ class InventoryTable extends DatabaseTable {
     public static function get_inventory($category_id, $date) {
         $sql = "SELECT T2.item_id AS id, T2.item_name AS name, T2.item_unit AS unit, IFNULL(T1.quantity, null) AS quantity,
                 T1.notes AS notes, T2.deviation AS deviation, T2.rounding_option AS rounding_option,
-                T2.rounding_factor AS rounding_factor FROM
+                T2.rounding_factor AS rounding_factor, T1.expected_quantity AS expected_quantity, T1.has_deviation,
+                T2.cat_id FROM
                 (SELECT * FROM Inventory
                 WHERE Inventory.date = '{$date}') AS T1
                 RIGHT JOIN
-                (SELECT Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit,
+                (SELECT Category.id AS cat_id, Item.id AS item_id, Item.name AS item_name, Item.unit AS item_unit,
                         Item.order_id, deviation, rounding_option, rounding_factor FROM Item
                 INNER JOIN Category ON Item.category_id = Category.id
-                WHERE Category.id = {$category_id}
-                    AND (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
+                    WHERE (Category.creation_date <= '{$date}' AND (Category.deletion_date > '{$date}' OR Category.deletion_date IS NULL))
                     AND (Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL))) AS T2 ON T2.item_id = T1.item_id
                 ORDER BY T2.order_id";
 
@@ -49,11 +49,38 @@ class InventoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function update_expected_quantity($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (`date`, item_id, expected_quantity)
+                VALUES ('$date', '$item_id', $quantity)
+                ON DUPLICATE KEY UPDATE
+                `date`= VALUES(`date`), item_id = VALUES(item_id), expected_quantity = VALUES(expected_quantity)";
+
+        return parent::query($sql);
+    }
+
+    public static function update_item_deviation($deviation, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (`date`, item_id, has_deviation)
+                VALUES ('$date', '$item_id', $deviation)
+                ON DUPLICATE KEY UPDATE
+                `date`= VALUES(`date`), item_id = VALUES(item_id), has_deviation = VALUES(has_deviation)";
+
+        return parent::query($sql);
+    }
+
+    public static function update_quantity_required($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (item_id, quantity_required, `date`)
+                VALUES ('$item_id', $quantity, '$date')
+                ON DUPLICATE KEY UPDATE
+                item_id = VALUES(item_id), quantity_required = VALUES(quantity_required), `date` = VALUES(`date`)";
+
+        return parent::query($sql);
+
+    }
 
     public static function get_inventory_with_deviation($date) {
         $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
                         Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
-                        Category.name AS category_name FROM Item
+                        Category.name AS category_name, Inventory.expected_quantity, Inventory.has_deviation FROM Item
                 INNER JOIN Category ON Category.id = Item.category_id
                 LEFT JOIN
                 (SELECT * FROM Inventory WHERE Inventory.date = '$date') AS Inventory ON Item.id = Inventory.item_id
@@ -66,8 +93,9 @@ class InventoryTable extends DatabaseTable {
 
      public static function get_search_inventory($date) {
         $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
-                        Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
-                        Inventory.notes, Category.name AS category_name FROM Item
+                        Item.order_id, Item.rounding_option, Item.rounding_factor, Item.unit, Item.deviation,
+                        Inventory.notes, Category.name AS category_name, Inventory.expected_quantity,
+                        Inventory.has_deviation FROM Item
                 INNER JOIN Category ON Category.id = Item.category_id
                 LEFT JOIN
                 (SELECT * FROM Inventory WHERE Inventory.date = '$date') AS Inventory ON Item.id = Inventory.item_id
@@ -105,6 +133,24 @@ class InventoryTable extends DatabaseTable {
 
         return parent::query($sql);
 
+    }
+
+    public static function update_cost_required($cost, $item_id, $date) {
+        $sql = "UPDATE Inventory
+                SET cost_required = $cost
+                WHERE item_id = $item_id
+                AND `date` = '$date'";
+
+        return parent::query($sql);
+    }
+
+    public static function update_cost_delivered($cost, $item_id, $date) {
+        $sql = "UPDATE Inventory
+                SET cost_delivered = $cost
+                WHERE item_id = $item_id
+                AND `date` = '$date'";
+
+        return parent::query($sql);
     }
 }
 ?>

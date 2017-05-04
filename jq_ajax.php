@@ -23,6 +23,8 @@ require_once "database/catering_recipe_item_table.php";
 require_once "database/cash_closing_table.php";
 require_once "database/cash_closing_data_table.php";
 
+$readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"])) ? "readonly" : "";
+
 /*---------------manage_users.php-------------*/
 if (isset($_POST["newRole"])) {
     UserRoleTable::update_user_role($_POST["roleUserName"], $_POST["newRole"]);
@@ -59,7 +61,7 @@ if (isset($_POST["UpdateItemOrder"])) {
 }
 
 if (isset($_POST["UpdateCategoryOrder"])) {
-    $order_number = 0;
+    $order_number = 1;
     foreach ($_POST["categoryIds"] as $value) {
         CategoryTable::update_category_order($value, $order_number);
         $order_number++;
@@ -130,7 +132,7 @@ if(isset($_POST["addItem"])) {
 }
 
 if(isset($_POST["getItems"])) {
-    $result = ItemTable::get_items_categories();
+    $result = ItemTable::get_items_categories($_SESSION["date"]);
     $current_category = 1;
     while($row = $result->fetch_assoc()) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
@@ -259,39 +261,20 @@ if (isset($_POST["getPrintPreview"])) {
                         <th>Notes</th>
                     </tr>';
         }
-        echo '<tr id="column_data" class="row">';
-                    $expected_sales = SalesTable::get_expected_sale($_SESSION["date"]);
-                    if (is_numeric($expected_sales)) {
-                        $sales_factor = $expected_sales / VariablesTable::get_base_sales();
-                        if (is_numeric($row["quantity"])) {
-                            $quantity = BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"];
-                            if ($row["rounding_option"] == "up") {
-                                $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                            } else if ($row["rounding_option"] == "down") {
-                                $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                            }
-                        } else {
-                            $quantity = "-";
-                        }
-                        if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
-                            $cost = "$ ".round($quantity * $row["price"], 2);
-                        } else {
-                            $cost = "-";
-                        }
-                    } else {
-                        $quantity = "-";
-                        $cost = "-";
-                    }
-        echo  '     <td>'.$row["item_name"].'</td>
-                    <td>'.$row["unit"].'</td>
-                    <td>'.$row["quantity"].'</td>
-                    <td class="quantity_required">'.$quantity.'</td>
-                    <td class="cost">'.$cost.'</td>
-                    <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'">'.$row["notes"].'</textarea>
-                        <input type="hidden" value="'.$row["item_id"].'">
-                    </td>
-                </tr>';
+        $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
+        $cost_required = $row["cost_required"] == "" ? "-" : "$ ".$row["cost_required"];
+
+        echo '<tr id="column_data" class="row">
+                <td>'.$row["item_name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td>'.$row["quantity"].'</td>
+                <td class="quantity_required">'.$quantity_required.'</td>
+                <td class="cost">'.$cost_required.'</td>
+                <td id="td_notes">
+                    <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'" '.$readonly.' >'.$row["notes"].'</textarea>
+                    <input type="hidden" value="'.$row["item_id"].'">
+                </td>
+            </tr>';
     }
 }
 
@@ -349,31 +332,16 @@ if (isset($_POST["getTrackedInvoice"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $expected_sales = SalesTable::get_expected_sale($_POST['date']);
-                    if (is_numeric($expected_sales)) {
-                        $sales_factor = $expected_sales / VariablesTable::get_base_sales();
-                        $quantity = (is_numeric($row["quantity"]) ? BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"] : "");
-                        if ($row["rounding_option"] == "up") {
-                            $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                        } else if ($row["rounding_option"] == "down") {
-                            $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                        }
-                        if (($row["quantity_delivered"] != "-" AND $row["quantity_delivered"] > -1) AND $row["price"] != "-") {
-                            $cost = "$ ".round($row["quantity_delivered"] * $row["price"], 2);
-                        } else {
-                            $cost = "-";
-                        }
-                    } else {
-                        $quantity = "-";
-                        $cost = "-";
-                    }
+                    $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
+                    $cost = is_numeric($row["cost_delivered"]) ? "$ ".$row["cost_delivered"] : "-";
+
         echo  '     <td>'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
-                    <td class="quantity_required">'.$quantity.'</td>
-                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'"></td>
+                    <td class="quantity_required">'.$quantity_required.'</td>
+                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'" '.$readonly.' ></td>
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["invoice_notes"].'">'.$row["invoice_notes"].'</textarea>
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["invoice_notes"].'" '.$readonly.' >'.$row["invoice_notes"].'</textarea>
                     </td>
                     <input type="hidden" value="'.$row["item_id"].'">
                 </tr>';
@@ -382,72 +350,19 @@ if (isset($_POST["getTrackedInvoice"])) {
 
 if (isset($_POST["getInventory"])) {
     $result = InventoryTable::get_inventory($_POST["categoryId"], $_POST["date"]);
-    $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
-    $expected_sales = SalesTable::get_expected_sale($date);
-    $actual_sales = SalesTable::get_actual_sale($_SESSION["date"]);
-    $base_sale = VariablesTable::get_base_sales();
     while ($row = $result -> fetch_assoc()) {
-        if (is_null($actual_sales) OR is_null($expected_sales)) {
-            $estimated_quantity = "-";
-        } else {
-            $quantity_factor = BaseQuantityTable::get_base_quantity($row["id"]) / $base_sale;
-            $expected_quantity = $expected_sales * $quantity_factor;
-            $actual_quantity = $actual_sales * $quantity_factor;
-            $estimated_quantity = $expected_quantity - $actual_quantity;
-            $estimated_quantity = $estimated_quantity < 0 ? 0 : $estimated_quantity;
-            if ($row["rounding_option"] == "up") {
-                $estimated_quantity = ceil($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-            } else if ($row["rounding_option"] == "down") {
-                $estimated_quantity = floor($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-            } else {
-                $estimated_quantity = round($estimated_quantity, 2);
-            }
-        }
+        $expected_quantity = $row["expected_quantity"] == "" ? "-" : $row["expected_quantity"];
+        $warning = $row["has_deviation"] > 0 ? "warning_sign" : "";
         echo '<tr>
-                <td class="item_name entypo-attention">'.$row["name"].'</td>
+                <td class="item_name entypo-attention '.$warning.'">'.$row["name"].'</td>
                 <td>'.$row["unit"].'</td>
-                <td class="td_expected">'.$estimated_quantity.'</td>
+                <td class="td_expected">'.$expected_quantity.'</td>
                 <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].
-                                        '" onchange="updateInventory(this); checkDeviation(this, true, true);" ></td>
-                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
+                                        '" onchange="updateInventory(this); checkDeviation(this, true, true);" '.$readonly.' ></td>
+                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this) '.$readonly.' ></td>
                 <input type="hidden" value='.$row["id"].'>
                 <input type="hidden" value='.$row["deviation"].'>
-            </tr>';
-    }
-}
-
-if (isset($_POST["getSearchInventory"])) {
-    $result = InventoryTable::get_search_inventory($_POST["date"]);
-    $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
-    $expected_sales = SalesTable::get_expected_sale($date);
-    $actual_sales = SalesTable::get_actual_sale($_SESSION["date"]);
-    $base_sale = VariablesTable::get_base_sales();
-    while ($row = $result -> fetch_assoc()) {
-        if (is_null($actual_sales) OR is_null($expected_sales)) {
-            $estimated_quantity = "-";
-        } else {
-            $quantity_factor = BaseQuantityTable::get_base_quantity($row["id"]) / $base_sale;
-            $expected_quantity = $expected_sales * $quantity_factor;
-            $actual_quantity = $actual_sales * $quantity_factor;
-            $estimated_quantity = $expected_quantity - $actual_quantity;
-            $estimated_quantity = $estimated_quantity < 0 ? 0 : $estimated_quantity;
-            if ($row["rounding_option"] == "up") {
-                $estimated_quantity = ceil($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-            } else if ($row["rounding_option"] == "down") {
-                $estimated_quantity = floor($estimated_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-            } else {
-                $estimated_quantity = round($estimated_quantity, 2);
-            }
-        }
-        echo '<tr>
-                <td class="item_name entypo-attention">'.$row["name"].'</td>
-                <td>'.$row["unit"].'</td>
-                <td class="td_expected">'.$estimated_quantity.'</td>
-                <td class="td_quantity"><input class="quantity_input align_center" type="number" min="0" step="any" value="'.$row["quantity"].
-                                        '" onchange="updateInventory(this); checkDeviation(this, true, true);" ></td>
-                <td><input type="text" value="'.$row["notes"].'" onchange=updateInventory(this)></td>
-                <input type="hidden" value='.$row["id"].'>
-                <input type="hidden" value='.$row["deviation"].'>
+                <input type="hidden" id="cat_id" value='.$row["cat_id"].'>
             </tr>';
     }
 }
@@ -466,9 +381,9 @@ if (isset($_POST["getCateringItems"])) {
         while ($row = $result->fetch_assoc()) {
             echo '<tr id="column_data" class="row">';
             echo  ' <td class="item_name recipe_item" >'.$row["name"].'</td><td></td>
-                    <td><input  onchange="updateRecipeQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_required"].'"></td>
+                    <td><input  onchange="updateRecipeQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_required"].'"  '.$readonly.' ></td>
                     <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateRecipeNotes(this)" value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                        <textarea name="" id="" rows="2" onchange="updateRecipeNotes(this)" value="'.$row["notes"].'"  '.$readonly.' >'.$row["notes"].'</textarea>
                     </td>
                     <input type="hidden" value="'.$row["recipe_id"].'">
                 </tr>';
@@ -491,9 +406,9 @@ if (isset($_POST["getCateringItems"])) {
         echo '<tr id="column_data" class="row">';
         echo  '     <td class="item_name">'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
-                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_required"].'"></td>
+                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_required"].'"  '.$readonly.' ></td>
                     <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["notes"].'"  '.$readonly.' >'.$row["notes"].'</textarea>
                     </td>
                     <input type="hidden" value="'.$row["item_id"].'">
                 </tr>';
@@ -528,7 +443,7 @@ if (isset($_POST["getCateringItemTable"])) {
                 <td class="quantity_required">'.$quantity.'</td>
                 <td class="cost">'.$cost.'</td>
                 <td id="td_notes">
-                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this); " value="'.$row["notes"].'">'.$row["notes"].'</textarea>
+                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this); " value="'.$row["notes"].'"  '.$readonly.' >'.$row["notes"].'</textarea>
                     <input type="hidden" value="'.$row["item_id"].'">
                     <input type="hidden" value="'.$row["recipe_id"].'">
                 </td>
@@ -553,7 +468,6 @@ if (isset($_POST["getCateringOrderInvoice"])) {
                         <th>Notes</th>
                     </tr>';
         }
-        echo '<tr id="column_data" class="row">';
                 $quantity_required = is_numeric($row["quantity_required"]) ? $row["quantity_required"] : "-";
                 $quantity = is_numeric($row["quantity_delivered"]) ? $row["quantity_delivered"] : "-";
                 if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
@@ -561,13 +475,15 @@ if (isset($_POST["getCateringOrderInvoice"])) {
                 } else {
                     $cost = "-";
                 }
-        echo  ' <td>'.$row["item_name"].'</td>
+
+        echo '<tr id="column_data" class="row">
+                <td>'.$row["item_name"].'</td>
                 <td>'.$row["unit"].'</td>
                 <td class="quantity_required">'.$quantity_required.'</td>
-                <td><input  onchange="updateCateringQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'"></td>
+                <td><input  onchange="updateCateringQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'" '.$readonly.' ></td>
                 <td class="cost">'.$cost.'</td>
                 <td id="td_notes">
-                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$row["invoice_notes"].'">'.$row["invoice_notes"].'</textarea>
+                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$row["invoice_notes"].'" '.$readonly.' >'.$row["invoice_notes"].'</textarea>
                 </td>
                 <input type="hidden" value="'.$row["item_id"].'">
                 <input type="hidden" value="'.$row["recipe_id"].'">
@@ -590,31 +506,11 @@ if (isset($_POST["printAll"])) {
     echo $exp = $_POST["expectedSales"] != "" ? "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>
                                             <span> $".$_POST["expectedSales"]."</span></th></tr>" : "";
     while ($row = $result->fetch_assoc()) {
-        $expected_sales = SalesTable::get_expected_sale($_SESSION["date"]);
-        if (is_numeric($expected_sales)) {
-            $sales_factor = $expected_sales / VariablesTable::get_base_sales();
-            if (is_numeric($row["quantity"])) {
-                $quantity = BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"];
-                if ($row["rounding_option"] == "up") {
-                    $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                } else if ($row["rounding_option"] == "down") {
-                    $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
-                }
-            } else {
-                $quantity = "-";
-            }
-            if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
-                $cost = "$ ".round($quantity * $row["price"], 2);
-                $total_cost += round($quantity * $row["price"], 2);
-            } else {
-                $cost = "-";
-            }
-        } else {
-            $quantity = "-";
-            $cost = "-";
-        }
+        $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
+        $cost_required = $row["cost_required"] == "" ? "-" : "$ ".$row["cost_required"];
+
         if ($_POST["required"] == "true") {
-            if (($quantity <= 0 OR $quantity == "-") AND $row["notes"] == "") {
+            if (($quantity_required <= 0 OR $quantity_required == "-") AND $row["notes"] == "") {
               continue;
             }
         }
@@ -635,7 +531,7 @@ if (isset($_POST["printAll"])) {
                 <td>'.$row["item_name"].'</td>
                 <td>'.$row["unit"].'</td>
                 <td>'.$row["quantity"].'</td>
-                <td class="quantity_required">'.$quantity.'</td>
+                <td class="quantity_required">'.$quantity_required.'</td>
                 <td class="cost">'.$cost.'</td>
                 <td id="td_notes">'.$row["notes"].'</td>
             </tr>';
@@ -789,6 +685,18 @@ if (isset($_POST["addCateringItem"])) {
     echo CateringItemTable::add_item($_POST["itemId"], $_POST["orderId"]);
 }
 
+if (isset($_POST["updateOrderRecipeItems"])) {
+    echo CateringRecipeItemTable::add_recipe_items($_POST["recipeId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["removeOrderRecipeItems"])) {
+    echo CateringRecipeItemTable::remove_recipe_items($_POST["recipeId"], $_POST["orderId"]);
+}
+
+if (isset($_POST["updateOrderItemQuantity"])) {
+    echo CateringRecipeItemTable::update_quantity_required($_POST["quantity"], $_POST["recipeId"], $_POST["orderId"]);
+}
+
 if (isset($_POST["removeCateringItem"])) {
     echo CateringItemTable::remove_item($_POST["itemId"], $_POST["orderId"]);
 }
@@ -866,6 +774,70 @@ if (isset($_POST["UpdateCashClosingOrder"])) {
     foreach ($_POST["rowIds"] as $value) {
         CashClosingTable::update_row_order($value, $order_number);
         $order_number++;
+    }
+}
+
+if (isset($_POST["updateDeviation"])) {
+    echo InventoryTable::update_item_deviation($_POST["deviation"], $_POST["itemId"], $_POST["date"]);
+}
+
+if (isset($_POST["updateCostDelivered"])) {
+    echo InventoryTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["date"]);
+}
+
+if (isset($_POST["calcExpected"])) {
+    $date = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("-1 day"))), 'Y-m-d');
+    $estimated_sales = SalesTable::get_expected_sale($date);
+    $todays_sales = $_POST["todaysSale"];
+    $base_sale = VariablesTable::get_base_sales();
+    $result = ItemTable::get_items();
+    while ($row = $result -> fetch_assoc()) {
+        if ($todays_sales == "NULL" OR is_null($estimated_sales)) {
+            $expected_quantity = 'NULL';
+        } else {
+            $quantity_factor = $row["quantity"] / $base_sale;
+            $estimated_quantity = $estimated_sales * $quantity_factor;
+            $todays_quantity = $todays_sales * $quantity_factor;
+            $expected_quantity = $estimated_quantity - $todays_quantity;
+            $expected_quantity = $expected_quantity < 0 ? 0 : $expected_quantity;
+            if ($row["rounding_option"] == "up") {
+                $expected_quantity = ceil($expected_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            } else if ($row["rounding_option"] == "down") {
+                $expected_quantity = floor($expected_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            } else {
+                $expected_quantity = round($expected_quantity, 2);
+            }
+        }
+        echo InventoryTable::update_expected_quantity($expected_quantity, $row["id"], $_SESSION["date"]);
+    }
+}
+
+if (isset($_POST["calcQuantityRequired"])) {
+    $expected_sales = $_POST["expectedSales"];
+    $result = CategoryTable::get_print_preview($_SESSION["date"]);
+    while ($row = $result -> fetch_assoc()) {
+        if (is_numeric($expected_sales)) {
+            $sales_factor = $expected_sales / VariablesTable::get_base_sales();
+            if (is_numeric($row["quantity"])) {
+                $quantity = BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"];
+                if ($row["rounding_option"] == "up") {
+                    $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                } else if ($row["rounding_option"] == "down") {
+                    $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+                }
+            } else {
+                $quantity = 'NULL';
+            }
+        } else {
+            $quantity = 'NULL';
+        }
+        if (($quantity != "NULL" AND $quantity > 0) AND $row["price"] != "-") {
+            $cost = round($quantity * $row["price"], 2);
+        } else {
+            $cost = "NULL";
+        }
+        echo InventoryTable::update_quantity_required($quantity, $row["item_id"], $_SESSION["date"]);
+        echo InventoryTable::update_cost_required($cost, $row["item_id"], $_SESSION["date"]);
     }
 }
 

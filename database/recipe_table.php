@@ -13,8 +13,7 @@ class RecipeTable extends DatabaseTable {
      * @return boolean               Returns true on query success and false if category already exists.
      * @throws Exception             If query fails.
      */
-    public static function add_recipe($recipe_name) {
-        $date = date('Y-m-d');
+    public static function add_recipe($recipe_name, $date) {
 
         $sql = "SELECT * FROM Recipe
                 WHERE name = '{$recipe_name}' AND deletion_date IS NULL";
@@ -50,8 +49,8 @@ class RecipeTable extends DatabaseTable {
      * @param  int $recipe_id       Id of recipe to remove.
      * @return boolean              Return true if query is succesful and false if it fails.
      */
-     public static function remove_recipe($recipe_id) {
-        $sql = "UPDATE Recipe SET deletion_date = '" .date('Y-m-d'). "'
+     public static function remove_recipe($recipe_id, $date) {
+        $sql = "UPDATE Recipe SET deletion_date = '$date'
                 WHERE id = '$recipe_id' and deletion_date IS NULL";
         if (parent::query($sql)) {
             $sql = "UPDATE Item SET recipe_id = NULL

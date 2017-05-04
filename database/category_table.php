@@ -13,8 +13,7 @@ class CategoryTable extends DatabaseTable {
      * @return boolean               returns true on query success and false if category already exists.
      * @throws Exception             if query fails.
      */
-    public static function add_category($category_name) {
-        $date = date('Y-m-d');
+    public static function add_category($category_name, $date) {
 
         $sql = "SELECT * FROM Category
                 WHERE name = '{$category_name}' AND deletion_date IS NULL";
@@ -49,8 +48,8 @@ class CategoryTable extends DatabaseTable {
      * @param  int $category_id      id of the category to remove.
      * @return boolean               return true if query is succesful and false if it fails.
      */
-    public static function remove_category($category_id) {
-        $sql = "UPDATE Category SET deletion_date = '" .date('Y-m-d'). "'
+    public static function remove_category($category_id, $date) {
+        $sql = "UPDATE Category SET deletion_date = '$date'
                 WHERE id = '$category_id' and deletion_date IS NULL";
         if (parent::query($sql)) {
             $sql = "UPDATE Item SET category_id = NULL
@@ -101,7 +100,8 @@ class CategoryTable extends DatabaseTable {
         $sql = "SELECT Category.name AS category_name, Item.name AS item_name, Item.id AS item_id,
                     IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes AS notes,
                     Inv.invoice_notes, Inv.quantity_delivered, Category.order_id AS Cat_order, Item.order_id AS Item_order,
-                    Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price
+                    Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price, Inv.quantity_required,
+                    Inv.cost_required, Inv.cost_delivered
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
                 LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id

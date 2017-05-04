@@ -72,7 +72,7 @@ $_SESSION["last_activity"] = time();
                         </li>
                 <?php endif ?>
                     <li id="order_li">
-                        <a onclick="getCateringInvoice(this)">
+                        <a class="flex_col" onclick="getCateringInvoice(this)">
                             <span id="order_name"><?php echo $row["name"] ?></span>
                             <span id="order_date_created">created on <?php echo date("jS M Y", strtotime($row["date_created"]))?></span>
                         </a>
@@ -196,15 +196,24 @@ $_SESSION["last_activity"] = time();
     }
 
     function updateCost(itemId, quantity, obj) {
+        var date = $(".invoice_date.active").next().val();
+        var cost = "";
         if (quantity != "NULL") {
             $.post("jq_ajax.php", {getItemPrice: "", itemId: itemId}, function(data) {
                 var price = data;
-                var cost = quantity * price;
+                cost = quantity * price;
                 obj.parentNode.parentNode.children[4].innerHTML = "$ " + cost;
                 totalCost();
+                saveCost();
             });
         } else {
             obj.parentNode.parentNode.children[4].innerHTML = "-";
+            cost = "NULL";
+        }
+        function saveCost() {
+            if ($(".option.selected").find(".icon_small_text").html() == "Inventory") {
+                $.post("jq_ajax.php", {updateCostDelivered: "", cost: cost, itemId: itemId, date: date});
+            }
         }
     }
 

@@ -58,7 +58,7 @@ if (isset($_POST["delete_order_id"])) {
                     </li>
             <?php endif ?>
                 <li id="order_li">
-                    <a onclick="getCateringItems(this)">
+                    <a class="flex_col" onclick="getCateringItems(this)">
                         <span id="order_name"><?php echo $row["name"] ?></span>
                         <span id="order_date_created">created on <?php echo date("jS M Y", strtotime($row["date_created"]))?></span>
                     </a>
@@ -90,7 +90,7 @@ if (isset($_POST["delete_order_id"])) {
             </div>
             <div id="add_heading"><h4></h4></div>
             <ul class="category_list display_none" id="order_items">
-                <?php $result = ItemTable::get_items_categories(); ?>
+                <?php $result = ItemTable::get_items_categories($_SESSION["date"]); ?>
                 <?php $current_category = 1; ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <?php if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
@@ -315,6 +315,7 @@ if (isset($_POST["delete_order_id"])) {
             var orderId = $(".active").next().val();
 
             $.post("jq_ajax.php", {updateCateringRecipeQuantity: "", quantity: quantity, recipeId: recipeId, orderId: orderId});
+            $.post("jq_ajax.php", {updateOrderItemQuantity: "", quantity: quantity, recipeId: recipeId, orderId: orderId});
         }
     }
 
@@ -456,8 +457,10 @@ if (isset($_POST["delete_order_id"])) {
                 $(this).toggleClass(function() {
                     if ($(this).hasClass("selected")) {
                         $.post("jq_ajax.php", {removeCateringRecipe: "", itemId: itemId, orderId: orderId});
+                        $.post("jq_ajax.php", {removeOrderRecipeItems: "", recipeId: itemId, orderId: orderId});
                     } else {
                         $.post("jq_ajax.php", {addCateringRecipe: "", itemId: itemId, orderId: orderId});
+                        $.post("jq_ajax.php", {updateOrderRecipeItems: "", recipeId: itemId, orderId: orderId});
                     }
                     $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
                         $(".print_tbody").remove();

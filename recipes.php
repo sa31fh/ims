@@ -26,7 +26,7 @@ $_SESSION["last_activity"] = time();
 
 if (isset($_POST["add_button"]) AND !empty($_POST["recipe"])) {
     try {
-        if (!RecipeTable::add_recipe($_POST["recipe"])) {
+        if (!RecipeTable::add_recipe($_POST["recipe"], $_SESSION["date"])) {
             echo '<div class="error">Recipe already exists</div>';
         }
     } catch (Exception $e) {
@@ -34,7 +34,7 @@ if (isset($_POST["add_button"]) AND !empty($_POST["recipe"])) {
     }
 }
 if(isset($_POST["delete_id"])) {
-    RecipeTable::remove_recipe($_POST["delete_id"]);
+    RecipeTable::remove_recipe($_POST["delete_id"], $_SESSION["date"]);
 }
 ?>
 
@@ -51,7 +51,7 @@ if(isset($_POST["delete_id"])) {
             <h4 class="font_roboto">Recipes</h4>
             <div class="div_list_category">
                 <ul class="category_list" id="recipe_list">
-                <?php $result = RecipeTable::get_recipes($date = date('Y-m-d')) ?>
+                <?php $result = RecipeTable::get_recipes(date('Y-m-d')) ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <li id="<?php echo $row['id']?>" class="list_category_li" onclick=recipeSelect(this)>
                         <span><?php echo $row["name"]?></span>
@@ -64,7 +64,7 @@ if(isset($_POST["delete_id"])) {
             </div>
             <input type="hidden" id="category_select">
             <div class="category_add" id="category_add">
-                <button class="button_flat entypo-trash float_left" onclick=deleteDrawer()>delete</button>
+                <button class="button_flat entypo-trash float_left" onclick=deleteRecipe()>delete</button>
                 <button class="button_flat entypo-plus float_right" onclick=slideDrawer()>Add</button>
             </div>
             <div class="category_add_drawer">
@@ -157,42 +157,16 @@ if(isset($_POST["delete_id"])) {
         $(".category_add_drawer").slideToggle(180, "linear");
     }
 
-    function deleteDrawer() {
-        $(".category_delete").slideToggle(180, "linear");
-        $("#recipe_list li").draggable({
-            scroll: false,
-            revert: "invalid",
-            containment: ".div_list_category",
-            zIndex: 500,
-            helper: function(event, ui) {
-                var helper = $(this).clone()
-                helper.addClass("category_drag");
-                $(this).css("opacity", "0");
-                return helper;
-            },
-            stop: function(event, ui) {
-                $(this).css("opacity", "1");
-            }
+    function deleteRecipe() {
+        alertify.confirm("Delete Recipe '"+$(".active").children("span").html()+"' ?", function() {
+            $(".active").children("form").submit();
         });
-    }
-
-    function closeDelete() {
-        $("#category_list li").draggable("destroy");
-        $(".category_delete").slideToggle(180, "linear");
     }
 
     $(document).ready(function() {
         $(".list_category_li:first").each(function() {
             recipeSelect($(this)[0]);
            $(this).addClass("active");
-        });
-
-        $(".category_delete .span_delete").droppable({
-            drop: function(event, ui) {
-                alertify.confirm("Delete Recipe '"+$(ui.draggable).children("span").html()+"' ?", function() {
-                    $(ui.draggable).children("form").submit();
-                });
-            }
         });
 
         $(".list_category_li").click(function() {

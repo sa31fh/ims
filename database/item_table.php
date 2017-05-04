@@ -14,8 +14,7 @@ class ItemTable extends DatabaseTable {
      * @return  boolean               Returns true on query success and false if item already exists.
      * @throws  exception             If query fails.
      */
-    public static function add_new_item($item_name, $item_unit) {
-        $date = date('Y-m-d');
+    public static function add_new_item($item_name, $item_unit, $date, $price, $deviation) {
 
         $sql = "SELECT * FROM Item
                 WHERE name = '{$item_name}'
@@ -29,11 +28,11 @@ class ItemTable extends DatabaseTable {
                 WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
         $result = parent::query($sql);
         if ($result->num_rows == 0) {
-            $sql = "INSERT INTO Item (name, unit, creation_date)
-                    VALUES('{$item_name}', '{$item_unit}', '{$date}')";
+            $sql = "INSERT INTO Item (name, unit, creation_date, price, deviation)
+                    VALUES('{$item_name}', '{$item_unit}', '{$date}', $price, $deviation)";
         } else {
             $sql = "UPDATE Item
-                    SET deletion_date = null, unit = '{$item_unit}'
+                    SET deletion_date = null, unit = '{$item_unit}', price = $price, deviation = $deviation
                     WHERE name = '{$item_name}' AND deletion_date = '{$date}'";
         }
         if (parent::query($sql)) {
@@ -68,7 +67,7 @@ class ItemTable extends DatabaseTable {
      * @return object|false     Returns mysqli_result object on query success or false if query fails.
      */
     public static function get_items() {
-        $sql = "SELECT name, unit, quantity, id FROM Item
+        $sql = "SELECT name, unit, quantity, id, rounding_option, rounding_factor FROM Item
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.deletion_date IS NULL
                 ORDER BY name ASC";
@@ -98,12 +97,12 @@ class ItemTable extends DatabaseTable {
      *
      * @return object|false    Returns mysqli_result object on query success or false if query fails.
      */
-    public static function get_items_categories() {
+    public static function get_items_categories($date) {
         $sql = "SELECT Item.name, unit, quantity, deviation, rounding_option, rounding_factor,
                        Item.id, Item.price, Category.name AS category_name, Item.order_id FROM Item
                 LEFT JOIN Category ON Item.category_id = Category.id
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
-                WHERE Item.deletion_date IS NULL
+                WHERE Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)
                 ORDER BY Category.order_id ASC, Item.order_id ASC";
 
         return parent::query($sql);
@@ -163,8 +162,7 @@ class ItemTable extends DatabaseTable {
      * @param  array $item_ids   Id's of items to be deleted.
      * @return boolean           Returns true on query success and false if it fails.
      */
-    public static function delete_multiple_items($item_ids) {
-        $date = date('Y-m-d');
+    public static function delete_multiple_items($item_ids, $date) {
 
         $sql = "UPDATE Item SET deletion_date = '$date'
                 WHERE id IN ('".implode("','", $item_ids)."')";

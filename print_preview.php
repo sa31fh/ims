@@ -201,6 +201,9 @@ $inventory_invoice = count($result);
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<?php if ($_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"]))): ?>
+    <script> $("input").prop("readonly", true); </script>
+<?php endif ?>
 <script>
     function getTab(tabName) {
         var timeSlotName = tabName.innerHTML;
@@ -237,7 +240,9 @@ $inventory_invoice = count($result);
     function updateExpectedSales(obj) {
         if (obj.value < 0) {
             obj.value = "";
+            $.post("jq_ajax.php", {calcQuantityRequired : "", expectedSales: obj.value});
         } else {
+            $.post("jq_ajax.php", {calcQuantityRequired : "", expectedSales: obj.value});
             obj.parentNode.submit();
         }
     }

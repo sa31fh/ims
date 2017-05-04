@@ -23,7 +23,7 @@ if (isset($_POST["order_name"]) AND !empty($_POST["order_name"]) AND !isset($_PO
     <script>window.parent.location.href = window.parent.location.href;</script> <?php
 }
 if (isset($_POST["order_id"])) {
-    printf(CateringOrderTable::edit_order($_POST["order_id"], $_POST["order_name"], $_POST["selected_date"]));?>
+    CateringOrderTable::edit_order($_POST["order_id"], $_POST["order_name"], $_POST["selected_date"]);?>
     <script>window.parent.location.href = window.parent.location.href;</script> <?php
 }
 ?>

@@ -174,6 +174,13 @@ class UserTable extends DatabaseTable{
         }
         $_SESSION["date"] = date_format((date_create(NULL, timezone_open($_SESSION["timezone"]))), "Y-m-d");
         $_SESSION["time_out"] = $row["time_out"];
+
+        $sql = "SELECT value FROM Variables
+                WHERE name='HistoryEdit'";
+
+        $result = parent::query($sql)->fetch_assoc()['value'];
+        $_SESSION["history_limit"] = "$result days";
+
         return true;
     }
 }

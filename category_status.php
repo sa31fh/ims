@@ -24,6 +24,7 @@ if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION[
 }
 $_SESSION["last_activity"] = time();
 $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
+$readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"])) ? "readonly" : "";
 ?>
 
 <!DOCTYPE html>
@@ -138,7 +139,8 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
                         <div  class="flex_1">
                             <span><?php echo $row["name"] ?></span>
                         </div>
-                        <input class="flex_1 row_amount" type="number" value="<?php echo $row["quantity"] ?>" onchange="updateTodaysSales(this)" placeholder="enter amount">
+                        <input class="flex_1 row_amount" type="number" value="<?php echo $row["quantity"] ?>"
+                                onchange="updateTodaysSales(this)" placeholder="enter amount">
                         <input type="hidden" id="type" value="<?php echo $row["type"] ?>">
                         <input type="hidden" id="row_id" value="<?php echo $row["id"] ?>">
                     </div>
@@ -164,6 +166,9 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
         </div>
     </div>
 
+    <form action="category_status.php" method="post" id="sales_form">
+        <input type="hidden" name="actual_sale" id="actual_sale">
+    </form>
 
     <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"]; ?>">
     <input type="hidden" id="date_check" value="<?php echo isset($_SESSION["date_check"]); ?>">
@@ -178,17 +183,32 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
       src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
       integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
       crossorigin="anonymous"></script>
+<?php if ($_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"]))): ?>
+    <script> $("input:not(#search_bar)").prop("readonly", true); </script>
+<?php endif ?>
 <script>
     function getInventory(categoryId , callBack) {
         var date = document.getElementById("session_date").value;
-        $.post("jq_ajax.php", {getInventory: "", categoryId: categoryId, date: date}, function(data, status) {
-            document.getElementById("item_tbody").innerHTML = data;
+        if ($("#item_tbody").html() == "") {
+            $.post("jq_ajax.php", {getInventory: "", categoryId: categoryId, date: date}, function(data, status) {
+                document.getElementById("item_tbody").innerHTML = data;
+                $("#item_tbody").children().hide();
+                $("#item_tbody").children().each(function() {
+                    if ($(this).find("#cat_id").val() == categoryId) {
+                        $(this).show();
+                    }
+                });
+            });
+        } else {
+            $("#item_tbody").children().hide();
+            $("#item_tbody").children().each(function() {
+                if ($(this).find("#cat_id").val() == categoryId) {
+                    $(this).show();
+                }
+            });
+        }
             typeof callBack === "function" ? callBack() : "";
             if ($(".switch-input").prop("checked")) { checkEmpty(); }
-            $(".quantity_input").each(function() {
-                checkDeviation($(this)[0], false, true);
-            });
-        });
     }
 
     function updateInventory(obj) {
@@ -209,8 +229,8 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
                         .success("Changes Saved");
                     if ($("#name").html() != "search result") {
                         if ($(".switch-input").prop("checked")) { checkEmpty(); }
-                        updateCount();
                     }
+                    updateCount(row.children[7].value);
                 }
             })
             .fail(function() {
@@ -236,10 +256,9 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
 
     function saveSales() {
         var sales = $("#total_input").val() == "" ? 'NULL' : $("#total_input").val();
-        $("#right #amount").html(sales == 'NULL' ? '-' : sales);
-        $("#right #dollar_sign").html(sales == 'NULL' ? '' : "$");
-        $("#sales_popup").css("display", "none");
-        $.post("jq_ajax.php", {saveTodaysSales: "", sales: sales});
+        $.post("jq_ajax.php",{calcExpected: "", todaysSale: sales});
+        $("#actual_sale").val(sales);
+        $("#sales_form").submit();
     }
 
     function calculateTotal() {
@@ -266,6 +285,8 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
     function checkDeviation(obj, message, icon) {
         var quantityPresent = obj.value;
         var row = document.getElementById("upinven_table").rows[obj.parentNode.parentNode.rowIndex];
+        var itemId = row.children[5].value;
+        var date = $("#session_date").val();
         if (quantityPresent != "") {
             var itemName = row.children[0].innerHTML;
             var estimated_quantity = row.children[2].innerHTML;
@@ -285,11 +306,14 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
                         .delay(3000)
                         .error("Item '"+itemName+"' is outside deviation range.")
                 }
+                $.post("jq_ajax.php", {updateDeviation: "", itemId: itemId, date: date, deviation: 1});
             } else {
                 row.children[0].className = "item_name entypo-attention";
+                $.post("jq_ajax.php", {updateDeviation: "", itemId: itemId, date: date, deviation: 0});
             }
         } else {
                 row.children[0].className = "item_name entypo-attention";
+                $.post("jq_ajax.php", {updateDeviation: "", itemId: itemId, date: date, deviation: 0});
         }
     }
 
@@ -301,19 +325,25 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
                 }
             });
         } else {
-            $("tr").show();
+            getInventory($(".list_category_li.active").find("#category_id").val());
         }
     }
 
-    function updateCount() {
+    function updateCount(id) {
         var count = 0;
-        $(".td_quantity").each(function() {
-            if ($(this).children().val() >= "0" ) {
-                count++;
+        var categoryName = "";
+        $(".list_category_li").each(function() {
+            if ($(this).find("#category_id").val() == id) {
+                categoryName = $(this).find("#category_name").html();
             }
         });
-
-        var categoryName = document.getElementById("name").innerHTML;
+        $("#item_tbody #cat_id").each(function() {
+            if ($(this).val() == id) {
+                if ($(this).parent().find(".td_quantity").children().val() >= "0") {
+                    count++;
+                }
+            }
+        });
         document.getElementById(categoryName+"_count").innerHTML = count;
     }
 
@@ -346,44 +376,20 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
 
     function searchBar(obj) {
         if (obj.value != "") {
-            var date = document.getElementById("session_date").value;
             var searchWord = new RegExp(obj.value, "i");
-            if ($("#search_tbody").html() == "") {
-                $.post("jq_ajax.php", {getSearchInventory: "", date: date}, function(data, status) {
-                    document.getElementById("search_tbody").innerHTML = data;
-                    $("#search_tbody").children().hide();
-                    $("#item_tbody").hide();
-                    $("#search_tbody").find(".item_name").each(function() {
-                        var val = $(this).html();
-                        if (val.search(searchWord) > -1) {
-                            $(this).parent().show();
-                        }
-                    });
-                    $("#search_tbody").show();
-                    $("#name").html("search result");
-                    $("#search_tbody .quantity_input").each(function() {
-                        checkDeviation($(this)[0], false, true);
-                    });
-                });
-            } else {
-                $("#search_tbody").children().hide();
-                $("#item_tbody").hide();
-                $("#search_tbody").find(".item_name").each(function() {
-                    var val = $(this).html();
-                    if (val.search(searchWord) > -1) {
-                        $(this).parent().show();
-                    }
-                });
-                $("#search_tbody").show();
-                $("#name").html("search result");
-                $("#search_tbody .quantity_input").each(function() {
-                    checkDeviation($(this)[0], false, true);
-                });
-            }
+            $("#item_tbody").children().hide();
+            $("#item_tbody").find(".item_name").each(function() {
+                var val = $(this).html();
+                if (val.search(searchWord) > -1) {
+                    $(this).parent().show();
+                }
+            });
+            $("#name").html("search result");
+            // $("#search_tbody .quantity_input").each(function() {
+            //     checkDeviation($(this)[0], false, true);
+            // });
         } else {
             getInventory($(".list_category_li.active").find("#category_id").val(), function() {
-                $("#search_tbody").hide();
-                $("#item_tbody").show();
                 $(".search_bar").val("");
                 $("#name").html($(".list_category_li.active").find("#category_name").html());
             });
@@ -399,8 +405,6 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
 
         $(".list_category_li").click(function() {
             getInventory($(this).find("#category_id").val(), function() {
-                $("#search_tbody").hide();
-                $("#item_tbody").show();
                 $(".search_bar").val("");
             });
                 $(".list_category_li").removeClass("active");
@@ -441,10 +445,11 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
             $("#sales_tabs .toolbar_div").removeClass("selected");
             if ($("#total_input").val() == $("#total_sales").html() || $("#total_input").val() == "" ) {
                 $("#calculated").addClass("selected");
-                $("#total_input").prop("disabled", true);
+                $("#total_input").prop("readonly", true)
+                $("#total_input").val($("#total_sales").html());
             } else {
                 $("#custom").addClass("selected");
-                $("#total_input").prop("disabled", false);
+                $("#total_input").prop("readonly", false)
                 $("#total_input").val($("#right #amount").html());
             }
         });
@@ -455,9 +460,9 @@ $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
 
             if ($(this).html() == "Calculated") {
                 $("#total_input").val($("#total_sales").html());
-                $("#total_input").prop("disabled", true);
+                $("#total_input").prop("readonly", true);
             } else {
-                $("#total_input").prop("disabled", false);
+                $("#total_input").prop("readonly", false);
                 $("#total_input").val($("#right #amount").html());
             }
         });

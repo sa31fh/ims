@@ -61,5 +61,23 @@ class VariablesTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function update_history_edit($value) {
+        $sql = "UPDATE Variables
+                SET value = $value
+                WHERE name = 'HistoryEdit'";
+
+        return parent::query($sql);
+    }
+
+    public static function get_history_edit() {
+        $sql = "SELECT value FROM Variables WHERE name = 'HistoryEdit' ";
+
+        if ($result = parent::query($sql)) {
+            return (int) $result->fetch_assoc()['value'];
+        } else {
+            throw new Exception("get_history_edit query failed");
+        }
+    }
 }
 ?>
