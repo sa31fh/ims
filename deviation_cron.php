@@ -77,9 +77,10 @@
         $mail = new PHPMailer;
         $result = NotificationStatusTable::get_alert_info("notify by email", "daily deviation report");
         $email_count = 0;
+        $mail->addAddress(" ");
         while ($row = $result->fetch_assoc()) {
             if ($row["noti_status"] == 1 AND $row["sub_noti_status"] == 1) {
-            $mail->addAddress($row["email"]);
+            $mail->AddBCC($row["email"]);
             $email_count++;
             }
         }
