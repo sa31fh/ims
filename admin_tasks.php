@@ -63,26 +63,35 @@ if(isset($_POST["new_date"])) {
                     </div>
                     <div class="flex_2">
                         <li>
-                        <a href="recipes.php" target="task_frame" >
-                            <span class="image entypo-book-open"></span>
-                            <span class="text">Recipes</span>
-                        </a>
+                            <a href="recipes.php" target="task_frame" >
+                                <span class="image entypo-book-open"></span>
+                                <span class="text">Recipes</span>
+                            </a>
                         </li>
                         <li>
                             <a href="manage_users.php" target="task_frame">
                                 <span class="image entypo-users"></span>
                                 <span class="text">Users</span>
-                            </a></li>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="user_groups.php" target="task_frame">
+                                <span class="image fa-users"></span>
+                                <span class="text">User Groups</span>
+                            </a>
+                        </li>
                         <li>
                             <a href="cash_closing.php" target="task_frame">
                                 <span class="image fa-calculator"></span>
                                 <span class="text">Cash Closing</span>
                             </a>
                         </li>
-                        <li><a href="admin_settings.php" target="task_frame">
-                            <span class="image fa-cog"></span>
-                            <span class="text">Settings</span>
-                        </a></li>
+                        <li>
+                            <a href="admin_settings.php" target="task_frame">
+                                <span class="image fa-cog"></span>
+                                <span class="text">Settings</span>
+                            </a>
+                        </li>
                     </div>
                 </div>
             </div>

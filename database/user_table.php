@@ -40,7 +40,7 @@ class UserTable extends DatabaseTable{
      * @return object|false  Returns mysqli_result object on query success or false if query fails.
      */
     public static function get_users() {
-        $sql = "SELECT * FROM User
+        $sql = "SELECT *, User.id AS user_id FROM User
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
                 WHERE username != 'System'
                 ORDER BY username ASC";

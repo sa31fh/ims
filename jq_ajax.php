@@ -22,6 +22,7 @@ require_once "database/catering_recipe_table.php";
 require_once "database/catering_recipe_item_table.php";
 require_once "database/cash_closing_table.php";
 require_once "database/cash_closing_data_table.php";
+require_once "database/user_group_list_table.php";
 
 $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"])) ? "readonly" : "";
 
@@ -634,6 +635,14 @@ if (isset($_POST["deleteRecipeItem"])) {
     echo RecipeItemTable::delete_recipe_item($_POST["itemId"], $_POST["recipeId"]);
 }
 
+if (isset($_POST["addGroupUser"])) {
+    echo UserGroupListTable::add_user($_POST["userId"], $_POST["groupId"]);
+}
+
+if (isset($_POST["deleteGroupUser"])) {
+    echo UserGroupListTable::remove_user($_POST["userId"], $_POST["groupId"]);
+}
+
 if (isset($_POST["getRecipeItems"])) {
     $result = RecipeItemTable::get_recipe_items($_POST["recipeId"]);
     if ($result) {
@@ -643,6 +652,16 @@ if (isset($_POST["getRecipeItems"])) {
                   <input type="number" value="'.$row["quantity"].'" onchange=updateQuantity(this)></li>';
         }
          echo '</ul>';
+    }
+}
+
+if (isset($_POST["getGroupUsers"])) {
+    $result = UserGroupListTable::get_users($_POST["groupId"]);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            echo '<li class="list_li grouped_item" user-id="'.$row["id"].'" group-id="'.$row["group_id"].'"
+                    item-name="'.$row["username"].'">' .$row["username"];
+        }
     }
 }
 

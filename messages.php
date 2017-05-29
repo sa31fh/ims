@@ -26,14 +26,19 @@ $_SESSION["last_activity"] = time();
             vp.setAttribute('content','width=780');
         }
     </script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?2">
 </head>
 <body>
     <div class="main">
-        <ul class="sidenav font_roboto" id="sideNav">
+        <ul class="sidenav font_roboto" id="message_sidenav">
             <li id="compose_li"><button class="button_flat fa-edit" onclick=composeButton()>Compose</button></li>
-            <li><a id="inbox" class="active" href="received_messages.php" target="message_frame" >Inbox <span id="status_view"></span></a></li>
-            <li><a id="deleted" href="deleted_messages.php" target="message_frame">Deleted</a></li>
+            <li>
+                <a id="inbox" class="active" href="received_messages.php" target="message_frame" >
+                    <span class="text">Inbox</span>
+                    <span id="status_view"></span>
+                </a>
+            </li>
+            <li><a id="deleted" href="deleted_messages.php" target="message_frame"><span class="text">Deleted</span></a></li>
         </ul>
 
         <div class="main_top_side font_open_sans">

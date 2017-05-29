@@ -2,6 +2,8 @@
 session_start();
 require_once "database/user_table.php";
 require_once "database/conversation_table.php";
+require_once "database/user_group_table.php";
+require_once "database/user_group_list_table.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -39,23 +41,46 @@ if (isset($_POST["message"])) {
 <body>
     <div class="main_iframe compose_frame font_open_sans">
         <form id="compose_form" class="compose_form" onsubmit=submitMessage() action="compose_messages.php" method="post">
+            <div class="div_fade"></div>
             <div class="compose_recipient">
                 <span id="send_label">Send To</span>
-            </div>
-            <div class="div_fade"></div>
-            <div class="compose_title">
+                <div id="container"></div>
                 <div class="name_drawer">
-                    <ul>
+                    <div class="toolbar_print">
+                        <div class="toolbar_div option selected">all users</div>
+                        <div class="toolbar_div option">groups</div>
+                    </div>
+                    <ul id="user_list">
                     <?php $result = UserTable::get_users(); ?>
                     <?php while ($row = $result->fetch_assoc()): ?>
                         <?php if ($row["username"] != $_SESSION["username"]): ?>
-                            <li class="contact_li" value="<?php echo $row['username'] ?>"><?php echo $row["first_name"]."
-                                                         ".$row["last_name"]." ( ".$row["username"]." )"; ?>
+                            <li class="contact_li" data-user="<?php echo $row['username'] ?>">
+                                <div id="username">
+                                    <div>
+                                        <span class="entypo-user avatar"></span>
+                                    </div>
+                                    <div>
+                                        <span id="name"><?php echo $row["first_name"]." ".$row["last_name"]?></span>
+                                        <span id="user_name"><?php echo $row["username"]?></span>
+                                    </div>
+                                </div>
                             </li>
                         <?php endif ?>
                     <?php endwhile ?>
                     </ul>
+                    <ul class="display_none" id="group_list">
+                        <?php $result = UserGroupTable::get_groups() ?>
+                        <?php while ($row = $result -> fetch_assoc()): ?>
+                            <li class="group_li">
+                                <span id="name"><?php echo $row["name"] ?></span>
+                                <?php $users = mysqli_fetch_all(UserGroupListTable::get_users($row["id"]), MYSQLI_ASSOC); ?>
+                                <input type="hidden" id="group_users" value=<?php echo $users = json_encode($users) ?>>
+                            </li>
+                        <?php endwhile ?>
+                    </ul>
                 </div>
+            </div>
+            <div class="compose_title">
                 <input type="text" name="title" placeholder="Title">
             </div>
             <div class="compose_text">
@@ -88,33 +113,72 @@ if (isset($_POST["message"])) {
 
     $(document).ready(function() {
         $(".compose_recipient").click(function() {
-            $(".name_drawer").slideDown(180, "linear");
+            $(".name_drawer").css("display", "flex");
             $(".div_fade").css("display", "block");
+        });
+
+        $(".option").click(function() {
+            $(".option").removeClass("selected");
+            $(this).addClass("selected");
+            if ($(this).html() == "groups") {
+                $("#user_list").css("display", "none");
+                $("#group_list").css("display", "inline-block");
+            } else {
+                $("#group_list").css("display", "none");
+                $("#user_list").css("display", "inline-block");
+            }
         });
 
         $(".contact_li").click(function() {
             var contact = $(this).html();
             $(this).toggleClass(function() {
-              if ($(this).hasClass("selected")) {
-                $(".name_tag").each(function() {
-                    if ($(this).children("span").html() == contact) {
-                        $(this).remove();
-                    }
-                });
-              } else {
-                var span = "<div class='name_tag'>"+
-                               "<span>"+contact+"</span>"+
-                               "<input type='hidden' name='recipient[]' value='"+$(this).attr("value")+"'>"+
-                           "</div>"
-                $(".compose_recipient").append(span);
-              }
-              return "selected";
+                if ($(this).hasClass("selected")) {
+                    $(".name_tag").each(function() {
+                        if ($(this).children("span").html() == contact) {
+                            $(this).remove();
+                        }
+                    });
+                } else {
+                    var span = "<div class='name_tag'><span>"+contact+"</span>"+
+                                   "<input type='hidden' name='recipient[]' value='"+$(this).attr("data-user")+"'>"+
+                               "</div>"
+                    $("#container").append(span);
+                }
+                return "selected";
             });
+        });
+
+        $(".group_li").click(function() {
+            $(".name_tag").remove();
+            $(".contact_li").removeClass("selected");
+
+            if ($(this).hasClass("selected")) {
+                $(this).removeClass("selected");
+            } else {
+                $(".group_li").removeClass("selected");
+                $(this).addClass("selected");
+                var users = JSON.parse($(this).find("#group_users").val());
+                for (var i = 0; i < users.length; i++) {
+                    $(".contact_li").each(function() {
+                        if ($(this).attr("data-user") == users[i].username) {
+                            if (!$(this).hasClass("selected")) {
+                                $(this).addClass("selected");
+                                var span = "<div class='name_tag'><span>"+$(this).html()+"</span>"+
+                                               "<input type='hidden' name='recipient[]' value='"+users[i].username+"'>"+
+                                           "</div>"
+                                $("#container").append(span);
+                            }
+                        }
+                    });
+
+                }
+            }
+            return "selected";
         });
 
         $(".div_fade").click(function() {
             $(".div_fade").css("display", "none");
-            $(".name_drawer").slideUp(180, "linear");
+            $(".name_drawer").css("display", "none");
         });
     });
 </script>
