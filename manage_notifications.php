@@ -51,6 +51,9 @@ if (isset($_POST["user_email"])) {
             <div class="div_sub">
                 <?php $rows = SubNotificationListTable::get_notification_list();
                 while ($sub_noti_list = $rows->fetch_assoc()): ?>
+                <?php if ($noti_list["name"] == "notify by message" AND $sub_noti_list["name"] == "received messages"){
+                    continue;
+                } ?>
                     <div class="div_sub_option">
                         <span class="noti_name"><?php echo $sub_noti_list["name"] ?></span>
                         <span class="entypo-info"></span>
@@ -68,6 +71,10 @@ if (isset($_POST["user_email"])) {
                             case 'incomplete inventory alert':
                                 echo '<span class="info_span">alert sent when item quantities have
                                         not been entered by 12:30AM on the following day</span>';
+                                break;
+
+                            case 'received messages':
+                                echo '<span class="info_span">messages received from other users</span>';
                                 break;
                         } ?>
                         <input type="hidden" id="sub_noti_id" value="<?php echo $sub_noti_list["id"] ?>">

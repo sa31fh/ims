@@ -52,8 +52,9 @@ class NotificationStatusTable extends DatabaseTable{
             $sub_noti_id = (int) $result->fetch_assoc()["id"];
         }
 
-        $sql = "SELECT NotificationStatus.user_name, User.email, UserRole.role, NotificationStatus.status AS noti_status,
-                SubNotificationStatus.status AS sub_noti_status FROM NotificationStatus
+        $sql = "SELECT NotificationStatus.user_name, User.first_name, User.last_name, User.email,
+                       UserRole.role, NotificationStatus.status AS noti_status, SubNotificationStatus.status AS sub_noti_status
+                       FROM NotificationStatus
                 INNER JOIN User ON username = user_name
                 INNER JOIN UserRole ON User.userrole_id = UserRole.id
                 INNER JOIN SubNotificationStatus ON NotificationStatus.notification_id = parent_noti_id

@@ -4,6 +4,10 @@ require_once "database/user_table.php";
 require_once "database/conversation_table.php";
 require_once "database/user_group_table.php";
 require_once "database/user_group_list_table.php";
+require_once "database/notification_status_table.php";
+require_once "mpdf/vendor/autoload.php";
+include_once 'phpmailer/PHPMailerAutoload.php';
+
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -22,11 +26,41 @@ exit();
 $_SESSION["last_activity"] = time();
 
 if (isset($_POST["message"])) {
+    $mail = new PHPMailer;
+    $mail->setFrom('system@ims-test.auntyskitchen.ca', 'IMS System - Waterloo');
+    $mail->Body = "Title: ".$_POST["title"]."\n \n".$_POST["message"];
+
+    if (isset($_POST["attachment"])) {
+        $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
+        $stylesheet = file_get_contents("css/pdf_styles.css");
+        $mpdf->useSubstitutions=false;
+        $mpdf->simpleTables = true;
+        $mpdf->WriteHtml($stylesheet, 1);
+        $mpdf->WriteHtml($_POST["attachment"], 2);
+        $content = $mpdf->Output('', 'S');
+        $mail->addStringAttachment($content, $_POST["attachment_title"].".pdf");
+    }
     foreach ($_POST["recipient"] as $recipient) {
         ConversationTable::create_conversation($_SESSION["username"], $recipient, $_POST["title"],
             $_POST["message"], gmdate("Y-m-d H:i:s"),
             isset($_POST["attachment"]) ? $_POST["attachment"] : null,
             isset($_POST["attachment_title"]) ? $_POST["attachment_title"] : null, "read", "unread");
+
+        $result = NotificationStatusTable::get_alert_info("notify by email", "received messages");
+        while ($row = $result->fetch_assoc()) {
+            if ($row["noti_status"] == 1 AND $row["sub_noti_status"] == 1 AND $row["user_name"] == $recipient) {
+                $mail->Subject  = $row['first_name']." ".$row["last_name"]." sent you a message;
+                $mail->addAddress($row["email"]);
+                if(!$mail->send()) {
+                  echo 'Message was not sent.';
+                  echo 'Mailer error: ' . $mail->ErrorInfo;
+                } else {
+                  echo 'Message has been sent.';
+                }
+                $mail->clearAllRecipients();
+            }
+        }
+
     }
 }
 ?>
