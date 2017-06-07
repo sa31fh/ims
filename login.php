@@ -35,7 +35,7 @@ if (isset($_POST["username"])) {
         <div class="div_block">
             <h3 style="color: #ccc;">Sign In</h3>
             <form action="login.php" method="post">
-                <input class="userinput_login" type="text" name="username" placeholder="Username" autofocus required>
+                <input class="userinput_login" type="text" name="username" placeholder="Username" autocapitalize="none" autofocus required>
                 <input class="userinput_login" type="password" name="password" placeholder="Password" required>
                 <input type="submit" value="Sign In" class="button_login">
             </form>
