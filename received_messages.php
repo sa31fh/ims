@@ -68,7 +68,7 @@ if (isset($_POST["checkbox"])) {
         <div class="message_table">
             <?php $result = ConversationTable::get_received_conversations($_SESSION["username"]) ?>
             <?php while ($row = $result->fetch_assoc()): ?>
-                <div class="message_row <?php if(($row['sender'] == $_SESSION['username'] AND $row['sender_status'] == 'unread')
+               <div class="message_row <?php if(($row['sender'] == $_SESSION['username'] AND $row['sender_status'] == 'unread')
                                         OR ($row['receiver'] == $_SESSION['username'] AND $row['receiver_status'] == 'unread')) {
                                         echo 'unread';} ?>">
                     <div class="div_left">
@@ -111,7 +111,7 @@ if (isset($_POST["checkbox"])) {
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script>
     function openMessage(obj){
-        obj.parentNode.parentNode.className = "message_row read";
+        obj.parentNode.parentNode.className = "message_row";
         showUnreadCount(function() {
             var id = obj.parentNode.parentNode.children[3].value;
             var receiver = obj.parentNode.parentNode.children[2].value;
@@ -129,7 +129,7 @@ if (isset($_POST["checkbox"])) {
             } else if($("input[type='checkbox']").filter(':checked').length == 0) {
                 $("#button_div").fadeOut(200, "linear");
             }
-            showUnreadCount();
+            countChecked();
         });
 
         $("#select_all").change(function(){
@@ -145,8 +145,8 @@ if (isset($_POST["checkbox"])) {
 
         $(".dropdown_div #read").click(function(){
             $("input[type='checkbox']:checked").parents(".message_row").each(function(){
-                $(this).removeClass("unread read");
-                $(this).addClass("read");
+                $(this).removeClass("unread");
+                $(this).prev().html("read");
             });
             var idVal = $(".message_table input[type='checkbox']:checked").map(function(){
                 return $(this).val();
@@ -154,10 +154,11 @@ if (isset($_POST["checkbox"])) {
             $.post("jq_ajax.php", {checkedId: idVal, newStatus: "read"});
             showUnreadCount();
         });
+
         $(".dropdown_div #unread").click(function(){
             $("input[type='checkbox']:checked").parents(".message_row").each(function(){
-                $(this).removeClass("unread read");
                 $(this).addClass("unread");
+                $(this).prev().html("unread");
             });
             var idVal = $(".message_table input[type='checkbox']:checked").map(function(){
                 return $(this).val();

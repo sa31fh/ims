@@ -164,7 +164,7 @@ class UserTable extends DatabaseTable{
             return false;
         }
         $row = $result->fetch_assoc();
-        $_SESSION["username"] = $user_name;
+        $_SESSION["username"] = $row["username"];
         $_SESSION["userrole"] = $row["role"];
 
         if (!empty($row["time_zone"])) {
