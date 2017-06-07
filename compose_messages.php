@@ -49,7 +49,7 @@ if (isset($_POST["message"])) {
         $result = NotificationStatusTable::get_alert_info("notify by email", "received messages");
         while ($row = $result->fetch_assoc()) {
             if ($row["noti_status"] == 1 AND $row["sub_noti_status"] == 1 AND $row["user_name"] == $recipient) {
-                $mail->Subject  = $row['first_name']." ".$row["last_name"]." sent you a message;
+                $mail->Subject  = $row['first_name']." ".$row["last_name"]. " sent you a message: ".$_POST["title"];
                 $mail->addAddress($row["email"]);
                 if(!$mail->send()) {
                   echo 'Message was not sent.';
