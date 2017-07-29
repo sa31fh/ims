@@ -218,6 +218,7 @@ CREATE TABLE `Inventory` (
   `quantity` decimal(11,2) DEFAULT NULL,
   `expected_quantity` int(11) DEFAULT NULL,
   `quantity_required` int(11) DEFAULT NULL,
+  `quantity_custom` int(11) DEFAULT NULL,
   `quantity_delivered` int(11) DEFAULT NULL,
   `notes` text,
   `invoice_notes` text,
@@ -264,6 +265,21 @@ CREATE TABLE `Item` (
   `deletion_date` date DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=116 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ItemRequiredDays`
+--
+
+DROP TABLE IF EXISTS `ItemRequiredDays`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ItemRequiredDays` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_id` int(11) NOT NULL,
+  `day_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

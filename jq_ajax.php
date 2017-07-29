@@ -23,6 +23,7 @@ require_once "database/catering_recipe_item_table.php";
 require_once "database/cash_closing_table.php";
 require_once "database/cash_closing_data_table.php";
 require_once "database/user_group_list_table.php";
+require_once "database/item_required_days_table.php";
 
 $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"])) ? "readonly" : "";
 
@@ -247,15 +248,22 @@ if(isset($_POST["getCategoryItemsTimeSlot"])) {
 }
 
 if (isset($_POST["getPrintPreview"])) {
+    $item_ids = [];
+    $required_day_id = date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'N');
+    $required_item_ids = ItemRequiredDaysTable::get_by_day($required_day_id);
+    while ($row = $required_item_ids->fetch_array()) {
+        $item_ids[] = $row[0];
+    }
     $result = CategoryTable::get_print_preview($_POST["date"]);
     $current_category = null;
     while ($row = $result->fetch_assoc()) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category"><td colspan="7" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
-                        <th>Item</th>
+                        <th></th>
+                        <th class="item_heading">Item</th>
                         <th>Unit</th>
                         <th>Quantity Present</th>
                         <th>Quantity Required</th>
@@ -265,17 +273,45 @@ if (isset($_POST["getPrintPreview"])) {
         }
         $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
         $cost_required = $row["cost_required"] == "" ? "-" : "$ ".$row["cost_required"];
+        $required = in_array($row["item_id"], $item_ids) ? "true" : "false";
 
         echo '<tr id="column_data" class="row">
-                <td>'.$row["item_name"].'</td>
+                <td class="row_icon">';
+                if ($required == "true") {
+                    echo '<span class="icon fa-star"></span>
+                        <span class="text">required item</span>';
+                }
+          echo '</td>
+                <td class="item_name ">'.$row["item_name"].'</td>
                 <td>'.$row["unit"].'</td>
-                <td>'.$row["quantity"].'</td>
-                <td class="quantity_required">'.$quantity_required.'</td>
-                <td class="cost">'.$cost_required.'</td>
+                <td>'.$row["quantity"].'</td>';
+                if ($required == "true") {
+                echo '<td class="quantity_required required" data-required ="'.$required.'" >
+                        <div class="div_required">
+                            <div class="div_tab">
+                                <span class="tab fa-calculator selected" id="calculated"></span>
+                                <span class="tab fa-pencil" id="custom"></span>
+                            </div>
+                            <div class="div_text">
+                                <div class="heading">
+                                    <span id="heading">calculated value</span>
+                                </div>
+                                <div class="div_value">
+                                    <span class="span_qr">'.$quantity_required.'</span>
+                                    <input type="number" class="span_qc" value="'.$row["quantity_custom"].'" onchange="updateQuantityCustom(this)"  placeholder="enter value" >
+                                </div>
+                            </div>
+                        </div>
+                     </td>';
+                } else {
+                 echo  '<td class="quantity_required" data-required ="'.$required.'" >'.$quantity_required.'</td>';
+
+                }
+        echo   '<td class="cost">'.$cost_required.'</td>
                 <td id="td_notes">
                     <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'" '.$readonly.' >'.$row["notes"].'</textarea>
-                    <input type="hidden" value="'.$row["item_id"].'">
                 </td>
+                <input type="hidden" value="'.$row["item_id"].'">
             </tr>';
     }
 }
@@ -334,7 +370,8 @@ if (isset($_POST["getTrackedInvoice"])) {
                     </tr>';
         }
         echo '<tr id="column_data" class="row">';
-                    $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
+                    $quantity_required = $row["quantity_custom"] == "" ? $row["quantity_required"] : $row["quantity_custom"];
+                    $quantity_required = $quantity_required == "" ? "-" : $quantity_required;
                     $cost = is_numeric($row["cost_delivered"]) ? "$ ".$row["cost_delivered"] : "-";
 
         echo  '     <td>'.$row["item_name"].'</td>
@@ -508,11 +545,12 @@ if (isset($_POST["printAll"])) {
     echo $exp = $_POST["expectedSales"] != "" ? "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>
                                             <span> $".$_POST["expectedSales"]."</span></th></tr>" : "";
     while ($row = $result->fetch_assoc()) {
+        $quantity_custom = $row["quantity_custom"] == "" ? "-" : $row["quantity_custom"];
         $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
         $cost_required = $row["cost_required"] == "" ? "-" : "$ ".$row["cost_required"];
 
         if ($_POST["required"] == "true") {
-            if (($quantity_required <= 0 OR $quantity_required == "-") AND $row["notes"] == "") {
+            if ((($quantity_custom == "-") AND ($quantity_required <= 0 OR $quantity_required == "-")) AND $row["notes"] == "") {
               continue;
             }
         }
@@ -533,8 +571,8 @@ if (isset($_POST["printAll"])) {
                 <td>'.$row["item_name"].'</td>
                 <td>'.$row["unit"].'</td>
                 <td>'.$row["quantity"].'</td>
-                <td class="quantity_required">'.$quantity_required.'</td>
-                <td class="cost">'.$cost.'</td>
+                <td class="quantity_required">'.($quantity_custom != "-" ? $quantity_custom : $quantity_required).'</td>
+                <td class="cost">'.$cost_required.'</td>
                 <td id="td_notes">'.$row["notes"].'</td>
             </tr>';
     }
@@ -689,6 +727,10 @@ if (isset($_POST["updateQuantityDelivered"])) {
     echo InventoryTable::update_quantity_delivered($_POST["quantity"], $_POST["itemId"], $_POST["date"]);
 }
 
+if (isset($_POST["updateQuantityCustom"])) {
+    echo InventoryTable::update_quantity_custom($_POST["quantity"], $_POST["itemId"], $_POST["itemDate"]);
+}
+
 if (isset($_POST["updateInvoiceNotes"])) {
     echo InventoryTable::update_invoice_note($_POST["note"], $_POST["itemId"], $_POST["date"]);
 }
@@ -787,6 +829,14 @@ if (isset($_POST["updateCashClosingRow"])) {
 
 if (isset($_POST["saveTodaysSales"])) {
     echo SalesTable::add_actual_sale($_POST["sales"], $_SESSION["date"]);
+}
+
+if (isset($_POST["addItemRequiredDay"])) {
+    echo ItemRequiredDaysTable::add_item_day($_POST["dayId"], $_POST["itemId"]);
+}
+
+if (isset($_POST["removeItemRequiredDay"])) {
+    echo ItemRequiredDaysTable::remove_item_day($_POST["dayId"], $_POST["itemId"]);
 }
 
 if (isset($_POST["UpdateCashClosingOrder"])) {

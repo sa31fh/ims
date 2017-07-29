@@ -100,7 +100,7 @@ $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_
                     <h4 id="name">Drinks</h4>
                 </div>
                 <div class="toolbar_div" id="div_pp">
-                    <a href="print_preview.php" class="fa-print print_preview">Print Preview</a>
+                    <a href="print_preview.php" class="fa-print pp_button">Print Preview</a>
                 </div>
                 <div class="toolbar_div search_div">
                     <input class="search_bar" id="search_bar" type="search" placeholder="search" oninput=searchBar(this)>
@@ -385,9 +385,6 @@ $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_
                 }
             });
             $("#name").html("search result");
-            // $("#search_tbody .quantity_input").each(function() {
-            //     checkDeviation($(this)[0], false, true);
-            // });
         } else {
             getInventory($(".list_category_li.active").find("#category_id").val(), function() {
                 $(".search_bar").val("");

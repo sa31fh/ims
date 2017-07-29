@@ -48,8 +48,17 @@ $inventory_invoice = count($result);
     <div class="main overflow_hidden">
         <div class="sidenav">
             <div id="heading"><h4>Print Preview</h4></div>
-            <ul class="side_nav">
-                <li id="order_li"><a >Inventory</a></li>
+            <ul class="side_nav print_preview">
+                <li id="order_li">
+                    <a id="inventory">
+                        <span id="left">Inventory</span>
+                        <span id="right" class="warning fa-star"></span>
+                        <div class="status_view">
+                            <span class="flex_1">required items</span>
+                            <span id="item_num">-</span>
+                        </div>
+                    </a>
+                </li>
                 <li id="order_li">
                     <a id="catering_option">
                         <span id="left">Catering Orders</span>
@@ -157,7 +166,7 @@ $inventory_invoice = count($result);
                 <div id="div_print_table">
                     <table class="table_view" id="print">
                         <tr id="print_date" class="row">
-                            <th colspan="6">
+                            <th colspan="7">
                                 <div id="table_date_heading"></div>
                                 <span id="table_date_span"><?php echo date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'D, jS M Y'); ?></span>
                                 <div class="print_table_date"><?php echo "created on ".date('jS M Y', strtotime($_SESSION["date"])); ?></div>
@@ -215,6 +224,21 @@ $inventory_invoice = count($result);
                 $("#table_date_span").html($("#formatted_date").val());
                 $(".print_table_date").css("display", "block");
                 checkRequired();
+                if ($(".span_qc").length > 0) {
+                    $("#right.warning").css("opacity", "1");
+                    checkRequiredItems();
+                    if (!$(".status_view").hasClass("visible")) {
+                        $(".status_view").addClass("visible");
+                        $(".status_view").one("transitionend", function(){
+                            $(this).css("z-index", "1");
+                        });
+                    }
+                }
+                $(".div_required").each(function() {
+                    if ($(this).find(".span_qc").val() != "") {
+                        $(this).find(".tab").trigger("click");
+                    }
+                });
             });
         } else {
             $.post("jq_ajax.php", {getPrintPreviewTimeslots: "", date: date, timeSlotName: timeSlotName}, function(data, status) {
@@ -249,8 +273,8 @@ $inventory_invoice = count($result);
 
     function updateNotes(obj) {
         var itemNote = obj.value;
-        var itemId = obj.parentNode.children[1].value;
-        var itemQuantity = obj.parentNode.parentNode.children[2].innerHTML;
+        var itemId = obj.parentNode.parentNode.children[7].value;
+        var itemQuantity = obj.parentNode.parentNode.children[3].innerHTML;
         itemQuantity = (itemQuantity == "-") ? "NULL" : itemQuantity;
         var itemDate = document.getElementById("session_date").value;
 
@@ -264,6 +288,20 @@ $inventory_invoice = count($result);
         var orderId = $(".tab_li.selected").attr("id");
 
         $.post("jq_ajax.php", {updateCateringNotes: "", notes: itemNote, itemId: itemId, recipeId: recipeId, orderId: orderId });
+    }
+
+    function updateQuantityCustom(obj) {
+        var quantity = obj.value;
+        if (quantity < 0) {
+            obj.value = "";
+        } else {
+            quantity = quantity == "" ? 'NULL' : quantity;
+            var itemId = obj.parentNode.parentNode.parentNode.parentNode.parentNode.children[7].value;
+            var itemDate = document.getElementById("session_date").value;
+
+            $.post("jq_ajax.php", {updateQuantityCustom: "", quantity: quantity, itemId: itemId, itemDate: itemDate});
+        }
+        checkRequiredItems();
     }
 
     function updateOrderNote(obj) {
@@ -297,29 +335,29 @@ $inventory_invoice = count($result);
 
     function trackInvoice(obj) {
         var date = document.getElementById("session_date").value;
-        if ($(".active").html() == "Inventory") {
+        if ($(".active").find("#left").html() == "Inventory") {
             if ($(obj).prop("checked")) {
                 $.post("jq_ajax.php", {trackInvoice: "", date: date});
-                $(".selected").parent().find("#inventory_invoice").val(1);
+                $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(1);
             } else {
                 $.post("jq_ajax.php", {removeInvoice: "", date: date});
-                $(".selected").parent().find("#inventory_invoice").val(0);
+                $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(0);
             }
         } else {
-            var orderId = $(".selected").attr("id");
+            var orderId = $(".tab_ul").find(".selected").attr("id");
             if ($(obj).prop("checked")) {
                 $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "'"+date+"'"});
-                $(".selected").find("#order_invoice").val(date);
+                $(".tab_ul").find(".selected").find("#order_invoice").val(date);
             } else {
                 $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "NULL"});
-                $(".selected").find("#order_invoice").val("");
+                $(".tab_ul").find(".selected").find("#order_invoice").val("");
             }
         }
 
     }
 
     function checkInvoice() {
-        if ($(".active").html() == "Inventory") {
+        if ($(".active").find("#left").html() == "Inventory") {
             if ($(".selected").parent().find("#inventory_invoice").val() > 0) {
                 $("#invoice_checkbox").prop("checked", true);
             } else {
@@ -348,17 +386,30 @@ $inventory_invoice = count($result);
         var table = document.createElement("table");
         var row_count = 0;
         table.setAttribute("class", "table_view");
-        if ($(".side_nav li .active").html() != "Inventory") {
-           table.innerHTML += "<tr class='row'><th colspan='6' class='table_title'>Catering Order</th></tr>";
+        if ($(".side_nav li .active").find("#left").html() != "Inventory") {
+           table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Catering Order</th></tr>";
         }
-        table.innerHTML += "<tr class='row'><th colspan='6' class='heading'> " +
+        table.innerHTML += "<tr class='row'><th colspan='7' class='heading'> " +
                             $(".tab_li.selected").children().html(); + "</th></tr>";
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
                 var cell = "";
                 $(this).children().each(function() {
-                    if ($(this).children("textarea").length > 0) {
+                    if ($(this).hasClass("row_icon")) {
+                        var td = document.createElement("TD");
+                        cell += td.outerHTML;
+                        return true;
+                    }
+                    if ($(this).children(".div_required").length > 0) {
+                        var td = document.createElement("TD");
+                        if ($(this).find(".span_qc").val() != "") {
+                            td.innerHTML = $(this).find(".span_qc").val();
+                        } else {
+                            td.innerHTML = $(this).find(".span_qr").html();
+                        }
+                        cell += td.outerHTML;
+                    } else if ($(this).children("textarea").length > 0) {
                         var td = document.createElement("TD");
                         td.innerHTML = $(this).children().val();
                         cell += td.outerHTML;
@@ -368,12 +419,12 @@ $inventory_invoice = count($result);
                 });
                 row.innerHTML = cell;
                 table.innerHTML += row.outerHTML;
-                if ($(".side_nav li .active").html() == "Inventory") {
-                    var expectedSales = $(".print_expected").val() == "" ? "   -" : "$ " + $(".print_expected").val();
-                    row_count == 0 ? table.innerHTML += "<tr class='row'><th colspan='6' class='expected_heading'><span class='print_table_date'>Expected Sales</span>" +
-                                                        "<span>"+ expectedSales +"</span></th></tr>" : "";
+                if ($(".side_nav li .active").find("#left").html() == "Inventory") {
+                    var expectedSales = $(".print_expected").val() == "" ? "   -" : "    $ " + $(".print_expected").val();
+                    row_count == 0 ? table.innerHTML += "<tr class='row'><th colspan='7' class='expected_heading'><span class='print_table_date'>Expected Sales   </span>" +
+                                                        "<span>  "+expectedSales+"</span></th></tr>" : "";
                     row_count++;
-                } 
+                }
             }
         });
         var totalCost = "";
@@ -382,12 +433,12 @@ $inventory_invoice = count($result);
             totalCost = +totalCost + +value.replace('$ ', "");
         });
         totalCost != "" ? totalCost = "$" + totalCost  : totalCost = "-";
-        table.innerHTML += "<tr><td class='table_heading' colspan='3'><h4>Total Cost</h4></td>"+
+        table.innerHTML += "<tr><td class='table_heading' colspan='4'><h4>Total Cost</h4></td>"+
                            "<td class='table_heading' colspan='3'><h4>"+totalCost+"</h4></td></tr>";
-        if ($(".side_nav li .active").html() != "Inventory") {
+        if ($(".side_nav li .active").find("#left").html() != "Inventory") {
             var note = $(".selected").find("#order_note").val() == "" ? "No Special Instructions Added" : $(".selected").find("#order_note").val();
-            table.innerHTML += '<tr id="category"><td colspan="5" class="table_title">Special Instructions</td></tr>';
-            table.innerHTML +=  '<tr id="column_data" class="row" colspan="5"><td class="order_note" colspan="5">'+note+'</td>'
+            table.innerHTML += '<tr id="category"><td colspan="7" class="table_title">Special Instructions</td></tr>';
+            table.innerHTML +=  '<tr id="column_data" class="row" colspan="5"><td class="order_note" colspan="7">'+note+'</td>'
         }
         callBack(table);
     }
@@ -416,6 +467,17 @@ $inventory_invoice = count($result);
         }
     }
 
+    function checkRequiredItems() {
+        var count = 0;
+        $(".div_required").each(function() {
+            if (($(this).find(".span_qr").html() < 1 || $(this).find(".span_qr").html() == "-") &&
+                 $(this).find(".span_qc").val() == "") {
+                count++;
+            }
+        });
+        $(".status_view").find("#item_num").html(count);
+    }
+
     (function checkExpectedSales() {
         if($(".print_expected").val() == "") {
             $("#center").css("border", "1px solid red");
@@ -441,7 +503,7 @@ $inventory_invoice = count($result);
         $('.side_nav li a').click(function() {
             $('.side_nav li a').removeClass("active");
             $(this).addClass('active');
-            if ($(this).html() == "Inventory") {
+            if ($(this).find("#left").html() == "Inventory") {
                 $("#div_table").css("margin-top", "35px");
                 $("#catering_tabs").css("display", "none");
                 $("#inventory_tabs").css("display", "block");
@@ -455,9 +517,11 @@ $inventory_invoice = count($result);
                    checkInvoice();
                 });
             } else {
+                $(".status_view").css("z-index", "-1");
+                $(".status_view").removeClass("visible");
                 $("#inventory_tabs").css("display", "none");
                 $(".div_expected").css("display", "none");
-                $("#div_table").css("margin-top", "15px");
+                $("#div_table").css("margin-top", "53px");
 
                 if ($("#catering_option #right").html() > 0) {
                     $("#catering_tabs").css("display", "block");
@@ -492,6 +556,61 @@ $inventory_invoice = count($result);
         $("#popup_close").click(function() {
             $(".div_popup_back").fadeOut(190, "linear");
             $(".main_iframe").removeClass("blur");
+        });
+
+        $(document).on("click", ".tab", function() {
+            $(this).parent().find(".selected").removeClass("selected");
+            $(this).addClass("selected");
+            if ($(this).attr("id") == "calculated") {
+                $(this).parents("td").find(".span_qc").css("display", "none");
+                $(this).parents("td").find(".span_qr").css("display", "block");
+                $(this).parents("td").find("#heading").html("calculated value");
+            } else {
+                $(this).parents("td").find(".span_qr").css("display", "none");
+                $(this).parents("td").find(".span_qc").css("display", "block");
+                $(this).parents("td").find("#heading").html("custom value");
+            }
+        });
+
+        $(document).on("click", ".edit_span", function() {
+            $(this).parents("td").find(".span_qr").css("display", "none");
+            $(this).parents("td").find(".span_qc").css("display", "block");
+        });
+
+        $(".status_view").click(function(event) {
+            event.stopPropagation();
+            var allViewed = true;
+            $(".div_required").each(function() {
+                if (($(this).find(".span_qr").html() < 1 || $(this).find(".span_qr").html() == "-") &&
+                    $(this).find(".span_qc").val() == "") {
+                    if (!$(this).hasClass("viewed")) {
+                        $(this).addClass("viewed");
+                        $("#div_print_table").animate({
+                           scrollTop: $(this).position().top
+                        }, 200);
+                        $(this).find(".tab").trigger("click");
+                        allViewed = false;
+                        return false;
+                    }
+                }
+            });
+            if (allViewed == true) {
+                $(".div_required").removeClass("viewed");
+                $(".div_required").each(function() {
+                    if (($(this).find(".span_qr").html() < 1 || $(this).find(".span_qr").html() == "-") &&
+                        $(this).find(".span_qc").val() == "") {
+                        if (!$(this).hasClass("viewed")) {
+                            $(this).addClass("viewed");
+                            $("#div_print_table").animate({
+                               scrollTop: $(this).position().top
+                            }, 200);
+                            $(this).find(".tab").trigger("click");
+                            allViewed = false;
+                            return false;
+                        }
+                    }
+                });
+            }
         });
     });
 </script>

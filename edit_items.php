@@ -3,6 +3,7 @@ session_start();
 require_once "database/item_table.php";
 require_once "database/variables_table.php";
 require_once "database/timeslot_table.php";
+require_once "database/item_required_days_table.php";
 
 if (!isset($_SESSION["username"])) {
     header("Location: login.php");
@@ -44,7 +45,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
 <head>
     <meta charset="UTF-8">
     <title>Time Slots</title>
-    <link rel="stylesheet" href="styles.css?38">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="main_iframe">
@@ -184,11 +185,34 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                             </tr>
                     <?php endif ?>
                         <tr>
-                            <input type="hidden" name="item_id" value="<?php echo $row["id"]?>">
+                            <td class="td_drawer">
+                                <div class="div_tray">
+                                <?php
+                                    $day_ids = [];
+                                    $result = ItemRequiredDaysTable::get_item_days($row["id"]);
+                                    while ($item_row = $result->fetch_array()) {
+                                        $day_ids[]= $item_row[0];
+                                    }
+                                ?>
+                                    <span value="7" class="<?php echo in_array('7', $day_ids) ? 'active' : ''?>">Sun</span>
+                                    <span value="1" class="<?php echo in_array('1', $day_ids) ? 'active' : ''?>">Mon</span>
+                                    <span value="2" class="<?php echo in_array('2', $day_ids) ? 'active' : ''?>">Tue</span>
+                                    <span value="3" class="<?php echo in_array('3', $day_ids) ? 'active' : ''?>">Wed</span>
+                                    <span value="4" class="<?php echo in_array('4', $day_ids) ? 'active' : ''?>">Thu</span>
+                                    <span value="5" class="<?php echo in_array('5', $day_ids) ? 'active' : ''?>">Fri</span>
+                                    <span value="6" class="<?php echo in_array('6', $day_ids) ? 'active' : ''?>">Sat</span>
+                                    <div class="close"></div>
+                                </div>
+                                <?php unset($day_ids); ?>
+                            </td>
+                            <input type="hidden" class="item_id" name="item_id" value="<?php echo $row["id"]?>">
                             <td class="td_checkbox">
                                 <div class="checkbox">
                                     <input type="checkbox" class="item_checkbox" name="checkbox[]" value="<?php echo $row["id"]?>" form="checkbox_form">
                                     <span class="checkbox_style"></span>
+                                </div>
+                                <div class="calendar">
+                                    <span class="fa-calendar-plus-o"></span>
                                 </div>
                             </td>
                             <td><input type="text" name="item_name" value="<?php echo $row["name"]?>" onchange=updateItem(this) class="align_center item_name"></td>
@@ -435,13 +459,11 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         });
 
         $(".tab_add_button").click(function() {
-            $(".div_popup_back").css("display", "block");
-            $(".main_iframe").addClass("blur");
+            $(".div_popup_back").fadeIn(120, "linear");
         });
 
         $(".popup_close").click(function() {
-            $(".main_iframe").removeClass("blur");
-            $(".div_popup_back").fadeOut(190, "linear");
+            $(".div_popup_back").fadeOut(120, "linear");
         });
 
         $("#add_item_button").click(function() {
@@ -486,6 +508,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         });
 
         $(document).on("click", "#delete_item", function() {
+            $(".calendar").css("display", "none");
             $(".tr_confirm").css("display", "table");
             $(".checkbox").css("display", "block");
             $(".tab_li:not(.selected)").addClass("disabled");
@@ -500,6 +523,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         $("#td_cancel").click(function() {
             $(".tr_confirm").css("display", "none");
             $(".checkbox").css("display", "none");
+            $(".calendar").css("display", "block");
             $(".tab_li").removeClass("disabled");
             $(".tab_add_button").removeClass("disabled");
             $(".tab_li.selected").css("pointer-events", "block");
@@ -515,6 +539,46 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
 
         $(document).on("click", "input.incorrect", function() {
             $(this).removeClass("incorrect");
+        });
+
+        $(".calendar").click(function() {
+            $(".td_drawer").removeClass("calendar_visible");
+            var ele = $(this);
+            $(this).parents("tr").find(".td_drawer").css("display", "table-cell").unbind("transitionend");
+            setTimeout(function() {
+                ele.parents("tr").find(".td_drawer").addClass("calendar_visible");
+            }, 10);
+        });
+
+        $(".close").click(function() {
+            $(this).parents(".td_drawer").removeClass("calendar_visible");
+            $(".td_drawer").on("transitionend", function() {
+                $(this).css("display", "none");
+            });
+        });
+
+        $(document).click(function(event) {
+            if(!$(event.target).closest('.td_drawer').length && !$(event.target).is(".calendar span")) {
+                if ($(".td_drawer").hasClass("calendar_visible")) {
+                    event.stopImmediatePropagation();
+                    $(".td_drawer").removeClass("calendar_visible");
+                    $(".td_drawer").on("transitionend", function() {
+                        $(this).css("display", "none");
+                    });
+                }
+            }
+        });
+
+        $(".td_drawer span").click(function() {
+            var itemId = $(this).parents("tr").find(".item_id").val();
+            var dayId = $(this).attr("value");
+            if ($(this).hasClass("active")) {
+                $(this).removeClass("active");
+                $.post("jq_ajax.php", {removeItemRequiredDay: "", itemId: itemId, dayId: dayId});
+            } else {
+                $(this).addClass("active");
+                $.post("jq_ajax.php", {addItemRequiredDay: "", itemId: itemId, dayId: dayId});
+            }
         });
     });
 </script>

@@ -77,6 +77,16 @@ class InventoryTable extends DatabaseTable {
 
     }
 
+    public static function update_quantity_custom($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (quantity_custom, item_id, `date`)
+                VALUES ($quantity, '$item_id', '$date')
+                ON DUPLICATE KEY UPDATE
+                quantity_custom = VALUES(quantity_custom), item_id = VALUES(item_id), `date` = VALUES(`date`)";
+
+        return parent::query($sql);
+
+    }
+
     public static function get_inventory_with_deviation($date) {
         $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
                         Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
