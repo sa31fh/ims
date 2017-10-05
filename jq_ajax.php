@@ -330,7 +330,7 @@ if (isset($_POST["getPrintPreview"])) {
                 <td id="td_notes">
                     <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'" '.$readonly.' >'.$row["notes"].'</textarea>
                 </td>
-                <input type="hidden" value="'.$row["item_id"].'">
+                <input id="hidden_id" type="hidden" value="'.$row["item_id"].'">
             </tr>';
     }
 }

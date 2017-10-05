@@ -413,6 +413,8 @@ $inventory_invoice = count($result);
                         var td = document.createElement("TD");
                         td.innerHTML = $(this).children().val();
                         cell += td.outerHTML;
+                    } else if ($(this).attr("id") == "hidden_id") {
+
                     } else {
                         cell += this.outerHTML;
                     }
