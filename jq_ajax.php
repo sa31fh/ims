@@ -122,12 +122,10 @@ if(isset($_POST["addItem"])) {
      try {
         if(!ItemTable::add_new_item($_POST["itemName"], $_POST["itemUnit"], $_SESSION["date"], $_POST["itemPrice"],
                                     $_POST["itemDeviation"])) {
-            echo '<div class="error">Item already exists</div>';
+            echo 'item exists';
         } else {
-            if (!empty($_POST["itemQuant"])) {
-                BaseQuantityTable::set_base_quantity($_POST["itemName"], $_POST["itemQuant"]);
-            }
-            echo '<div class="error">Item added successfully</div>';
+            BaseQuantityTable::set_base_quantity($_POST["itemName"], $_POST["itemQuant"]);
+            echo 'item added';
         }
     } catch (Exception $e) {
         echo '<div class="error">'.$e->getMessage().'</div>';
@@ -153,11 +151,32 @@ if(isset($_POST["getItems"])) {
         }
         echo '
             <tr>
-                <input type="hidden" name="item_id" value="'.$row["id"].'">
+                <td class="td_drawer">
+                    <div class="div_tray">';
+                        $day_ids = [];
+                        $requiredItems = ItemRequiredDaysTable::get_item_days($row["id"]);
+                        while ($item_row = $requiredItems->fetch_array()) {
+                            $day_ids[]= $item_row[0];
+                        }
+                echo   '<span value="7" class="' .(in_array("7", $day_ids) ? "active" : ""). '">Sun</span>
+                        <span value="1" class="' .(in_array("1", $day_ids) ? "active" : ""). '">Mon</span>
+                        <span value="2" class="' .(in_array("2", $day_ids) ? "active" : ""). '">Tue</span>
+                        <span value="3" class="' .(in_array("3", $day_ids) ? "active" : ""). '">Wed</span>
+                        <span value="4" class="' .(in_array("4", $day_ids) ? "active" : ""). '">Thu</span>
+                        <span value="5" class="' .(in_array("5", $day_ids) ? "active" : ""). '">Fri</span>
+                        <span value="6" class="' .(in_array("6", $day_ids) ? "active" : ""). '">Sat</span>
+                        <div class="close"></div>
+                    </div>';
+                    unset($day_ids);
+        echo   '</td>
+                <input type="hidden" class="item_id" name="item_id" value="'.$row["id"].'">
                 <td class="td_checkbox">
                     <div class="checkbox">
                         <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
                         <span class="checkbox_style"></span>
+                    </div>
+                    <div class="calendar">
+                        <span class="fa-calendar-plus-o"></span>
                     </div>
                 </td>
                 <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>

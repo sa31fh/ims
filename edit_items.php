@@ -55,23 +55,23 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                     <h4>Add New Item</h4>
                     <div class="inline">
                         <label for="new_item_name">Name</label>
-                        <input class="userinput" type="text" id="new_item_name" placeholder="Item Name" required autofocus>
+                        <input class="userinput" type="text" id="new_item_name" placeholder="Required" required autofocus>
                     </div>
                     <div class="inline">
                         <label for="new_item_unit">Unit</label>
-                        <input class="userinput" type="text" id="new_item_unit" placeholder="Item Unit" required>
+                        <input class="userinput" type="text" id="new_item_unit" placeholder="Required" required>
                     </div>
                     <div class="inline">
                         <label for="new_item_quantity">Quantity</label>
-                        <input class="userinput" type="text" id="new_item_quantity" placeholder="Item Quantity">
+                        <input class="userinput" type="number" id="new_item_quantity" placeholder="Required" required>
                     </div>
                     <div class="inline">
                         <label for="new_item_price">Price</label>
-                        <input class="userinput" type="text" id="new_item_price" placeholder="Item Price">
+                        <input class="userinput" type="number" id="new_item_price" placeholder="Optional">
                     </div>
                     <div class="inline">
                         <label for="new_item_deviation">Deviation</label>
-                        <input class="userinput" type="text" id="new_item_deviation" placeholder="Item Deviation">
+                        <input class="userinput" type="number" id="new_item_deviation" placeholder="Optional">
                     </div>
                     <div class="block" id="item_add_div" >
                         <input type="submit" value="Add Item" class="button button_add_drawer" id="item_add_button">
@@ -371,17 +371,17 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
     function quantityChange(obj) {
         var quantity = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[1].value;
 
         $.post("jq_ajax.php", {updateItemQuantity: "", itemId: itemId, quantity: quantity});
     }
 
     function updateItem(obj) {
         var row =document.getElementById("item_table_view").rows[obj.parentNode.parentNode.rowIndex];
-        var itemName = row.children[2].children[0].value;
-        var itemUnit  = row.children[3].children[0].value;
-        var itemPrice  = row.children[5].children[0].value;
-        var itemId  = row.children[0].value;
+        var itemName = row.children[3].children[0].value;
+        var itemUnit  = row.children[4].children[0].value;
+        var itemPrice  = row.children[6].children[0].value;
+        var itemId  = row.children[1].value;
         $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId, itemPrice: itemPrice});
     }
 
@@ -497,13 +497,29 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             var itemPrice = $("#new_item_price").val() == "" ? 'NULL' : $("#new_item_price").val();
             var itemDeviation = $("#new_item_deviation").val() == "" ? 'NULL' : $("#new_item_deviation").val();
 
-            if (itemName) {
+            if (itemName != "" && itemUnit != "" && itemQuantity != "") {
                 $.post("jq_ajax.php", {addItem: "", itemName: itemName, itemUnit: itemUnit, itemQuant: itemQuantity,
                                        itemPrice: itemPrice, itemDeviation: itemDeviation}, function(data, status) {
-                    $("body").append(data);
-                    getTab(document.getElementById("day_tab"));
-                    $("userinput").trigger("reset");
+                    if (data == "item added") {
+                        alertify
+                            .delay(2500)
+                            .success("Item added successfully");
+                        getTab(document.getElementById("day_tab"));
+                        $("userinput").trigger("reset");
+                    } else if (data == "item exists") {
+                        alertify
+                            .delay(2500)
+                            .log("Item name already exists");
+                    } else {
+                        alertify
+                            .delay(2500)
+                            .error("Process failed. Try again");
+                    }
                 });
+            } else {
+                alertify
+                    .delay(3000)
+                    .error("Fill all required fields");
             }
         });
 
@@ -541,7 +557,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             $(this).removeClass("incorrect");
         });
 
-        $(".calendar").click(function() {
+        $(document).on("click", ".calendar", function() {
             $(".td_drawer").removeClass("calendar_visible");
             var ele = $(this);
             $(this).parents("tr").find(".td_drawer").css("display", "table-cell").unbind("transitionend");
@@ -550,7 +566,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             }, 10);
         });
 
-        $(".close").click(function() {
+        $(document).on("click", ".close", function() {
             $(this).parents(".td_drawer").removeClass("calendar_visible");
             $(".td_drawer").on("transitionend", function() {
                 $(this).css("display", "none");
@@ -569,7 +585,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             }
         });
 
-        $(".td_drawer span").click(function() {
+        $(document).on("click", ".td_drawer span", function() {
             var itemId = $(this).parents("tr").find(".item_id").val();
             var dayId = $(this).attr("value");
             if ($(this).hasClass("active")) {

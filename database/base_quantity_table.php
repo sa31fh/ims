@@ -31,7 +31,7 @@ class BaseQuantityTable extends DatabaseTable {
     public static function set_base_quantity($item_name, $quantity) {
         $sql = "INSERT INTO BaseQuantity (item_id, quantity)
                 VALUES( (SELECT id FROM Item WHERE name='$item_name' AND deletion_date is null),
-                        '$quantity')
+                        $quantity)
                 ON DUPLICATE KEY UPDATE item_id = VALUES(item_id), quantity = VALUES(quantity)";
 
         return parent::query($sql);
