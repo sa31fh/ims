@@ -2,9 +2,8 @@
     position: relative;
     width: 100%;
     margin: 0;
-    border-collapse:collapse;
-    border: 1px solid #cecece;
-    border-radius: 2px;
+    border-collapse: collapse;
+    border-bottom: 1px solid #cecece;
     background: white;
 }
 .table_view #category{
@@ -22,8 +21,31 @@
 }
 .table_view th.heading{
     font-size: 20px;
+    border-bottom: 1px solid #cecece;
+    background: #f4f4f5;
     text-transform: uppercase;
     padding-bottom: 0;
+}
+.table_view td.field_warning{
+    background: #e05d33;
+    color: white;
+    border: 1px solid white;
+}
+.table_view td.row_mark{
+    background: #f4f4f5;
+    width: 90px;
+    box-sizing: border-box;
+    font-size: 11px;
+    text-transform: uppercase;
+    border-bottom: 1px solid white;
+}
+.table_view td.marked{
+    background: #79bc4d!important;
+    color: white;
+}
+.table_view td.marked_warning{
+    background: #e05d33!important;
+    color: white;
 }
 .table_view td{
     text-align: center;
@@ -36,14 +58,20 @@
     word-wrap: break-word;
     font-size: 15px;
 }
-.table_heading{
+.table_view .table_heading{
     background: #f4f4f5;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+.table_title{
+    background: #ededed;
     border: 1px solid #cecece;
-    border-left: none;
-    border-right: none;
     margin: 0;
     padding: 5px 0px !important;
-    font-size: 16px;
+    font-size: 18px;
     text-transform: uppercase;
     font-weight: bold;
 }

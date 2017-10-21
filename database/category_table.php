@@ -101,7 +101,7 @@ class CategoryTable extends DatabaseTable {
                     IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes AS notes,
                     Inv.invoice_notes, Inv.quantity_delivered, Category.order_id AS Cat_order, Item.order_id AS Item_order,
                     Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price, Inv.quantity_required,
-                    Inv.quantity_custom, Inv.cost_required, Inv.cost_delivered
+                    Inv.quantity_custom, Inv.quantity_received, Inv.cost_required, Inv.cost_delivered
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
                 LEFT OUTER JOIN (SELECT * FROM Inventory WHERE date='{$date}') AS Inv ON Inv.item_id = Item.id

@@ -87,6 +87,26 @@ class InventoryTable extends DatabaseTable {
 
     }
 
+    public static function update_quantity_delivered($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (item_id, quantity_delivered, `date`)
+                VALUES ('$item_id', $quantity, '$date')
+                ON DUPLICATE KEY UPDATE
+                item_id = VALUES(item_id), quantity_delivered = VALUES(quantity_delivered), `date` = VALUES(`date`)";
+
+        return parent::query($sql);
+
+    }
+
+    public static function update_quantity_received($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (item_id, quantity_received, `date`)
+                VALUES ('$item_id', $quantity, '$date')
+                ON DUPLICATE KEY UPDATE
+                item_id = VALUES(item_id), quantity_received = VALUES(quantity_received), `date` = VALUES(`date`)";
+
+        return parent::query($sql);
+
+    }
+
     public static function get_inventory_with_deviation($date) {
         $sql = "SELECT IFNULL(Inventory.quantity, null) AS quantity, Item.id, Item.category_id, Item.name,
                         Item.order_id, Item.rounding_option,Item.rounding_factor, Item.unit, Item.deviation,
@@ -122,16 +142,6 @@ class InventoryTable extends DatabaseTable {
                 AND quantity IS NOT NULL";
 
         return parent::query($sql);
-    }
-
-    public static function update_quantity_delivered($quantity, $item_id, $date) {
-        $sql = "INSERT INTO Inventory (item_id, quantity_delivered, `date`)
-                VALUES ('$item_id', $quantity, '$date')
-                ON DUPLICATE KEY UPDATE
-                item_id = VALUES(item_id), quantity_delivered = VALUES(quantity_delivered), `date` = VALUES(`date`)";
-
-        return parent::query($sql);
-
     }
 
     public static function update_invoice_note($note, $item_id, $date) {

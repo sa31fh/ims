@@ -21,8 +21,6 @@ if (isset($_SESSION["last_activity"]) && $_SESSION["last_activity"] + $_SESSION[
 if (isset($_POST["table_data"])) {
     $mpdf = new mPDF("", "A4", 0, 'roboto', 0, 0, 0, 0, 0, 0);
     $stylesheet = file_get_contents("css/pdf_styles.css");
-    $mpdf->useSubstitutions=false;
-    $mpdf->simpleTables = true;
     $mpdf->WriteHtml($stylesheet, 1);
     $mpdf->WriteHtml($_POST["table_data"], 2);
     $mpdf->Output($_POST["table_name"]." - ".$_POST["table_date"].".pdf", "D");
@@ -118,7 +116,7 @@ $_SESSION["last_activity"] = time();
             <div class="div_invoice_table">
                 <table class="table_view" id="invoice_table">
                     <tr id="print_date" class="row">
-                        <th colspan="6">
+                        <th colspan="8">
                             <div id="table_date_heading"></div>
                             <span id="table_date_span"></span>
                             <div class="print_table_date"></div>
@@ -157,6 +155,7 @@ $_SESSION["last_activity"] = time();
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script>
 
     function showInvoice(obj) {
@@ -185,13 +184,48 @@ $_SESSION["last_activity"] = time();
         if (obj.value < 0 ) {
             obj.value = "";
         } else {
+        var itemName = $(obj).parents("tr").find("#item_name").html();
         var date = $(".invoice_date.active").next().val();
-        var itemId = obj.parentNode.parentNode.children[6].value;
+        var itemId = $(obj).parents("tr").find("#item_id").val();
         var quantity = obj.value;
         quantity == "" ? quantity = "NULL" : quantity;
 
-        $.post("jq_ajax.php", {updateQuantityDelivered: "", quantity: quantity, itemId: itemId, date: date});
-        updateCost(itemId, quantity, obj);
+        $.post("jq_ajax.php", {updateQuantityReceived: "", quantity: quantity, itemId: itemId, date: date}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Changes for Item '"+itemName+"' did not saved. Click here to try again", function(event) {
+                    updateQuantity(obj);
+                });
+        });
+        // updateCost(itemId, quantity, obj);
+        }
+    }
+
+     function markCustom(obj) {
+        var num = parseFloat(obj.value).toFixed(2);
+        if ($(obj).val() == "") {
+            $(obj).parents("tr").find(".row_mark").removeClass("marked_warning");
+            $(obj).parents("tr").find(".row_mark .text").html("not received");
+            $(obj).parents("tr").find("#quantity_received").parent().removeClass("field_warning");
+            $(obj).prop("readonly", false);
+        } else if (num != $(obj).parents("tr").find("#quantity_delivered").html()) {
+            $(obj).parents("tr").find(".row_mark").addClass("marked_warning");
+            $(obj).parents("tr").find(".row_mark .text").html("received <br> discrepancy");
+            $(obj).parents("tr").find("#quantity_received").parent().addClass("field_warning");
+            $(obj).prop("readonly", true);
+        } else {
+            $(obj).parents("tr").find(".row_mark").addClass("marked");
+            $(obj).parents("tr").find(".row_mark .text").html("received");
+            $(obj).prop("readonly", true);
         }
     }
 
@@ -209,6 +243,7 @@ $_SESSION["last_activity"] = time();
         } else {
             obj.parentNode.parentNode.children[4].innerHTML = "-";
             cost = "NULL";
+            totalCost();
         }
         function saveCost() {
             if ($(".option.selected").find(".icon_small_text").html() == "Inventory") {
@@ -304,15 +339,29 @@ $_SESSION["last_activity"] = time();
             table.innerHTML += "<tr class='row'><th colspan='6'>Catering Order</th></tr>";
             table.innerHTML += "<tr class='row'><th colspan='6' class='heading'>"+orderName+"</th></tr>";
         } else {
-            table.innerHTML += "<tr class='row'><th colspan='6' class='heading'>Invoice</th></tr>";
+            table.innerHTML += "<tr class='row'><th colspan='8' class='heading'>Invoice</th></tr>";
         }
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
                 var cell = "";
-                $(this).children(":lt(6)").each(function() {
-                    if ($(this).children().attr("id") == "quantity_delivered" || $(this).children("textarea").length > 0) {
+                $(this).children(":lt(8)").each(function() {
+                    if ($(this).hasClass("row_mark")) {
                         var td = document.createElement("TD");
+                        if ($(this).hasClass("marked")) {
+                            td.setAttribute("class", "row_mark marked");
+                        } else if ($(this).hasClass("marked_warning")) {
+                            td.setAttribute("class", "row_mark marked_warning");
+                        } else {
+                            td.setAttribute("class", "row_mark");
+                        }
+                        td.innerHTML = $(this).find(".text").html();
+                        cell = td.outerHTML;
+                    } else if ($(this).children().attr("id") == "quantity_received" || $(this).children("textarea").length > 0) {
+                        var td = document.createElement("TD");
+                        if ($(this).hasClass('field_warning')) {
+                            td.setAttribute("class", "field_warning");
+                        }
                         td.innerHTML = $(this).children().val();
                         cell += td.outerHTML;
                     } else {
@@ -324,7 +373,7 @@ $_SESSION["last_activity"] = time();
             }
         });
         var totalCost = $("#cost_span").html();
-        table.innerHTML += "<tr><td class='table_heading' colspan='3'><h4>Total Cost</h4></td>"+
+        table.innerHTML += "<tr><td class='table_heading' colspan='5'><h4>Total Cost</h4></td>"+
                            "<td class='table_heading' colspan='3'><h4>"+totalCost+"</h4></td></tr>";
         callBack(table);
     }
@@ -397,6 +446,25 @@ $_SESSION["last_activity"] = time();
                 $("#print_date span").html($(this).find("#selected_date").val());
                 $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
             });
+        });
+
+        $(document).on("click", ".row_mark", function() {
+            if ($(this).hasClass("marked") || $(this).hasClass("marked_warning")) {
+                $(this).removeClass("marked marked_warning")
+                $(this).find(".text").html("not received");
+                $(this).parent().find("#quantity_received").parent().removeClass("field_warning");
+                $(this).parent().find("#quantity_received").val("").prop("readonly", false);
+                updateQuantity($(this).parent().find("#quantity_received")[0]);
+            } else if ($(this).parent().find("#quantity_delivered").html() != "-") {
+                $(this).addClass("marked");
+                $(this).find(".text").html("received");
+                if ($(this).parent().find("#quantity_delivered").html() >= 0 &&
+                    $(this).parent().find("#quantity_received").val() == "") {
+                    $(this).parent().find("#quantity_received").val($(this).parent().find("#quantity_delivered").html());
+                }
+                $(this).parent().find("#quantity_received").prop("readonly", true);
+                updateQuantity($(this).parent().find("#quantity_received")[0]);
+            }
         });
 
      });

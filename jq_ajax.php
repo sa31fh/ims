@@ -378,30 +378,56 @@ if (isset($_POST["getTrackedInvoice"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category"><td colspan="8" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
+                        <th>Status</th>
                         <th>Item</th>
                         <th>Unit</th>
                         <th>Quantity Required</th>
                         <th>Quantity Delivered</th>
+                        <th>Quantity Received</th>
                         <th>Cost</th>
                         <th>Notes</th>
                     </tr>';
         }
-        echo '<tr id="column_data" class="row">';
                     $quantity_required = $row["quantity_custom"] == "" ? $row["quantity_required"] : $row["quantity_custom"];
                     $quantity_required = $quantity_required == "" ? "-" : $quantity_required;
+                    $quantity_delivered = $row["quantity_delivered"] == "" ? "-" : $row["quantity_delivered"];
                     $cost = is_numeric($row["cost_delivered"]) ? "$ ".$row["cost_delivered"] : "-";
+                    $delivered_warning = "";
+                    $received_warning = "";
+                    $row_class = "";
 
-        echo  '     <td>'.$row["item_name"].'</td>
+                     if ($quantity_required != $quantity_delivered) {
+                        $delivered_warning = "field_warning";
+                    }
+                    if ($quantity_delivered == $row["quantity_received"]) {
+                        $row_class = "marked";
+                        $text = "received";
+                    } else if ($row["quantity_received"] != "" && $quantity_delivered != $row["quantity_received"]) {
+                        $row_class = "marked_warning";
+                        $text = "received <br> discrepancy";
+                        $received_warning = "field_warning";
+                    } else {
+                        $row_class = "";
+                        $text = "not received";
+                    }
+
+        echo   '<tr id="column_data" class="row">
+                    <td class="row_mark '.$row_class.'">
+                        <span class="icon entypo-cancel"></span>
+                        <span class="text">'.$text.'</span>
+                    </td>
+                    <td id="item_name">'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
-                    <td class="quantity_required">'.$quantity_required.'</td>
-                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'" '.$readonly.' ></td>
+                    <td id="quantity_required">'.$quantity_required.'</td>
+                    <td id="quantity_delivered" class="'.$delivered_warning.'">'.$quantity_delivered.'</td>
+                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
                         <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["invoice_notes"].'" '.$readonly.' >'.$row["invoice_notes"].'</textarea>
                     </td>
-                    <input type="hidden" value="'.$row["item_id"].'">
+                    <input type="hidden" id="item_id" value="'.$row["item_id"].'">
                 </tr>';
     }
 }
@@ -744,6 +770,9 @@ if (isset($_POST["trackInvoice"])) {
 
 if (isset($_POST["updateQuantityDelivered"])) {
     echo InventoryTable::update_quantity_delivered($_POST["quantity"], $_POST["itemId"], $_POST["date"]);
+}
+if (isset($_POST["updateQuantityReceived"])) {
+    echo InventoryTable::update_quantity_received($_POST["quantity"], $_POST["itemId"], $_POST["date"]);
 }
 
 if (isset($_POST["updateQuantityCustom"])) {

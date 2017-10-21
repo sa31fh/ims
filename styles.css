@@ -1113,6 +1113,61 @@ input:-moz-read-only::-moz-placeholder{
 .row_icon .text{
     font-size: 11px;
 }
+.table_view .status_warning{
+    background: #ffeded;
+    transition: background 0.25s;
+}
+.table_view .field_warning, .field_warning input{
+    position: relative;
+    color: red;
+    font-weight: bold;
+}
+.table_view .field_warning:after{
+    content: "discrepancy";
+    position: absolute;
+    bottom: 5%;
+    left: 0;
+    right: 0;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+.table_view .row_mark{
+    width: 100px;
+    padding: 0px 2px;
+    box-sizing: border-box;
+    color: #999;
+    border-top: 1px solid white;
+    cursor: pointer;
+    transition: background 0.25s;
+}
+.row_mark span{
+    display: block;
+    padding: 5px;
+}
+.row_mark .icon:before,{
+    font-size: 30px;
+}
+.row_mark.marked .icon:before{
+    content: "\e813";
+    font-family: "entypo";
+}
+.row_mark.marked_warning .icon:before{
+    content: "\f12a";
+    font-family: "FontAwesome";
+}
+.row_mark .text{
+    font-size: 10px;
+    flex: 1;
+    text-transform: uppercase;
+}
+.row_mark.marked{
+    background: #79bc4d;
+    color: white;
+}
+.row_mark.marked_warning{
+    background: #e05d33;
+    color: white;
+}
 .tr_confirm{
     display: none;
     position: absolute;
@@ -1171,7 +1226,7 @@ input:-moz-read-only::-moz-placeholder{
     color: #444;
     height: 30px;
     padding: 15px 0px;
-    min-width: 90px;
+    min-width: 98px;
     max-width: 200px;
     word-wrap: break-word;
     font-size: 15px;
@@ -1365,14 +1420,17 @@ td.table_heading{
     border-bottom: 1px solid #cecece;
 }
 .table_view input{
+    background: transparent;
     border: 1px solid transparent;
     border-bottom: 1px solid #bfbfbf;
-    margin: 5px 5px;
-    padding: 5px;
+    margin: 0;
+    padding: 5px 0px;
+    text-align: center;
     font-size: 15px;
     min-width: 110px;
     width: 80%;
     max-width: 250px;
+    font-family: "Open Sans";
 }
 .table_view input:disabled{
     border-bottom: 1px solid #dadada;
@@ -1389,6 +1447,7 @@ td.table_heading{
     border: 1px solid red;
 }
 .table_view textarea{
+    background: transparent;
     padding: 2px 4px;
     width: 90%;
     font-size: 17px;
