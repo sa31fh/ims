@@ -254,10 +254,25 @@ $_SESSION["last_activity"] = time();
 
     function updateNotes(obj) {
         var date = $(".invoice_date.active").next().val();
-        var itemId = obj.parentNode.parentNode.children[6].value;
+        var itemId = obj.parentNode.parentNode.children[8].value;
         var note = obj.value;
 
-        $.post("jq_ajax.php", {updateInvoiceNotes: "", note: note, itemId: itemId, date: date});
+        $.post("jq_ajax.php", {updateInvoiceNotes: "", note: note, itemId: itemId, date: date}, function(data) {
+            if (data) {
+                alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+         .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Changes for Item '"+itemName+"' did not saved. Click here to try again", function(event) {
+                    updateNotes(obj);
+                });
+        });
     }
 
     function updateCateringNotes(obj) {
