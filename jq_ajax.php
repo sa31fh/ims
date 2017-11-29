@@ -399,13 +399,13 @@ if (isset($_POST["getTrackedInvoice"])) {
                     $row_class = "";
                     $notes = $row["invoice_notes"] != "" ? $row["invoice_notes"] : $row["notes"];
 
-                     if ($quantity_required != $quantity_delivered) {
+                    if (($quantity_required <= 0 AND $quantity_delivered > 0) OR ($quantity_required > 0 AND $quantity_delivered == "-")  OR (($quantity_required > 0 AND $quantity_delivered >0) AND $quantity_required != $quantity_delivered)) {
                         $delivered_warning = "field_warning";
                     }
                     if ($quantity_delivered == $row["quantity_received"]) {
                         $row_class = "marked";
                         $text = "received";
-                    } else if ($row["quantity_received"] != "" && $quantity_delivered != $row["quantity_received"]) {
+                    } else if ($row["quantity_received"] != "" AND $quantity_delivered != $row["quantity_received"]) {
                         $row_class = "marked_warning";
                         $text = "received <br> discrepancy";
                         $received_warning = "field_warning";
@@ -427,7 +427,6 @@ if (isset($_POST["getTrackedInvoice"])) {
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
                         <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$notes.'" '.$readonly.' >'.$notes.'</textarea>
-                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["invoice_notes"].'" '.$readonly.' >'.$row["invoice_notes"].'</textarea>
                     </td>
                     <input type="hidden" id="item_id" value="'.$row["item_id"].'">
                 </tr>';
