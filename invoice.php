@@ -2,6 +2,7 @@
 session_start();
 require_once "database/invoice_table.php";
 require_once "database/catering_order_table.php";
+require_once "database/variables_table.php";
 require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
@@ -94,11 +95,13 @@ $_SESSION["last_activity"] = time();
 
         <div class="main_top_side">
             <div class="toolbar_print"  id="invoice_toolbar">
-                <label class="switch">
-                    <input class="switch-input" type="checkbox" onclick=checkRequired() />
-                    <span class="switch-label" data-on="Required" data-off="All"></span>
-                    <span class="switch-handle"></span>
-                </label>
+                <div class="toolbar_div">
+                    <label class="switch">
+                        <input class="switch-input" type="checkbox" onclick=checkRequired() />
+                        <span class="switch-label" data-on="Required" data-off="All"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
                 <div class="divider"></div>
                 <div class="toolbar_div">
                     <a id="print_share" class="option" onclick=sendPrint()>Share</a>
@@ -109,7 +112,10 @@ $_SESSION["last_activity"] = time();
                 </div>
                 <div class="toolbar_div float_right" id="totalcost_div">
                     <span id="label">total cost</span>
-                    <span id="cost_span"></span>
+                    <span id="cost_span">-</span>
+                    <span id="tax_span">w/tax</span>
+                    <span id="tax_cost">-</span>
+                    <input type="hidden" id="sales_tax" value="<?php echo Variablestable::get_sales_tax(); ?>">
                 </div>
             </div>
 
@@ -184,29 +190,29 @@ $_SESSION["last_activity"] = time();
         if (obj.value < 0 ) {
             obj.value = "";
         } else {
-        var itemName = $(obj).parents("tr").find("#item_name").html();
-        var date = $(".invoice_date.active").next().val();
-        var itemId = $(obj).parents("tr").find("#item_id").val();
-        var quantity = obj.value;
-        quantity == "" ? quantity = "NULL" : quantity;
+            var itemName = $(obj).parents("tr").find("#item_name").html();
+            var date = $(".invoice_date.active").next().val();
+            var itemId = $(obj).parents("tr").find("#item_id").val();
+            var quantity = obj.value;
+            quantity == "" ? quantity = "NULL" : quantity;
 
-        $.post("jq_ajax.php", {updateQuantityReceived: "", quantity: quantity, itemId: itemId, date: date}, function(data) {
-            if (data) {
-                    alertify
-                    .delay(2000)
-                    .success("Changes Saved");
-            }
-        })
-        .fail(function() {
-            alertify
-                .maxLogItems(10)
-                .delay(0)
-                .closeLogOnClick(true)
-                .error("Changes for Item '"+itemName+"' did not saved. Click here to try again", function(event) {
-                    updateQuantity(obj);
-                });
-        });
-        // updateCost(itemId, quantity, obj);
+            $.post("jq_ajax.php", {updateQuantityReceived: "", quantity: quantity, itemId: itemId, date: date}, function(data) {
+                if (data) {
+                        alertify
+                        .delay(2000)
+                        .success("Changes Saved");
+                }
+            })
+            .fail(function() {
+                alertify
+                    .maxLogItems(10)
+                    .delay(0)
+                    .closeLogOnClick(true)
+                    .error("Changes for Item '"+itemName+"' did not saved. Click here to try again", function(event) {
+                        updateQuantity(obj);
+                    });
+            });
+            updateCost(itemId, quantity, obj);
         }
     }
 
@@ -236,14 +242,15 @@ $_SESSION["last_activity"] = time();
             $.post("jq_ajax.php", {getItemPrice: "", itemId: itemId}, function(data) {
                 var price = data;
                 cost = quantity * price;
-                obj.parentNode.parentNode.children[4].innerHTML = "$ " + cost;
+                $(obj).parents("tr").find(".cost").html("$ " + cost);
                 totalCost();
                 saveCost();
             });
         } else {
-            obj.parentNode.parentNode.children[4].innerHTML = "-";
+            $(obj).parents("tr").find(".cost").html("-");
             cost = "NULL";
             totalCost();
+            saveCost();
         }
         function saveCost() {
             if ($(".option.selected").find(".icon_small_text").html() == "Inventory") {
@@ -395,12 +402,20 @@ $_SESSION["last_activity"] = time();
 
     function totalCost() {
         var totalCost = "";
+        var tax = $("#sales_tax").val();
+        var costSpan = document.getElementById("cost_span");
         $(".cost").each(function() {
             var value = $(this).html() != "-" ? $(this).html() : "";
             totalCost = +totalCost + +value.replace('$ ', "");
         });
-        var costSpan = document.getElementById("cost_span");
         totalCost != "" ? costSpan.innerHTML = "$" + totalCost  : costSpan.innerHTML = "-";
+
+        if (tax > 0 && totalCost != "") {
+            var taxCost = (totalCost*tax/100) + totalCost;
+            $("#tax_cost").html("$" + taxCost);
+        } else {
+            $("#tax_cost").html("-");
+        }
     }
 
     $(document).ready(function() {

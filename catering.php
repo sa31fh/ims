@@ -137,11 +137,13 @@ if (isset($_POST["delete_order_id"])) {
                     <a class="option" onclick=addRecipes()>Add Recipes</a>
                 </div>
                 <div class="divider"></div>
-                <label class="switch">
-                    <input class="switch-input" type="checkbox" onclick=checkRequired() />
-                    <span class="switch-label" data-on="Required" data-off="All"></span>
-                    <span class="switch-handle"></span>
-                </label>
+                <div class="toolbar_div">
+                    <label class="switch">
+                        <input class="switch-input" type="checkbox" onclick=checkRequired() />
+                        <span class="switch-label" data-on="Required" data-off="All"></span>
+                        <span class="switch-handle"></span>
+                    </label>
+                </div>
                 <div class="divider"></div>
                 <div class="toolbar_div">
                     <a id="print_share" class="option" onclick=sendPrint()>Share</a>

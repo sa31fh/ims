@@ -62,6 +62,24 @@ class VariablesTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function get_sales_tax() {
+        $sql = "SELECT value FROM Variables WHERE name='SalesTax'";
+
+        if ($result = parent::query($sql)) {
+            return (int) $result->fetch_assoc()['value'];
+        } else {
+            throw new Exception("get_sales_tax query failed");
+        }
+    }
+
+    public static function update_sales_tax($sales_tax) {
+        $sql = "INSERT INTO Variables (name, value)
+                VALUES ('SalesTax', '$sales_tax')
+                ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)";
+
+        return parent::query($sql);
+    }
+
     public static function update_history_edit($value) {
         $sql = "UPDATE Variables
                 SET value = $value

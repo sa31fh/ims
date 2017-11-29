@@ -68,7 +68,7 @@ $inventory_invoice = count($result);
             </ul>
         </div>
         <div class="main_top_side">
-            <div class="toolbar_print">
+            <div class="toolbar_print" id="pp_toolbar">
                 <div class="toolbar_div">
                     <a href="category_status.php" class="option" id="back">back</a>
                 </div>
