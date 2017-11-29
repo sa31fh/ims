@@ -38,7 +38,7 @@ if (isset($_POST["itemQuantity"])) {
 }
 /*--------------edit_items.php------------*/
 if (isset($_POST["updateItemQuantity"])) {
-    BaseQuantityTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
+    echo BaseQuantityTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
 }
 
 /*-----------------edit_categories.php-------------*/
@@ -397,6 +397,7 @@ if (isset($_POST["getTrackedInvoice"])) {
                     $delivered_warning = "";
                     $received_warning = "";
                     $row_class = "";
+                    $notes = $row["invoice_notes"] != "" ? $row["invoice_notes"] : $row["notes"];
 
                      if ($quantity_required != $quantity_delivered) {
                         $delivered_warning = "field_warning";
@@ -425,6 +426,7 @@ if (isset($_POST["getTrackedInvoice"])) {
                     <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$notes.'" '.$readonly.' >'.$notes.'</textarea>
                         <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["invoice_notes"].'" '.$readonly.' >'.$row["invoice_notes"].'</textarea>
                     </td>
                     <input type="hidden" id="item_id" value="'.$row["item_id"].'">
