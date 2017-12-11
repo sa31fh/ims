@@ -980,6 +980,18 @@ input:-moz-read-only::-moz-placeholder{
     font-size: 10px;
     text-transform: uppercase;
 }
+.div_list_title{
+    position: relative;
+}
+.div_list_title .list_sort{
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    cursor: pointer;
+}
+.div_list_title .list_sort:before{
+    font-size: 18px;
+}
 .div_category h4{
     padding: 10px 0px;
     font-size: 15px;

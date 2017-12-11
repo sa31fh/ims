@@ -47,7 +47,10 @@ if(isset($_POST["delete_id"])) {
 <body>
     <div class="category_main font_open_sans">
         <div class="div_category">
-            <h4 class="font_roboto">Categories</h4>
+            <div class="div_list_title">
+                <h4 class="font_roboto">Categories</h4>
+                <span class="list_sort fa-sort-alpha-asc" id="cat_sort"></span>
+            </div>
             <div class="div_list_category">
             <ul class="category_list" id="category_list">
                 <?php $result = CategoryTable::get_categories($_SESSION["date"]) ?>
@@ -81,7 +84,10 @@ if(isset($_POST["delete_id"])) {
 
         <div class="list_container" id="list_container">
             <div class="div_item_list">
-                <h4 class="font_roboto">Categorized Items</h4>
+                <div class="div_list_title">
+                    <h4 class="font_roboto">Categorized Items</h4>
+                    <span class="list_sort fa-sort-alpha-asc" id="cat_item_sort"></span>
+                </div>
                 <div id="div" class="div_list">
                     <ul class="category_list" name="" id="categorized_list" ></ul>
                 </div>
@@ -236,6 +242,42 @@ if(isset($_POST["delete_id"])) {
         $("#uncategorized_list").on('click', 'li', function() {
             $(this).toggleClass("selected");
             $("#categorized_list li").removeClass("selected");
+        });
+
+        $("#cat_sort").click(function() {
+            alertify.confirm("Sort Categories alphabetically?", function() {
+                $(".list_category_li").each(function() {
+                    var item = $(this);
+                    $(".list_category_li").each(function() {
+                        if (item.find("span").html().toLowerCase() > $(this).find("span").html().toLowerCase()) {
+                            $(this).insertBefore(item);
+                        }
+                    });
+                });
+                var ids = $(".list_category_li")
+                    .map(function() {
+                        return this.id;
+                    }).get();
+                $.post("jq_ajax.php", {UpdateCategoryOrder: "", categoryIds: ids});
+            });
+        });
+
+        $("#cat_item_sort").click(function() {
+            alertify.confirm("Sort Items alphabetically?", function() {
+                $("#categorized_list").find(".list_li").each(function() {
+                    var item = $(this);
+                    $("#categorized_list").find(".list_li").each(function() {
+                        if (item.html().toLowerCase() > $(this).html().toLowerCase()) {
+                            $(this).insertBefore(item);
+                        }
+                    });
+                });
+                var ids = $("#categorized_list").find(".list_li")
+                    .map(function() {
+                        return this.id;
+                    }).get();
+                $.post("jq_ajax.php", {UpdateItemOrder: "", itemIds: ids});
+            });
         });
     });
 </script>
