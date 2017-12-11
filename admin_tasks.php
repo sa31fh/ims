@@ -81,6 +81,12 @@ if(isset($_POST["new_date"])) {
                             </a>
                         </li>
                         <li>
+                            <a href="contacts.php" target="task_frame">
+                                <span class="image fa-id-card-o"></span>
+                                <span class="text">Contacts</span>
+                            </a>
+                        </li>
+                        <li>
                             <a href="cash_closing.php" target="task_frame">
                                 <span class="image fa-calculator"></span>
                                 <span class="text">Cash Closing</span>

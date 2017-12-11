@@ -143,36 +143,46 @@ CREATE TABLE `CateringRecipeItems` (
   `invoice_notes` varchar(45) DEFAULT NULL,
   `price` int(11) DEFAULT NULL,
   PRIMARY KEY (`item_id`,`recipe_id`,`order_id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=131 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  UNIQUE KEY `id` (`id`),
+  UNIQUE KEY `id_2` (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `CateringRecipes`
 --
 
-DROP TABLE IF EXISTS `CateringRecipes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `CateringRecipes` (
+CREATE TABLE IF NOT EXISTS `CateringRecipes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `recipe_id` int(11) NOT NULL,
   `order_id` int(11) NOT NULL,
   `quantity_required` int(11) DEFAULT NULL,
   `notes` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`recipe_id`,`order_id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  PRIMARY KEY (`recipe_id`,`order_id`,`id`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Contacts`
+--
+
+CREATE TABLE IF NOT EXISTS `Contacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `Conversation`
 --
 
-DROP TABLE IF EXISTS `Conversation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Conversation` (
+CREATE TABLE IF NOT EXISTS `Conversation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `timestamp` datetime NOT NULL,
   `sender` varchar(45) DEFAULT NULL,

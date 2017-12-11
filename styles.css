@@ -64,7 +64,7 @@ select{
     padding: 0px 10px;
 }
 input:read-only{
- border: none!important;
+ border: 1px solid transparent!important;
 }
 input:read-only::-webkit-input-placeholder{
     color: transparent;
@@ -1055,6 +1055,22 @@ input:-moz-read-only::-moz-placeholder{
     font-family: "Open Sans";
     color: #555;
 }
+.user_table input{
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 1px solid #bfbfbf;
+    margin: 0;
+    padding: 5px 0px;
+    text-align: center;
+    font-size: 15px;
+    font-family: "Open Sans";
+}
+.user_table #th_edit, .user_table #th_delete{
+    width: 80px;
+}
+.user_table #edit .selected{
+    color: #79b64d;
+}
 .user_table td#name{
     text-align: center;
 }
@@ -1671,6 +1687,7 @@ input:focus{
     margin: 0;
 }
 #item_list_div{
+    display: none;
     max-width: 0px;
     transition: width .25s;
     height: 100%;
@@ -2103,20 +2120,24 @@ input:focus{
     padding: 12px 15px!important;
 }
 .invoice_date div{
+    padding: 0px 5px;
+    align-items: center;
+}
+.invoice_date #right{
+    flex: 2;
+    text-align: left;
+}
+.invoice_date #left{
     flex: 1;
+    text-align: right;
 }
 .invoice_date #left span{
-    font-size: 24px;
+    font-size: 17px;
 }
-.invoice_date #right #top{
-    display: block;
-    font-size: 16px;
-}
-.invoice_date #right #bottom{
-    display: block;
-    font-size: 12px;
+.invoice_date #right span{
+    font-size: 15px;
     text-transform: uppercase;
-    font-family: "Open Sans";
+    font-family: "Roboto";
 }
 .div_expected{
     display: flex;
@@ -2222,6 +2243,31 @@ input:focus{
     padding-bottom: 10px;
     overflow: auto;
     list-style-type: none;
+}
+.side_nav .list_heading{
+    background: #cecece;
+}
+.side_nav .floating_header{
+    position: absolute;
+}
+.side_nav .invoice_year{
+    background: #eaeaea;
+    padding: 5px 0px;
+    border-top: 1px solid #cecece;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 15px;
+    z-index: 3;
+}
+.side_nav .invoice_month{
+    background: #f4f4f5;
+    padding: 5px 0px;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 15px;
+    z-index: 2;
 }
 .side_nav .heading{
     margin-top: -1px;
@@ -3180,6 +3226,8 @@ input:focus{
 }
 .sidenav #heading{
     text-align: center;
+    background: white;
+    z-index: 4;
     padding: 9px 0px;
     border-bottom: 1px solid #cecece;
 }

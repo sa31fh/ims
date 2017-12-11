@@ -37,6 +37,9 @@ if (isset($_POST["checkbox"])) {
 if (isset($_POST["base_sales"])) {
     VariablesTable::update_base_sales($_POST["base_sales"]);
 }
+if (isset($_POST["sales_tax"])) {
+    VariablesTable::update_sales_tax($_POST["sales_tax"]);
+}
 $item_table = ItemTable::get_items_categories($_SESSION["date"]);
 ?>
 
@@ -137,12 +140,21 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                             <div class="divider"></div>
                             <button class="button_flat entypo-trash" id="delete_item">Delete</button>
                         </th>
-                        <th colspan="4" id="th_sales">
+                        <th colspan="2" id="th_sales">
                             <div class="none" id="div_quantity_sales">
                                 Quantity for sales
-                                <form action="edit_items.php" method="post" class="inline middle">
-                                <span>$</span>
+                                <form action="edit_items.php" method="post" class="inline">
+                                    <span>$</span>
                                     <input type="number" name="base_sales" value="<?php echo VariablesTable::get_base_sales(); ?>" onchange="this.form.submit()" class="align_center">
+                                </form>
+                            </div>
+                        </th>
+                        <th colspan="2">
+                            <div id="div_sales_tax">
+                                Sales Tax
+                                <form action="edit_items.php" method="post" class="inline">
+                                    <span>%</span>
+                                    <input type="number" name="sales_tax" value="<?php echo VariablesTable::get_sales_tax(); ?>" onchange="this.form.submit()">
                                 </form>
                             </div>
                         </th>
@@ -311,9 +323,25 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
     function updateRoundingOption(obj) {
         var option = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[1].value;
+        var itemName = document.getElementById("item_table_view").rows[rowIndex].children[3].children[0].value;
 
-        $.post("jq_ajax.php", {updateRoundingOption: "", roundingOption: option, itemId: itemId});
+        $.post("jq_ajax.php", {updateRoundingOption: "", roundingOption: option, itemId: itemId}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Rounding Option for Item '"+itemName+"' did not save. Click here to try again", function(event) {
+                    updateRoundingOption(obj);
+                });
+        });
 
         if (option == "none") {
             $(obj).next().attr("disabled", "disabled");
@@ -325,9 +353,25 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
     function updateRoundingFactor(obj) {
         var factor = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[1].value;
+        var itemName = document.getElementById("item_table_view").rows[rowIndex].children[3].children[0].value;
 
-        $.post("jq_ajax.php", {updateRoundingFactor: "", roundingFactor: factor, itemId: itemId});
+        $.post("jq_ajax.php", {updateRoundingFactor: "", roundingFactor: factor, itemId: itemId}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Rounding Factor for Item '"+itemName+"' did not save. Click here to try again", function(event) {
+                    updateRoundingFactor(obj);
+                });
+        });
     }
 
     function updateItemDeviation(obj) {
@@ -337,9 +381,25 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             obj.value = deviation;
         }
         var rowIndex = obj.parentNode.parentNode.rowIndex;
-        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[0].value;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[1].value;
+        var itemName = document.getElementById("item_table_view").rows[rowIndex].children[3].children[0].value;
 
-        $.post("jq_ajax.php", {updateItemDeviation: "", deviation: deviation, itemId: itemId});
+        $.post("jq_ajax.php", {updateItemDeviation: "", deviation: deviation, itemId: itemId}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Deviation for Item '"+itemName+"' did not save. Click here to try again", function(event) {
+                    updateItemDeviation(obj);
+                });
+        });
     }
 
     function tabDelete() {
@@ -372,8 +432,24 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         var quantity = obj.value;
         var rowIndex = obj.parentNode.parentNode.rowIndex;
         var itemId = document.getElementById("item_table_view").rows[rowIndex].children[1].value;
+        var itemName = document.getElementById("item_table_view").rows[rowIndex].children[3].children[0].value;
 
-        $.post("jq_ajax.php", {updateItemQuantity: "", itemId: itemId, quantity: quantity});
+        $.post("jq_ajax.php", {updateItemQuantity: "", itemId: itemId, quantity: quantity}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Quantity for Item '"+itemName+"' did not save. Click here to try again", function(event) {
+                    quantityChange(obj);
+                });
+        });
     }
 
     function updateItem(obj) {
@@ -382,7 +458,22 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         var itemUnit  = row.children[4].children[0].value;
         var itemPrice  = row.children[6].children[0].value;
         var itemId  = row.children[1].value;
-        $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId, itemPrice: itemPrice});
+        $.post("jq_ajax.php", {updateItems: "", itemName: itemName, itemUnit: itemUnit, itemId: itemId, itemPrice: itemPrice}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Changes for Item '"+itemName+"' did not save. Click here to try again", function(event) {
+                    updateItem(obj);
+                });
+        });
     }
 
     function searchBar(obj) {
@@ -468,7 +559,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
 
         $("#add_item_button").click(function() {
             if ($(this).html() == "Item List") {
-                $("#item_list_div").css({"flex": "1","max-width": "initial"});
+                $("#item_list_div").css({"flex": "1","max-width": "initial", "display": "flex"});
             } else {
                 $("#add_div").slideDown(180, "linear", function() {
                     $(".div_fade").css("display", "block");
@@ -546,7 +637,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         });
 
         $("#item_list_cancel").click(function() {
-            $("#item_list_div").css({"flex": "0","max-width": "0"});
+            $("#item_list_div").css({"flex": "0","max-width": "0", "diplay": "none"});
         });
 
         $("#select_all").change(function() {

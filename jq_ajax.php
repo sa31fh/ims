@@ -24,6 +24,7 @@ require_once "database/cash_closing_table.php";
 require_once "database/cash_closing_data_table.php";
 require_once "database/user_group_list_table.php";
 require_once "database/item_required_days_table.php";
+require_once "database/contacts_table.php";
 
 $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"])) ? "readonly" : "";
 
@@ -902,6 +903,10 @@ if (isset($_POST["updateDeviation"])) {
 
 if (isset($_POST["updateCostDelivered"])) {
     echo InventoryTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["date"]);
+}
+
+if (isset($_POST["updateContactDetails"])) {
+    echo ContactsTable::update_contact_details($_POST["id"], $_POST["name"], $_POST["email"]);
 }
 
 if (isset($_POST["calcExpected"])) {
