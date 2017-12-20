@@ -75,6 +75,14 @@ class CategoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function update_category_name($name, $id) {
+        $sql = "UPDATE Category
+                SET name = '$name'
+                WHERE id = $id";
+
+        return parent::query($sql);
+    }
+
     /**
      * Update order_id for the given category.
      *

@@ -73,5 +73,13 @@ class RecipeTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function update_recipe($name, $id) {
+        $sql = "UPDATE Recipe
+                SET name = '$name'
+                WHERE id = $id";
+
+        return parent::query($sql);
+    }
 }
 ?>

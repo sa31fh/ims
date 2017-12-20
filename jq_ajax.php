@@ -63,6 +63,10 @@ if (isset($_POST["UpdateItemOrder"])) {
     }
 }
 
+if (isset($_POST["updateCategoryName"])) {
+    CategoryTable::update_category_name($_POST["name"], $_POST["id"]);
+}
+
 if (isset($_POST["UpdateCategoryOrder"])) {
     $order_number = 1;
     foreach ($_POST["categoryIds"] as $value) {

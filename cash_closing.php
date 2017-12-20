@@ -92,8 +92,8 @@ if (isset($_POST["checkbox"])) {
                         <button name="add_row" class="button_round entypo-plus" id="add_button" ></button>
                     </form>
                 </div>
-                <div class="toolbar_div">
-                    <div class="option" id="reorder_button">
+                <div class="toolbar_div option">
+                    <div id="reorder_button">
                         <span class="icon_small fa-list-ol"></span>
                         <span class="icon_small_text">reorder</span>
                     </div>

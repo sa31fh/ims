@@ -24,14 +24,17 @@ exit();
 }
 $_SESSION["last_activity"] = time();
 
-if (isset($_POST["add_button"]) AND !empty($_POST["recipe"])) {
+if (isset($_POST["new_name"]) AND !empty($_POST["new_name"])) {
     try {
-        if (!RecipeTable::add_recipe($_POST["recipe"], $_SESSION["date"])) {
+        if (!RecipeTable::add_recipe($_POST["new_name"], $_SESSION["date"])) {
             echo '<div class="error">Recipe already exists</div>';
         }
     } catch (Exception $e) {
         echo '<div class="error">'.$e->getMessage().'</div>';
     }
+}
+if (isset($_POST["edit_name"]) AND !empty($_POST["edit_name"])) {
+    RecipeTable::update_recipe($_POST["edit_name"], $_POST["edit_id"]);
 }
 if(isset($_POST["delete_id"])) {
     RecipeTable::remove_recipe($_POST["delete_id"], $_SESSION["date"]);
@@ -63,22 +66,23 @@ if(isset($_POST["delete_id"])) {
                 </ul>
             </div>
             <input type="hidden" id="category_select">
-            <div class="category_add" id="category_add">
-                <button class="button_flat entypo-trash float_left" onclick=deleteRecipe()>delete</button>
-                <button class="button_flat entypo-plus float_right" onclick=slideDrawer()>Add</button>
+            <div class="option_bar" id="category_add">
+                <div class="toolbar_div option" onclick=deleteRecipe()>
+                    <span class="icon_small entypo-trash"></span>
+                    <span class="icon_small_text">delete</span>
+                </div>
+                <div class="toolbar_div option" onclick='slideDrawer("add")'>
+                    <button class="button_round entypo-plus"></button>
+                </div>
+                <div class="toolbar_div option" onclick='slideDrawer("edit")' >
+                    <span class="icon_small fa-edit"></span>
+                    <span class="icon_small_text">edit</span>
+                </div>
             </div>
             <div class="category_add_drawer">
-                <form action="recipes.php" method="post" >
-                    <input class="category_input" type="text" name="recipe" id="category_name" placeholder="Recipe Name">
-                    <input type="submit" name="add_button" value="Add" class="button">
-                </form>
-                <button class="button_cancel" onclick=slideDrawer()>cancel</button>
-            </div>
-            <div class="category_delete">
-                <button class="button_flat" onclick=closeDelete()>done</button>
-                <span class="span_delete">
-                    <span class="span_hint entypo-trash">drag here to delete</span>
-                </span>
+                <input class="category_input" type="text" name="recipe" id="category_name" placeholder="Recipe Name">
+                <button name="add_button" id="add_button" class="button" onclick=checkButton(this)>Add</button>
+                <button class="button_cancel"  onclick=slideDrawer("")>cancel</button>
             </div>
         </div>
 
@@ -102,6 +106,14 @@ if(isset($_POST["delete_id"])) {
             </div>
         </div>
     </div>
+
+    <form action="recipes.php" method="post" id="add_form">
+        <input type="hidden" name="new_name" id="new_name">
+    </form>
+    <form action="recipes.php" method="post" id="edit_form">
+        <input type="hidden" name="edit_name" id="edit_name">
+        <input type="hidden" name="edit_id" id="edit_id">
+    </form>
 </body>
 </html>
 
@@ -153,14 +165,44 @@ if(isset($_POST["delete_id"])) {
         $.post("jq_ajax.php", {updateRecipeInventoryQuantity: "", quantity: quantity, recipeItemId: recipeItemId});
     }
 
-    function slideDrawer() {
-        $(".category_add_drawer").slideToggle(180, "linear");
+    function slideDrawer(type) {
+        $(".category_add_drawer").slideToggle(120);
+        switch (type) {
+            case 'add':
+                $("#category_name").val("").focus();
+                $("#add_button").html("Add");
+                break;
+            case 'edit':
+                $("#category_name").val($(".active").children("span").html()).focus();
+                $("#add_button").html("Save");
+        }
+    }
+
+    function addRecipe() {
+        $("#new_name").val($("#category_name").val());
+        $("#add_form").submit();
+    }
+
+    function editRecipe() {
+        $("#edit_name").val($("#category_name").val());
+        $("#edit_id").val($(".active").attr("id"));
+        $("#edit_form").submit();
     }
 
     function deleteRecipe() {
         alertify.confirm("Delete Recipe '"+$(".active").children("span").html()+"' ?", function() {
             $(".active").children("form").submit();
         });
+    }
+
+    function checkButton(obj) {
+        switch ($(obj).html()) {
+            case 'Add':
+                addRecipe();
+                break;
+            case 'Save':
+                editRecipe();
+        }
     }
 
     $(document).ready(function() {

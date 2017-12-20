@@ -32,9 +32,14 @@ if (isset($_POST["new_name"]) AND !empty($_POST["new_name"])) {
         echo '<div class="error">'.$e->getMessage().'</div>';
     }
 }
+
+if (isset($_POST["edit_name"]) AND !empty($_POST["edit_name"])) {
+    CategoryTable::update_category_name($_POST["edit_name"], $_POST["edit_id"]);
+}
 if(isset($_POST["delete_id"])) {
     CategoryTable::remove_category($_POST["delete_id"], $_SESSION["date"]);
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -65,14 +70,23 @@ if(isset($_POST["delete_id"])) {
             </ul>
             </div>
             <input type="hidden" id="category_select">
-            <div class="category_add" id="category_add">
-                <button class="button_flat entypo-trash float_left" onclick=deleteCategory()>delete</button>
-                <button class="button_flat entypo-plus float_right" onclick=slideDrawer()>Add</button>
+            <div class="option_bar" id="category_add">
+                <div class="toolbar_div option" onclick=deleteCategory()>
+                    <span class="icon_small entypo-trash"></span>
+                    <span class="icon_small_text">delete</span>
+                </div>
+                <div class="toolbar_div option" onclick='slideDrawer("add")'>
+                    <button class="button_round entypo-plus"></button>
+                </div>
+                <div class="toolbar_div option" onclick='slideDrawer("edit")' >
+                    <span class="icon_small fa-edit"></span>
+                    <span class="icon_small_text">edit</span>
+                </div>
             </div>
             <div class="category_add_drawer">
                 <input class="category_input" type="text" name="category" id="category_name" placeholder="Category Name">
-                <button name="add_button" class="button" onclick=addCategory()>Add</button>
-                <button class="button_cancel"  onclick=slideDrawer()>cancel</button>
+                <button name="add_button" id="add_button" class="button" onclick=checkButton(this)>Add</button>
+                <button class="button_cancel"  onclick=slideDrawer("")>cancel</button>
             </div>
             <div class="category_delete">
                 <button class="button_flat" onclick=closeDelete()>done</button>
@@ -108,6 +122,10 @@ if(isset($_POST["delete_id"])) {
 
     <form action="edit_categories.php" method="post" id="add_form">
         <input type="hidden" name="new_name" id="new_name">
+    </form>
+    <form action="edit_categories.php" method="post" id="edit_form">
+        <input type="hidden" name="edit_name" id="edit_name">
+        <input type="hidden" name="edit_id" id="edit_id">
     </form>
     <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
 </body>
@@ -164,14 +182,33 @@ if(isset($_POST["delete_id"])) {
         });
     }
 
-    function slideDrawer() {
-        $(".category_add_drawer").slideToggle(180, "linear");
+    function slideDrawer(type) {
+        $(".category_add_drawer").slideToggle(120);
+        switch (type) {
+            case 'add':
+                $("#category_name").val("").focus();
+                $("#add_button").html("Add");
+                break;
+            case 'edit':
+                $("#category_name").val($(".active").children("span").html()).focus();
+                $("#add_button").html("Save");
+        }
     }
 
     function deleteCategory() {
         alertify.confirm("Delete Category '"+$(".active").children("span").html()+"' ?", function() {
             $(".active").children("form").submit();
         });
+    }
+
+    function checkButton(obj) {
+        switch ($(obj).html()) {
+            case 'Add':
+                addCategory();
+                break;
+            case 'Save':
+                editCategory();
+        }
     }
 
     function addCategory() {
@@ -182,6 +219,12 @@ if(isset($_POST["delete_id"])) {
         $.post("jq_ajax.php", {UpdateCategoryOrder: "", categoryIds: ids});
         $("#new_name").val($("#category_name").val());
         $("#add_form").submit();
+    }
+
+    function editCategory() {
+        $("#edit_name").val($("#category_name").val());
+        $("#edit_id").val($(".active").attr("id"));
+        $("#edit_form").submit();
     }
 
     $(document).ready(function() {

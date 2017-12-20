@@ -1095,13 +1095,18 @@ input:-moz-read-only::-moz-placeholder{
 .user_table td#delete input{
     outline: none;
 }
-.toolbar_print{
+.toolbar_print, .option_bar{
     display: flex;
     align-items: center;
     padding: 0;
-    border-bottom: 1px solid #cecece;
     background: #f4f4f5;
     font-family: "Open Sans";
+}
+.toolbar_print{
+    border-bottom: 1px solid #cecece;
+}
+.option_bar{
+    border-top: 1px solid #cecece;
 }
 #pp_toolbar .toolbar_div{
     flex: 1;
@@ -1296,10 +1301,12 @@ td .warning:before{
 }
 .table_view td .div_tab .tab{
     display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
     background: #eeeeee;
-    flex: 1;
+    border: 1px solid #dedede;
+    border-right: none;
     padding: 0px 5px;
     color: #bebebe;
     outline: none;
@@ -1314,21 +1321,22 @@ td .warning:before{
     background: white;
     color: #79bc4d;
     z-index: 2;
-    box-shadow: -2px -1px 5px 0 rgba(0, 0, 0, 0.1),
-                -2px 1px 5px 0 rgba(0, 0, 0,0.1);
+    border: 1px solid #cecece;
+    border-right: none;
 }
 .table_view .div_text{
     flex: 1;
     display: flex;
     flex-direction: column;
-    box-shadow: 0px 0px 7px 0 rgba(0, 0, 0, 0.22);
+    border: 1px solid #cecece;
 }
 .div_text .heading{
     text-align: left;
-    padding: 5px 10px 0px 10px;
+    padding: 5px 10px;
     text-transform: uppercase;
     font-size: 11px;
     color: #79bc4d;
+    border-bottom: 1px solid #cecece;
 }
 .div_text .div_value{
     flex: 1;
@@ -1445,7 +1453,7 @@ td.table_heading{
     text-transform: uppercase;
     font-weight: bold;
 }
-.table_view .option_bar{
+.table_view .table_option_bar{
     position: relative;
     border-bottom: 1px solid #cecece;
 }
@@ -2527,25 +2535,25 @@ input:focus{
 }
 .message_row, .message_cell{
     padding: 2px 5px;
-    vertical-align: middle;
 }
 .message_row{
+    display: flex;
     border-bottom: 1px solid #cecece;
     background: #f1f1f1;
     cursor: pointer;
 }
 .message_row .div_left, .message_row .div_right{
     padding: 0;
-    display: inline-block;
+    display: flex;
+    align-items: center;
 }
 .message_row .div_left{
-    width: 88%;
+    flex: 1;
 }
 .message_row .div_right{
-    width: 10%;
+    flex-basis: 60px;
 }
 .message_cell{
-    display: inline-block;
     transition:background-color .25s;
 }
 .message_cell.name{
@@ -2553,31 +2561,38 @@ input:focus{
     min-width: 85px;
     overflow: hidden;
     color: #444;
+    flex-basis: 150px;
 }
 .message_cell.body{
+    display: flex;
+    flex: 1;
+    align-items: center;
     overflow: hidden;
-    width: 90%;
     padding: 5px 0px;
 }
 .message_cell.body .con_container{
-    display: inline-block;
-    width: 85%;
-    white-space: nowrap;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    overflow: hidden;
     padding: 2px 5px;
-    vertical-align: middle;
 }
 .message_cell.body .title{
     overflow: hidden;
-    font-size: 12px;
+    flex-basis: 80px;
+    flex: 1;
     text-transform: uppercase;
+    font-size: 12px;
     font-weight: 600;
     color: #555;
 }
 .message_cell.body .conversation{
+    flex: 2;
     padding-left: 10px;
     overflow: hidden;
     color: rgb(102, 102, 102);
     font-size: 14px;
+    word-break: break-word;
 }
 .message_cell.date{
     font-size: 13px;
@@ -2830,9 +2845,10 @@ input:focus{
 }
 .name_tag{
     display: inline-block;
+    flex: 0 0;
+    flex-basis: 150px;
     padding: 2px;
     margin: 2px;
-    min-width: 150px;
     background: #f4f4f5;
     border: 1px solid #cecece;
     font-size: 14px;
@@ -2848,7 +2864,8 @@ input:focus{
 .name_tag #name{
     text-transform: uppercase;
     font-size: 12px;
-    font-weight: 600
+    font-weight: 600;
+    white-space: nowrap;
 }
 .name_tag #user_name{
     font-size: 12px!important;
@@ -3108,7 +3125,8 @@ input:focus{
     color: white;
 }
 #username{
-    padding: 0px 10px;
+    display: flex;
+    padding: 0px 5px;
     margin: 0;
 }
 #username div{
