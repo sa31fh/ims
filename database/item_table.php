@@ -66,9 +66,13 @@ class ItemTable extends DatabaseTable {
      *
      * @return object|false     Returns mysqli_result object on query success or false if query fails.
      */
-    public static function get_items() {
-        $sql = "SELECT name, unit, quantity, id, rounding_option, rounding_factor FROM Item
+    public static function get_items($date) {
+        $sql = "SELECT Item.id, name, unit, BaseQuantity.quantity as base_quantity,
+                Inventory.quantity AS quantity_stock, Inventory.quantity_delivered, Inventory.quantity_received,
+                rounding_option, rounding_factor FROM Item
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
+                LEFT OUTER JOIN (SELECT item_id, quantity, quantity_delivered, quantity_received FROM Inventory
+                                WHERE date = '$date') AS Inventory ON Inventory.item_id = Item.id
                 WHERE Item.deletion_date IS NULL
                 ORDER BY name ASC";
 

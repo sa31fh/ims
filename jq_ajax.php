@@ -913,15 +913,21 @@ if (isset($_POST["calcExpected"])) {
     $estimated_sales = SalesTable::get_expected_sale($date);
     $todays_sales = $_POST["todaysSale"];
     $base_sale = VariablesTable::get_base_sales();
-    $result = ItemTable::get_items();
+    $result = ItemTable::get_items($date);
     while ($row = $result -> fetch_assoc()) {
         if ($todays_sales == "NULL" OR is_null($estimated_sales)) {
             $expected_quantity = 'NULL';
         } else {
-            $quantity_factor = $row["quantity"] / $base_sale;
-            $estimated_quantity = $estimated_sales * $quantity_factor;
+            $quantity_factor = $row["base_quantity"] / $base_sale;
             $todays_quantity = $todays_sales * $quantity_factor;
-            $expected_quantity = $estimated_quantity - $todays_quantity;
+            if (is_numeric($row["quantity_received"])) {
+                $stored_quantity = $row["quantity_received"] + $row["quantity_stock"];
+            } else if (is_numeric($row["quantity_delivered"])) {
+                $stored_quantity = $row["quantity_delivered"] + $row["quantity_stock"];
+            } else {
+                $stored_quantity = $estimated_sales * $quantity_factor;
+            }
+            $expected_quantity = $stored_quantity - $todays_quantity;
             $expected_quantity = $expected_quantity < 0 ? 0 : $expected_quantity;
             if ($row["rounding_option"] == "up") {
                 $expected_quantity = ceil($expected_quantity / $row["rounding_factor"]) * $row["rounding_factor"];
