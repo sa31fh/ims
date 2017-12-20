@@ -300,7 +300,7 @@ if (isset($_POST["getPrintPreview"])) {
         $required = in_array($row["item_id"], $item_ids) ? "true" : "false";
 
         echo '<tr id="column_data" class="row">
-                <td class="row_icon">';
+                <td class="row_icon"  data-required ="'.$required.'">';
                 if ($required == "true") {
                     echo '<span class="icon fa-star"></span>
                         <span class="text">required item</span>';
@@ -308,30 +308,25 @@ if (isset($_POST["getPrintPreview"])) {
           echo '</td>
                 <td class="item_name ">'.$row["item_name"].'</td>
                 <td>'.$row["unit"].'</td>
-                <td>'.$row["quantity"].'</td>';
-                if ($required == "true") {
-                echo '<td class="quantity_required required" data-required ="'.$required.'" >
-                        <div class="div_required">
-                            <div class="div_tab">
-                                <span class="tab fa-calculator selected" id="calculated"></span>
-                                <span class="tab fa-pencil" id="custom"></span>
+                <td>'.$row["quantity"].'</td>
+                <td class="quantity_required required" >
+                    <div class="div_required">
+                        <div class="div_tab">
+                            <span class="tab fa-calculator selected" id="calculated"></span>
+                            <span class="tab fa-pencil" id="custom"></span>
+                        </div>
+                        <div class="div_text">
+                            <div class="heading">
+                                <span id="heading">calculated value</span>
                             </div>
-                            <div class="div_text">
-                                <div class="heading">
-                                    <span id="heading">calculated value</span>
-                                </div>
-                                <div class="div_value">
-                                    <span class="span_qr">'.$quantity_required.'</span>
-                                    <input type="number" class="span_qc" value="'.$row["quantity_custom"].'" onchange="updateQuantityCustom(this)"  placeholder="enter value" >
-                                </div>
+                            <div class="div_value">
+                                <span class="span_qr">'.$quantity_required.'</span>
+                                <input type="number" class="span_qc" value="'.$row["quantity_custom"].'" onchange="updateQuantityCustom(this)"  placeholder="enter value" >
                             </div>
                         </div>
-                     </td>';
-                } else {
-                 echo  '<td class="quantity_required" data-required ="'.$required.'" >'.$quantity_required.'</td>';
-
-                }
-        echo   '<td class="cost">'.$cost_required.'</td>
+                    </div>
+                </td>
+                <td class="cost">'.$cost_required.'</td>
                 <td id="td_notes">
                     <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'" '.$readonly.' >'.$row["notes"].'</textarea>
                 </td>

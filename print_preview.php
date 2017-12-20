@@ -451,7 +451,8 @@ $inventory_invoice = count($result);
                 var total = $(this).find(".quantity_required").length;
                 var remove = 0;
                 $(this).find(".quantity_required").each(function() {
-                  if ((this.innerHTML <=0 || this.innerHTML == "-") && $(this).nextAll("#td_notes").children("textarea").val() == "") {
+                  if ((($(this).find(".span_qc").val() <= 0 || $(this).find(".span_qc").val() == "") &&
+                       ($(this).find(".span_qr").html() <= 0 || $(this).find(".span_qr").html() == "-"))  && $(this).nextAll("#td_notes").children("textarea").val() == "") {
                     $(this).parent().hide();
                     remove++;
                   }
@@ -471,10 +472,12 @@ $inventory_invoice = count($result);
 
     function checkRequiredItems() {
         var count = 0;
-        $(".div_required").each(function() {
-            if (($(this).find(".span_qr").html() < 1 || $(this).find(".span_qr").html() == "-") &&
-                 $(this).find(".span_qc").val() == "") {
-                count++;
+        $(".row_icon").each(function() {
+            if ($(this).attr("data-required") == "true") {
+                if (($(this).parent().find(".span_qr").html() < 1 || $(this).parent().find(".span_qr").html() == "-") &&
+                     $(this).parent().find(".span_qc").val() == "") {
+                    count++;
+                }
             }
         });
         $(".status_view").find("#item_num").html(count);
@@ -582,31 +585,31 @@ $inventory_invoice = count($result);
         $(".status_view").click(function(event) {
             event.stopPropagation();
             var allViewed = true;
-            $(".div_required").each(function() {
-                if (($(this).find(".span_qr").html() < 1 || $(this).find(".span_qr").html() == "-") &&
-                    $(this).find(".span_qc").val() == "") {
+            $(".icon.fa-star").each(function() {
+                if (($(this).parents("tr").find(".span_qr").html() < 1 || $(this).parents("tr").find(".span_qr").html() == "-") &&
+                    $(this).parents("tr").find(".span_qc").val() == "") {
                     if (!$(this).hasClass("viewed")) {
                         $(this).addClass("viewed");
                         $("#div_print_table").animate({
-                           scrollTop: $(this).position().top
+                           scrollTop: $(this).parents("tr").position().top
                         }, 200);
-                        $(this).find(".tab").trigger("click");
+                        $(this).parents("tr").find(".tab").trigger("click");
                         allViewed = false;
                         return false;
                     }
                 }
             });
             if (allViewed == true) {
-                $(".div_required").removeClass("viewed");
-                $(".div_required").each(function() {
-                    if (($(this).find(".span_qr").html() < 1 || $(this).find(".span_qr").html() == "-") &&
-                        $(this).find(".span_qc").val() == "") {
+                $(".icon.fa-star").removeClass("viewed");
+                $(".icon.fa-star").each(function() {
+                    if (($(this).parents("tr").find(".span_qr").html() < 1 || $(this).parents("tr").find(".span_qr").html() == "-") &&
+                        $(this).parents("tr").find(".span_qc").val() == "") {
                         if (!$(this).hasClass("viewed")) {
                             $(this).addClass("viewed");
                             $("#div_print_table").animate({
-                               scrollTop: $(this).position().top
+                               scrollTop: $(this).parents("tr").position().top
                             }, 200);
-                            $(this).find(".tab").trigger("click");
+                            $(this).parents("tr").find(".tab").trigger("click");
                             allViewed = false;
                             return false;
                         }
