@@ -144,6 +144,14 @@ class InventoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function get_quantity_delivered($date, $item_id) {
+        $sql = "SELECT quantity_delivered FROM Inventory
+                WHERE `date` = '$date'
+                AND item_id = $item_id";
+
+        return parent::query($sql);
+    }
+
     public static function update_invoice_note($note, $item_id, $date) {
         $sql = "INSERT INTO Inventory (item_id, invoice_notes, `date`)
                 VALUES ('$item_id', '$note', '$date')
@@ -169,6 +177,24 @@ class InventoryTable extends DatabaseTable {
                 SET cost_delivered = $cost
                 WHERE item_id = $item_id
                 AND `date` = '$date'";
+
+        return parent::query($sql);
+    }
+
+    public static function get_item_data($item_id, $date) {
+        $sql = "SELECT item_id, `date`, quantity_required, quantity_custom, price, cost_required FROM Inventory
+                INNER JOIN
+                (SELECT id, price FROM Item WHERE id = '$item_id') AS Item ON Item.id = Inventory.item_id
+                WHERE `date` = '$date'
+                AND item_id = $item_id";
+
+        return parent::query($sql);
+    }
+
+    public static function get_bulk_quantity($item_id, $date_start, $date_end) {
+        $sql = "SELECT quantity_required, quantity_custom FROM Inventory
+                WHERE item_id = $item_id
+                AND `date` BETWEEN '$date_start' AND '$date_end'";
 
         return parent::query($sql);
     }

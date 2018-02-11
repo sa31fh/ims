@@ -5,6 +5,7 @@ require_once "database/sales_table.php";
 require_once "database/invoice_table.php";
 require_once "database/sales_table.php";
 require_once "database/catering_order_table.php";
+require_once "database/bulk_order_data_table.php";
 require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
@@ -50,8 +51,13 @@ $inventory_invoice = count($result);
             <div id="heading"><h4>Print Preview</h4></div>
             <ul class="side_nav print_preview">
                 <li id="order_li">
-                    <a id="inventory">
-                        <span id="left">Inventory</span>
+                    <div class="heading" id="inventory">
+                        <span>Inventory</span>
+                    </div>
+                </li>
+                <li id="daily_order">
+                    <a>
+                        <span id="left">Daily order</span>
                         <span id="right" class="warning fa-star"></span>
                         <div class="status_view">
                             <span class="flex_1">required items</span>
@@ -59,8 +65,19 @@ $inventory_invoice = count($result);
                         </div>
                     </a>
                 </li>
+                <li id="bulk_order">
+                    <a>
+                        <span id="left">bulk order</span>
+                        <input type="hidden" id="bulk_invoice" value="0">
+                    </a>
+                </li>
                 <li id="order_li">
-                    <a id="catering_option">
+                    <div class="heading" id="catering_option">
+                        <span>Catering</span>
+                    </div>
+                </li>
+                <li id="catering_order">
+                    <a>
                         <span id="left">Catering Orders</span>
                         <span id="right"><?php echo CateringOrderTable::get_order_count($_SESSION["date"], $future_date); ?></span>
                     </a>
@@ -100,7 +117,7 @@ $inventory_invoice = count($result);
             </div>
 
         <?php if ($_SESSION["userrole"] == "admin"): ?>
-            <div class="div_expected">
+            <div class="div_expected" id="daily_expected">
                 <div id="left">
                     <span id="heading">Todays sales</span>
                     <span id="amount">
@@ -123,6 +140,40 @@ $inventory_invoice = count($result);
                     $sales = SalesTable::get_actual_sale($last_week);
                     echo is_null($sales) ? "-" : "$ ".$sales;?>
                     </span>
+                </div>
+            </div>
+            <div class="div_expected" id="bulk_expected">
+                <?php
+                $result = BulkOrderDataTable::get_bulk_dates($_SESSION["date"]);
+                if (mysqli_num_rows($result) > 0) {
+                    $bulk_dates = $result->fetch_assoc();
+                    $date_from = date_create($bulk_dates["date_start"]);
+                    $date_to = date_create($bulk_dates["date_end"]);
+                    $date_from_text = date_format($date_from, "j M Y");
+                    $date_to_text = date_format($date_to, "j M Y");
+                } else{
+                    $date_from =  date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"));
+                    $date_to =  date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("3 day"));
+                    $date_from_text = "Enter Date";
+                    $date_to_text = "Enter Date";
+                }
+                ?>
+                <div id="left">
+                    <span id="heading">Date From</span>
+                    <span id="date_from"><?php echo $date_from_text ?></span>
+                    <input type="hidden" id="date_from_val" value="<?php echo date_format($date_from, "Y-m-d") ?>">
+                    <div class="div_cal"></div>
+                </div>
+                <div id="center">
+                    <span id="heading">Date To</span>
+                    <span id="date_to"><?php echo $date_to_text ?></span>
+                    <input type="hidden" id="date_to_val" value="<?php echo date_format($date_to, "Y-m-d") ?>">
+                    <div class="div_cal"></div>
+                </div>
+                <div id="right">
+                    <span id="heading">Expected Sales</span>
+                    <span id="icon">$</span>
+                    <span id="total_expected">-</span>
                 </div>
             </div>
         <?php endif ?>
@@ -182,13 +233,50 @@ $inventory_invoice = count($result);
         </div>
     </div>
 
-    <div class="div_popup_back">
+    <div class="div_popup_back" id="share_popup">
         <div class="div_popup popup_share">
             <div class="popup_titlebar">
                 <span>New Message</span>
                 <span class="popup_close" id="popup_close"></span>
             </div>
             <iframe id="popup_frame" name="popup_frame" src="" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <div class="div_popup_back" id="expected_popup">
+        <div class="div_popup popup_todays_sales">
+            <div class="popup_titlebar">
+                <span>Calculate Expected Sales</span>
+                <span class="popup_close" id="popup_close"></span>
+            </div>
+            <div class="div_sales" id="div_total_expected"></div>
+            <div class="flex_row total_bar">
+                <span class="flex_1">Total</span>
+                <span>$</span>
+                <span class="flex_1" id="total_sales"></span>
+            </div>
+            <div class="div_save">
+                <button class="button" id="bulk_expected_done">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="div_popup_back" id="bulk_custom_popup">
+        <div class="div_popup popup_todays_sales">
+            <div class="popup_titlebar">
+                <span>Enter Custom Quantity Values</span>
+                <span class="popup_close" id="popup_close"></span>
+            </div>
+            <div class="div_sales" id="div_total_custom"></div>
+            <div class="flex_row total_bar">
+                <span class="flex_2">Total Quantity</span>
+                <span class="flex_1" id="total_sales"></span>
+            </div>
+            <div class="div_save">
+                <button class="button" id="custom_quantity_done">Done</button>
+            </div>
+            <input type="hidden" id="tbody_index">
+            <input type="hidden" id="row_index">
         </div>
     </div>
 
@@ -210,6 +298,10 @@ $inventory_invoice = count($result);
 </html>
 
 <script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script
+      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"></script>
 <?php if ($_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"]))): ?>
     <script> $("input").prop("readonly", true); </script>
 <?php endif ?>
@@ -226,7 +318,7 @@ $inventory_invoice = count($result);
                 checkRequired();
                 if ($(".span_qc").length > 0) {
                     $("#right.warning").css("opacity", "1");
-                    checkRequiredItems();
+                checkRequiredItems();
                     if (!$(".status_view").hasClass("visible")) {
                         $(".status_view").addClass("visible");
                         $(".status_view").one("transitionend", function(){
@@ -300,6 +392,7 @@ $inventory_invoice = count($result);
             var itemDate = document.getElementById("session_date").value;
 
             $.post("jq_ajax.php", {updateQuantityCustom: "", quantity: quantity, itemId: itemId, itemDate: itemDate});
+            updateCost(obj);
         }
         checkRequiredItems();
     }
@@ -315,7 +408,17 @@ $inventory_invoice = count($result);
     function printPdf() {
         createTable(function(table) {
             $("#table_data").val(table.outerHTML);
-            document.getElementById("table_name").value = $(".tab_li.selected").children().html();
+            switch ($(".print_preview .active").parent().attr("id")) {
+                case 'daily_order':
+                    document.getElementById("table_name").value = $(".tab_li.selected").children().html();
+                    break;
+                case 'bulk_order':
+                    document.getElementById("table_name").value = "Bulk Order";
+                    break;
+                case 'catering_order':
+                    document.getElementById("table_name").value = $(".tab_li.selected").children().html();
+                    break;
+            }
             document.getElementById("table_date").value = $("#print_date").children().find("#table_date_span").html();
             $("#test_form").submit();
         });
@@ -335,49 +438,83 @@ $inventory_invoice = count($result);
 
     function trackInvoice(obj) {
         var date = document.getElementById("session_date").value;
-        if ($(".active").find("#left").html() == "Inventory") {
-            if ($(obj).prop("checked")) {
-                $.post("jq_ajax.php", {trackInvoice: "", date: date});
-                $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(1);
-            } else {
-                $.post("jq_ajax.php", {removeInvoice: "", date: date});
-                $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(0);
-            }
-        } else {
-            var orderId = $(".tab_ul").find(".selected").attr("id");
-            if ($(obj).prop("checked")) {
-                $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "'"+date+"'"});
-                $(".tab_ul").find(".selected").find("#order_invoice").val(date);
-            } else {
-                $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "NULL"});
-                $(".tab_ul").find(".selected").find("#order_invoice").val("");
-            }
+        switch ($(".print_preview .active").parent().attr("id")) {
+            case "daily_order":
+                if ($(obj).prop("checked")) {
+                    $.post("jq_ajax.php", {trackInvoice: "", date: date});
+                    $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(1);
+                } else {
+                    $.post("jq_ajax.php", {removeInvoice: "", date: date});
+                    $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(0);
+                }
+                break;
+            case 'bulk_order':
+                var dateStart = $("#date_from_val").val();
+                var dateEnd = $("#date_to_val").val();
+                if ($(obj).prop("checked")) {
+                    $.post("jq_ajax.php", {trackBulkInvoice: "", dateCreated: date, dateStart: dateStart, dateEnd: dateEnd});
+                    $("#bulk_invoice").val(1);
+                } else {
+                    $.post("jq_ajax.php", {removeBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd});
+                    $("#bulk_invoice").val(0);
+                }
+                break;
+            case "catering_order":
+                var orderId = $(".tab_ul").find(".selected").attr("id");
+                if ($(obj).prop("checked")) {
+                    $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "'"+date+"'"});
+                    $(".tab_ul").find(".selected").find("#order_invoice").val(date);
+                } else {
+                    $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "NULL"});
+                    $(".tab_ul").find(".selected").find("#order_invoice").val("");
+                }
+                break;
         }
-
     }
 
     function checkInvoice() {
-        if ($(".active").find("#left").html() == "Inventory") {
-            if ($(".selected").parent().find("#inventory_invoice").val() > 0) {
-                $("#invoice_checkbox").prop("checked", true);
-            } else {
-                $("#invoice_checkbox").prop("checked", false);
-            }
-        } else {
-            if ($(".selected").find("#order_invoice").val() != "") {
-                $("#invoice_checkbox").prop("checked", true);
-            } else {
-                $("#invoice_checkbox").prop("checked", false);
-            }
+        switch ($(".print_preview .active").parent().attr("id")) {
+            case "daily_order":
+                if ($(".selected").parent().find("#inventory_invoice").val() > 0) {
+                    $("#invoice_checkbox").prop("checked", true);
+                } else {
+                    $("#invoice_checkbox").prop("checked", false);
+                }
+                break;
+            case "bulk_order":
+                if ($("#bulk_invoice").val() > 0) {
+                    $("#invoice_checkbox").prop("checked", true);
+                } else {
+                    $("#invoice_checkbox").prop("checked", false);
+                }
+                break;
+
+            case "catering_order":
+                if ($(".selected").find("#order_invoice").val() != "") {
+                    $("#invoice_checkbox").prop("checked", true);
+                } else {
+                    $("#invoice_checkbox").prop("checked", false);
+                }
+                break;
         }
     }
 
     function sendPrint() {
         createTable(function(table) {
             document.getElementById("new_print_data").value = table.outerHTML;
-            document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
+             switch ($(".print_preview .active").parent().attr("id")) {
+                case 'daily_order':
+                    document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
+                    break;
+                case 'bulk_order':
+                    document.getElementById("print_table_name").value = "Bulk Order";
+                    break;
+                case 'catering_order':
+                    document.getElementById("print_table_name").value = $(".tab_li.selected").children().html();
+                    break;
+            }
             document.getElementById("print_table_date").value = $("#print_date").children().find("#table_date_span").html();
-            $(".div_popup_back").css("display", "block");
+            $("#share_popup").css("display", "block");
             $("#print_form").submit();
         });
     }
@@ -386,11 +523,20 @@ $inventory_invoice = count($result);
         var table = document.createElement("table");
         var row_count = 0;
         table.setAttribute("class", "table_view");
-        if ($(".side_nav li .active").find("#left").html() != "Inventory") {
-           table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Catering Order</th></tr>";
+        switch ($(".side_nav li .active").parent().attr("id")) {
+            case 'daily_order':
+                table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Daily Order</th></tr>";
+                table.innerHTML += "<tr class='row'><th colspan='7' class='heading'> " +
+                                    $(".tab_li.selected").children().html(); + "</th></tr>";break;
+            case 'bulk_order':
+                table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Bulk Order</th></tr>";
+                break;
+            case 'catering_order':
+                table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Catering Order</th></tr>";
+                table.innerHTML += "<tr class='row'><th colspan='7' class='heading'> " +
+                                    $(".tab_li.selected").children().html(); + "</th></tr>";
+                break;
         }
-        table.innerHTML += "<tr class='row'><th colspan='7' class='heading'> " +
-                            $(".tab_li.selected").children().html(); + "</th></tr>";
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
@@ -403,10 +549,21 @@ $inventory_invoice = count($result);
                     }
                     if ($(this).children(".div_required").length > 0) {
                         var td = document.createElement("TD");
-                        if ($(this).find(".span_qc").val() != "") {
-                            td.innerHTML = $(this).find(".span_qc").val();
-                        } else {
-                            td.innerHTML = $(this).find(".span_qr").html();
+                        switch ($(".side_nav li .active").parent().attr("id")) {
+                            case 'bulk_order':
+                                if ($(this).find(".span_qc").val() != "") {
+                                    td.innerHTML = $(this).find(".span_qc").val();
+                                } else {
+                                    td.innerHTML = "-";
+                                }
+                                break;
+                            default:
+                                if ($(this).find(".span_qc").val() != "") {
+                                    td.innerHTML = $(this).find(".span_qc").val();
+                                } else {
+                                    td.innerHTML = $(this).find(".span_qr").html();
+                                }
+                                break;
                         }
                         cell += td.outerHTML;
                     } else if ($(this).children("textarea").length > 0) {
@@ -421,8 +578,15 @@ $inventory_invoice = count($result);
                 });
                 row.innerHTML = cell;
                 table.innerHTML += row.outerHTML;
-                if ($(".side_nav li .active").find("#left").html() == "Inventory") {
-                    var expectedSales = $(".print_expected").val() == "" ? "   -" : "    $ " + $(".print_expected").val();
+                if ($(".side_nav li .active").parent().attr("id") != "catering_order") {
+                    switch ($(".side_nav li .active").parent().attr("id")) {
+                        case 'daily_order':
+                            var expectedSales = $(".print_expected").val() == "" ? "   -" : "    $ " + $(".print_expected").val();
+                            break;
+                        case 'bulk_order':
+                            var expectedSales = $("#total_expected").html() == "" ? "   -" : "    $ " + $("#total_expected").html();
+                            break;
+                    }
                     row_count == 0 ? table.innerHTML += "<tr class='row'><th colspan='7' class='expected_heading'><span class='print_table_date'>Expected Sales   </span>" +
                                                         "<span>  "+expectedSales+"</span></th></tr>" : "";
                     row_count++;
@@ -437,7 +601,7 @@ $inventory_invoice = count($result);
         totalCost != "" ? totalCost = "$" + totalCost  : totalCost = "-";
         table.innerHTML += "<tr><td class='table_heading' colspan='4'><h4>Total Cost</h4></td>"+
                            "<td class='table_heading' colspan='3'><h4>"+totalCost+"</h4></td></tr>";
-        if ($(".side_nav li .active").find("#left").html() != "Inventory") {
+        if ($(".side_nav li .active").parent().attr("id") == "catering_order") {
             var note = $(".selected").find("#order_note").val() == "" ? "No Special Instructions Added" : $(".selected").find("#order_note").val();
             table.innerHTML += '<tr id="category"><td colspan="7" class="table_title">Special Instructions</td></tr>';
             table.innerHTML +=  '<tr id="column_data" class="row" colspan="5"><td class="order_note" colspan="7">'+note+'</td>'
@@ -450,17 +614,33 @@ $inventory_invoice = count($result);
             $(".print_tbody").each(function() {
                 var total = $(this).find(".quantity_required").length;
                 var remove = 0;
-                $(this).find(".quantity_required").each(function() {
-                  if ((($(this).find(".span_qc").val() <= 0 || $(this).find(".span_qc").val() == "") &&
-                       ($(this).find(".span_qr").html() <= 0 || $(this).find(".span_qr").html() == "-"))  && $(this).nextAll("#td_notes").children("textarea").val() == "") {
-                    $(this).parent().hide();
-                    remove++;
-                  }
-                });
-                if (total - remove == 0) {
-                    $(this).hide();
-                    $(this).children().hide();
-                }
+            switch ($(".print_preview .active").parent().attr("id")) {
+                case 'bulk_order':
+                    $(this).find(".quantity_required").each(function() {
+                        if ((($(this).find(".span_qc").val() <= 0 || $(this).find(".span_qc").val() == "") &&
+                             $(this).nextAll("#td_notes").children("textarea").val() == "")) {
+                            $(this).parent().hide();
+                            remove++;
+                        }
+                    });
+                    break;
+                default:
+                    $(this).find(".quantity_required").each(function() {
+                        if (($(this).find(".span_qc").val() <= 0 && $(this).find(".span_qc").val() != "") && $(this).nextAll("#td_notes").children("textarea").val() == "") {
+                            $(this).parent().hide();
+                            remove++;
+                        } else if (($(this).find(".span_qc").val() == "" && ($(this).find(".span_qr").html() <= 0 || $(this).find(".span_qr").html() == "-"))  && $(this).nextAll("#td_notes").children("textarea").val() == "") {
+                            $(this).parent().hide();
+                            remove++;
+                        }
+                    });
+                    break;
+            }
+
+            if (total - remove == 0) {
+                $(this).hide();
+                $(this).children().hide();
+            }
             });
         } else {
             $(".print_tbody").each(function() {
@@ -483,6 +663,7 @@ $inventory_invoice = count($result);
         $(".status_view").find("#item_num").html(count);
     }
 
+
     (function checkExpectedSales() {
         if($(".print_expected").val() == "") {
             $("#center").css("border", "1px solid red");
@@ -494,9 +675,156 @@ $inventory_invoice = count($result);
         }
     })();
 
+    var monthArray = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+    function createDatePicker(obj) {
+        var defaultDate = obj.find("input").val();
+        $(".ui-datepicker").css("display", "none");
+        obj.find(".ui-datepicker").css("display", "block");
+        obj.find(".div_cal").datepicker({
+                dateFormat: "yy-mm-dd",
+                defaultDate: defaultDate,
+                dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                prevText: "previous",
+                onSelect: function(dateText) {
+                    $(".ui-datepicker").css("display", "none");
+                    var dateObj = new Date(dateText.replace(/-/g, '\/'));
+                    var dateFormat = dateObj.getDate()+" "+monthArray[dateObj.getMonth()]+" "+dateObj.getFullYear();
+                    obj.find("#heading").next().html(dateFormat);
+                    obj.find("input").val(dateText);
+                    checkBulkOrderValues();
+                    saveBulkDates();
+                }
+        });
+    }
+
+    function createBulkSales() {
+        $("#div_total_expected").html("");
+        var dateStart = $("#date_from_val").val();
+        var dateEnd = $("#date_to_val").val();
+        if (dateStart != "" && dateEnd != "") {
+            $.post("jq_ajax.php", {getBulkSales: "", dateStart: dateStart, dateEnd: dateEnd}, function(data) {
+                $("#div_total_expected").html(data);
+                showTotalBulkSales();
+            });
+        }
+    }
+
+    function updateBulkExpSales(obj) {
+        var expSales = obj.value;
+        var date = $(obj).next().val();
+        expSales = expSales == "" ? 'NULL' : expSales;
+        $.post("jq_ajax.php", {updateBulkExpSales: "", expSales: expSales, date: date});
+        $.post("jq_ajax.php", {calcBulkQuantityRequired: "", expectedSales: expSales, date: date});
+        showTotalBulkSales();
+    }
+
+    function showTotalBulkSales() {
+        var totalSales = 0;
+        $("#div_total_expected .row_amount").each(function() {
+            if ($(this).val() != "") {
+                totalSales += parseFloat($(this).val());
+            }
+        });
+        var totalExpected = totalSales == 0 ? "-" : totalSales;
+        var display =  totalExpected == "-" ?  "none" : "inline-block";
+        $("#bulk_expected #right #icon").css("display", display);
+        $("#div_total_expected").next().find("#total_sales").html(totalExpected);
+        $("#bulk_expected").find("#total_expected").html(totalExpected);
+        checkTotalExpected();
+    }
+
+
+    function updateBulkNotes(obj) {
+        var itemNote = obj.value;
+        var itemId = obj.parentNode.parentNode.children[7].value;
+        var itemDate = $("#date_from_val").val();
+
+        $.post("jq_ajax.php", {updateBulkNotes: "", itemId: itemId, itemDate: itemDate, itemNote: itemNote});
+    }
+
+    function getBulkPreview() {
+        var dateFrom = $("#date_from_val").val();
+        var dateTo = $("#date_to_val").val();
+        var totalExpected = $("#total_expected").html();
+        if (dateFrom != "" && dateTo != "" && totalExpected != "-") {
+            $.post("jq_ajax.php", {getBulkPrintPreview: "", dateStart: dateFrom, dateEnd: dateTo}, function(data) {
+                $(".print_tbody").remove();
+                $("#print").append(data);
+                $("#table_date_span").html($("#date_from").html() + " - " +  $("#date_to").html());
+                $(".print_table_date").css("display", "block");
+                $(".div_required").each(function() {
+                    if ($(this).find(".span_qc").val() != "") {
+                        $(this).find(".tab").trigger("click");
+                    }
+                });
+                getBulkInvoice();
+                checkRequired();
+            });
+        }
+    }
+
+    function getBulkInvoice() {
+        var dateStart = $("#date_from_val").val();
+        var dateEnd = $("#date_to_val").val();
+        $.post("jq_ajax.php", {getBulkTrackedInvoice: "", dateStart: dateStart, dateEnd: dateEnd}, function(data) {
+            $("#bulk_invoice").val(data);
+            checkInvoice();
+        });
+    }
+
+    function getBulkCustom(obj) {
+        var itemId = $(obj).parents("tr").find("#item_id").val();
+        var dateStart = $("#date_from_val").val();
+        var dateEnd = $("#date_to_val").val();
+        $.post("jq_ajax.php", {getBulkCustom: "", itemId: itemId, dateStart: dateStart, dateEnd: dateEnd}, function(data) {
+            $("#div_total_custom").html(data);
+            showTotalBulkCustom();
+            showTotalBulkCost();
+        });
+    }
+
+    function updateBulkQuantityCustom(obj) {
+        var date = $(obj).parents(".div_cell").find("#date").val();
+        var itemId = $(obj).parents(".div_cell").find("#item_id").val();
+        var value = obj.value;
+        value = value != "" ? value : 'NULL';
+        $.post("jq_ajax.php", {updateBulkQuantityCustom: "", value: value, itemId: itemId, date: date});
+        showTotalBulkCustom();
+        updateBulkCost(obj);
+    }
+
+      function showTotalBulkCustom() {
+        var row = $(".table_view")
+                                .children().eq($("#bulk_custom_popup").find("#tbody_index").val())
+                                .children().eq($("#bulk_custom_popup").find("#row_index").val());
+        var totalSales = 0;
+        $("#div_total_custom .row_data").each(function() {
+            var quantityRequired = $(this).find(".span_required").html();
+            var quantityCustom = $(this).find(".row_amount").val();
+            quantityRequired = quantityRequired != "" ? quantityRequired : 0;
+            quantityCustom = quantityCustom != "" ? quantityCustom : 0;
+            var quantity = quantityCustom > 0 ? quantityCustom : quantityRequired;
+            totalSales += parseFloat(quantity);
+        });
+        totalSales = totalSales == 0 ? "-" : totalSales.toFixed(2);
+        $("#div_total_custom").next().find("#total_sales").html(totalSales);
+        row.find(".bulk_custom").val(totalSales);
+
+    }
+
+
+    function saveBulkDates() {
+        var dateStart = $("#date_from_val").val();
+        var dateEnd = $("#date_to_val").val();
+        var dateCreated = $("#session_date").val();
+
+        $.post("jq_ajax.php", {saveBulkDates: "", dateCreated: dateCreated, dateStart: dateStart, dateEnd: dateEnd});
+    }
+
     $(document).ready(function() {
-        $(".side_nav li:first").each(function() {
-           $(this).children().addClass("active");
+        $(".side_nav li a:first").each(function() {
+           $(this).addClass("active");
         });
 
         $(".div_child .tab_li span:first").each(function() {
@@ -508,46 +836,68 @@ $inventory_invoice = count($result);
         $('.side_nav li a').click(function() {
             $('.side_nav li a').removeClass("active");
             $(this).addClass('active');
-            if ($(this).find("#left").html() == "Inventory") {
-                $("#div_table").css("margin-top", "35px");
-                $("#catering_tabs").css("display", "none");
-                $("#inventory_tabs").css("display", "block");
-                $(".div_expected").css("display", "flex");
-                $("#table_date_heading").html("");
-                $("#order_note_div").css("display", "none");
-                $("#inventory_tabs .tab_li span:first").each(function() {
-                   getTab($(this)[0]);
-                   $(".div_child .tab_li").removeClass("selected");
-                   $(this).parent().addClass("selected");
-                   checkInvoice();
+        });
+
+        $("#catering_order").click(function() {
+            $(".status_view").css("z-index", "-1");
+            $(".status_view").removeClass("visible");
+            $("#inventory_tabs").css("display", "none");
+            $(".div_expected").css("display", "none");
+            $("#print_all").parent().css("display", "flex");
+            $("#div_table").css("margin-top", "53px");
+
+            if ($("#catering_option #right").html() > 0) {
+                $("#catering_tabs").css("display", "block");
+                $("#table_date_heading").html("delivery date");
+                $("#catering_tabs .tab_li:first").each(function() {
+                    getOrderTab($(this)[0]);
+                    $(".div_child .tab_li").removeClass("selected");
+                    $(this).addClass("selected");
+                    $("#order_note_div").css("display", "block");
+                    $("#note_text").html($(".selected").find("#order_note").val());
+                    $("#note_text").val($(".selected").find("#order_note").val());
+                    checkInvoice();
                 });
             } else {
-                $(".status_view").css("z-index", "-1");
-                $(".status_view").removeClass("visible");
-                $("#inventory_tabs").css("display", "none");
-                $(".div_expected").css("display", "none");
-                $("#div_table").css("margin-top", "53px");
-
-                if ($("#catering_option #right").html() > 0) {
-                    $("#catering_tabs").css("display", "block");
-                    $("#table_date_heading").html("delivery date");
-                    $("#catering_tabs .tab_li:first").each(function() {
-                        getOrderTab($(this)[0]);
-                        $(".div_child .tab_li").removeClass("selected");
-                        $(this).addClass("selected");
-                        $("#order_note_div").css("display", "block");
-                        $("#note_text").html($(".selected").find("#order_note").val());
-                        $("#note_text").val($(".selected").find("#order_note").val());
-                        checkInvoice();
-                    });
-                } else {
-                    $("#table_date_heading").html("No Upcoming Catering Orders.");
-                    $("#table_date_span").html("");
-                    $(".print_table_date").css("display", "none");
-                    $(".print_tbody").remove();
-                    $("#invoice_checkbox").prop("checked", false);
-                }
+                $("#table_date_heading").html("No Upcoming Catering Orders.");
+                $("#table_date_span").html("");
+                $(".print_table_date").css("display", "none");
+                $(".print_tbody").remove();
+                $("#invoice_checkbox").prop("checked", false);
             }
+        });
+
+        $("#daily_order").click(function() {
+            $("#table_date_heading").html("");
+            $(".print_tbody").remove();
+            $("#print_all").parent().css("display", "flex");
+            $("#div_table").css("margin-top", "35px");
+            $("#catering_tabs").css("display", "none");
+            $("#inventory_tabs").css("display", "block");
+            $("#order_note_div").css("display", "none");
+            $("#bulk_expected").css("display", "none");
+            $("#daily_expected").css("display", "flex");
+            $("#inventory_tabs .tab_li span:first").each(function() {
+               getTab($(this)[0]);
+               $(".div_child .tab_li").removeClass("selected");
+               $(this).parent().addClass("selected");
+               checkInvoice();
+            });
+        });
+
+        $("#bulk_order").click(function() {
+            $(".status_view").css("z-index", "-1");
+            $(".status_view").removeClass("visible");
+            $("#table_date_heading").html("");
+            $(".print_tbody").remove();
+            $("#print_all").parent().css("display", "none");
+            $("#div_table").css("margin-top", "35px");
+            $("#catering_tabs").css("display", "none");
+            $("#inventory_tabs").css("display", "none");
+            $("#order_note_div").css("display", "none");
+            $("#daily_expected").css("display", "none");
+            $("#bulk_expected").css("display", "flex");
+            checkBulkOrderValues();
         });
 
         $(".div_child .tab_li").click(function() {
@@ -558,8 +908,8 @@ $inventory_invoice = count($result);
             checkInvoice();
         });
 
-        $("#popup_close").click(function() {
-            $(".div_popup_back").fadeOut(190, "linear");
+        $(".popup_close").click(function() {
+            $(this).parents(".div_popup_back").fadeOut(190, "linear");
             $(".main_iframe").removeClass("blur");
         });
 
@@ -615,6 +965,58 @@ $inventory_invoice = count($result);
                         }
                     }
                 });
+            }
+        });
+
+        $("#bulk_expected #right").click(function() {
+            $("#expected_popup").css("display", "block");
+        });
+
+        $(document).on("click", ".bulk_custom", function() {
+            $("#div_total_custom").html("");
+            $("#bulk_custom_popup").find("#tbody_index").val($(this).parents("tbody").index());
+            $("#bulk_custom_popup").find("#row_index").val($(this).parents("tr").index());
+            getBulkCustom(this);
+            $("#bulk_custom_popup").css("display", "block");
+        });
+
+        $("#date_from").click(function() {
+            createDatePicker($(this).parent());
+            $(this).parent().find(".div_cal").datepicker("option", "maxDate", $("#date_to_val").val());
+        });
+
+        $("#date_to").click(function() {
+            createDatePicker($(this).parent());
+            $(this).parent().find(".div_cal").datepicker("option", "minDate", $("#date_from_val").val());
+        });
+
+        $("#bulk_expected_done").click(function() {
+            var emptyField = 0;
+            $("#div_total_expected .row_amount").each(function() {
+                if (!$(this).val()) {
+                    emptyField++;
+                    $(this).css("border", "1px solid red");
+                }
+            });
+            if (emptyField == 0) {
+                getBulkPreview();
+                $(this).parents(".div_popup_back").fadeOut(190, "linear");
+            }
+        });
+
+         $(document).on("click", "#div_total_expected .row_amount", function()  {
+            $(this).css({"border": "none", "border-bottom": "1px solid #cecece"});
+         });
+
+        $("#custom_quantity_done").click(function() {
+            $(this).parents(".div_popup_back").fadeOut(190, "linear");
+        });
+
+         $(document).click(function(event) {
+            if(!$(event.target).closest('input').length && !$(event.target).is("a, span")) {
+                if($('.ui-datepicker').is(":visible")) {
+                    $('.div_cal .ui-datepicker').css("display", "none");
+                }
             }
         });
     });

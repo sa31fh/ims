@@ -28,7 +28,6 @@ class SalesTable extends DatabaseTable {
         if ($result = parent::query($sql)) {
             return $result->fetch_assoc()['actual_sales'];
         }
-        return parent::query($sql);
     }
 
     public static function get_expected_sale($date) {
@@ -38,7 +37,6 @@ class SalesTable extends DatabaseTable {
         if ($result = parent::query($sql)) {
             return $result->fetch_assoc()['expected_sales'];
         }
-        return parent::query($sql);
     }
 }
 ?>

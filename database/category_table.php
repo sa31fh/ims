@@ -120,6 +120,29 @@ class CategoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function get_bulk_print_preview($date_start, $date_end) {
+        $sql = "SELECT Category.name AS category_name, Item.name AS item_name, Item.id AS item_id,
+                    IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes,
+                    Inv.invoice_notes, Category.order_id AS Cat_order, Item.order_id AS Item_order,
+                    Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price, Inv.quantity_required,
+                    Inv.quantity_custom, Inv.quantity_delivered, Inv.quantity_received, Inv.cost_required, Inv.cost_delivered
+                FROM Category
+                INNER JOIN Item ON Item.category_id = Category.id
+                LEFT OUTER JOIN
+                    (SELECT item_id, SUM(quantity_required) AS quantity_required, SUM(cost_required) AS cost_required,
+                    SUM(quantity) AS quantity, SUM(quantity_custom) AS quantity_custom,
+                    SUM(quantity_delivered) AS quantity_delivered, SUM(quantity_received) AS quantity_received,
+                    SUM(cost_delivered) AS cost_delivered, GROUP_CONCAT(invoice_notes SEPARATOR '\n') AS invoice_notes,
+                    GROUP_CONCAT(notes SEPARATOR '\n') AS notes FROM Inventory
+                    WHERE `date` BETWEEN '$date_start' AND '$date_end'
+                    GROUP BY item_id) AS Inv ON Inv.item_id = Item.id
+                WHERE (Category.creation_date <= '$date_start' AND (Category.deletion_date > '$date_start' OR Category.deletion_date IS NULL))
+                AND (Item.creation_date <= '$date_start' AND (Item.deletion_date > '$date_start' OR Item.deletion_date IS NULL))
+                ORDER BY Cat_order, Item_order";
+
+        return parent::query($sql);
+    }
+
     /**
      * Get data for print preview table for a given timeslot
      *

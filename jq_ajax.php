@@ -24,6 +24,8 @@ require_once "database/cash_closing_table.php";
 require_once "database/cash_closing_data_table.php";
 require_once "database/user_group_list_table.php";
 require_once "database/item_required_days_table.php";
+require_once "database/bulk_order_data_table.php";
+require_once "database/invoice_bulk_table.php";
 require_once "database/contacts_table.php";
 
 $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"])) ? "readonly" : "";
@@ -331,6 +333,56 @@ if (isset($_POST["getPrintPreview"])) {
                     <textarea name="" id="" rows="2" onchange="updateNotes(this); checkRequired();" value="'.$row["notes"].'" '.$readonly.' >'.$row["notes"].'</textarea>
                 </td>
                 <input id="hidden_id" type="hidden" value="'.$row["item_id"].'">
+                <input type="hidden" id="item_price" value="'.$row["price"].'">
+            </tr>';
+    }
+}
+
+if (isset($_POST["getBulkPrintPreview"])) {
+    $result = CategoryTable::get_bulk_print_preview($_POST["dateStart"], $_POST["dateEnd"]);
+    $current_category = null;
+    while ($row = $result->fetch_assoc()) {
+        $item_data = InventoryTable::get_bulk_quantity($row["item_id"], $_POST["dateStart"], $_POST["dateEnd"]);
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="7" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th></th>
+                        <th class="item_heading">Item</th>
+                        <th>Unit</th>
+                        <th>Quantity Present</th>
+                        <th>Quantity Required</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        $total_quantity = "";
+        while ($item_row = $item_data->fetch_assoc()) {
+            $quantity = is_numeric($item_row["quantity_custom"]) ? $item_row["quantity_custom"] : $item_row["quantity_required"];
+            $total_quantity += $quantity;
+        }
+        $total_quantity = $total_quantity == "" ? "" : $total_quantity;
+        $cost_required = $row["cost_required"] == "" ? "-" : "$ ".$row["cost_required"];
+        $required = "false";
+
+        echo '<tr id="column_data" class="row">
+                <td class="row_icon"  data-required ="'.$required.'"></td>
+                <td class="item_name ">'.$row["item_name"].'</td>
+                <td>'.$row["unit"].'</td>
+                <td>'.$row["quantity"].'</td>
+                <td class="quantity_required required" >
+                    <div class="div_required">
+                            <div class="div_value">
+                                <input type="number" class="span_qc bulk_custom" value="'.$total_quantity.'" onchange="updateBulkQuantityCustom(this)"  placeholder="enter value" >
+                            </div>
+                    </div>
+                </td>
+                <td class="cost">'.$cost_required.'</td>
+                <td id="td_notes">
+                    <textarea name="" id="" rows="2" onchange="updateBulkNotes(this); checkRequired();" value="'.$row["notes"].'" '.$readonly.' >'.$row["notes"].'</textarea>
+                </td>
+                <input id="item_id" type="hidden" value="'.$row["item_id"].'">
             </tr>';
     }
 }
@@ -427,6 +479,73 @@ if (isset($_POST["getTrackedInvoice"])) {
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
                         <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$notes.'" '.$readonly.' >'.$notes.'</textarea>
+                    </td>
+                    <input type="hidden" id="item_id" value="'.$row["item_id"].'">
+                </tr>';
+    }
+}
+
+if (isset($_POST["getBulkInvoice"])) {
+    $result = CategoryTable::get_bulk_print_preview($_POST["dateStart"], $_POST["dateEnd"]);
+    $current_category = null;
+    while ($row = $result->fetch_assoc()) {
+        $item_data = InventoryTable::get_bulk_quantity($row["item_id"], $_POST["dateStart"], $_POST["dateEnd"]);
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '<tbody class="print_tbody" id="print_tbody">
+                    <tr id="category"><td colspan="8" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category_columns">
+                        <th>Status</th>
+                        <th>Item</th>
+                        <th>Unit</th>
+                        <th>Quantity Required</th>
+                        <th>Quantity Delivered</th>
+                        <th>Quantity Received</th>
+                        <th>Cost</th>
+                        <th>Notes</th>
+                    </tr>';
+        }
+        $total_quantity = "";
+        while ($item_row = $item_data->fetch_assoc()) {
+            $quantity = is_numeric($item_row["quantity_custom"]) ? $item_row["quantity_custom"] : $item_row["quantity_required"];
+            $total_quantity += $quantity;
+        }
+        $total_quantity = $total_quantity == "" ? "-" : $total_quantity;
+        $quantity_delivered = $row["quantity_delivered"] == "" ? "-" : $row["quantity_delivered"];
+        $cost = is_numeric($row["cost_delivered"]) ? "$ ".$row["cost_delivered"] : "-";
+        $delivered_warning = "";
+        $received_warning = "";
+        $row_class = "";
+        $notes = $row["invoice_notes"] != "" ? $row["invoice_notes"] : $row["notes"];
+
+        if (($total_quantity <= 0 AND $quantity_delivered > 0) OR ($total_quantity > 0 AND $quantity_delivered == "-")  OR (($total_quantity > 0 AND $quantity_delivered >0) AND $total_quantity != $quantity_delivered)) {
+            $delivered_warning = "field_warning";
+        }
+        if ($quantity_delivered == $row["quantity_received"]) {
+            $row_class = "marked";
+            $text = "received";
+        } else if ($row["quantity_received"] != "" AND $quantity_delivered != $row["quantity_received"]) {
+            $row_class = "marked_warning";
+            $text = "received <br> discrepancy";
+            $received_warning = "field_warning";
+        } else {
+            $row_class = "";
+            $text = "not received";
+        }
+
+        echo   '<tr id="column_data" class="row">
+                    <td class="row_mark '.$row_class.'">
+                        <span class="icon entypo-cancel"></span>
+                        <span class="text">'.$text.'</span>
+                    </td>
+                    <td id="item_name">'.$row["item_name"].'</td>
+                    <td>'.$row["unit"].'</td>
+                    <td id="quantity_required">'.$total_quantity.'</td>
+                    <td id="quantity_delivered" class="'.$delivered_warning.'">'.$quantity_delivered.'</td>
+                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateBulkQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
+                    <td class="cost">'.$cost.'</td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateBulkNotes(this)" value="'.$notes.'" '.$readonly.' >'.$notes.'</textarea>
                     </td>
                     <input type="hidden" id="item_id" value="'.$row["item_id"].'">
                 </tr>';
@@ -683,6 +802,99 @@ if (isset($_POST["printAll"])) {
     }
 }
 
+if (isset($_POST["getExpSales"])) {
+    echo SalesTable::get_expected_sale($_POST["date"]);
+}
+
+if (isset($_POST["updateBulkExpSales"])) {
+    echo SalesTable::add_expected_sale($_POST["expSales"], $_POST["date"]);
+}
+
+if (isset($_POST["updateBulkQuantityCustom"])) {
+    echo InventoryTable::update_quantity_custom($_POST["value"], $_POST["itemId"], $_POST["date"]);
+}
+
+
+if (isset($_POST["saveBulkDates"])) {
+    echo BulkOrderDataTable::save_bulk_dates($_POST["dateCreated"], $_POST["dateStart"], $_POST["dateEnd"]);
+}
+
+if (isset($_POST["trackBulkInvoice"])) {
+    echo InvoiceBulkTable::track_invoice($_POST["dateStart"], $_POST["dateEnd"], $_POST["dateCreated"]);
+}
+
+if (isset($_POST["removeBulkInvoice"])) {
+    echo InvoiceBulkTable::remove_invoice($_POST["dateStart"], $_POST["dateEnd"]);
+}
+
+if (isset($_POST["getBulkTrackedInvoice"])) {
+    echo InvoiceBulkTable::get_tracked($_POST["dateStart"], $_POST["dateEnd"]);
+}
+
+if (isset($_POST["getBulkSales"])) {
+    $date_start = date_create($_POST["dateStart"]);
+    $date_end = date_create($_POST["dateEnd"]);
+    $date_next = $date_start;
+    echo '<div class="flex_row div_cell">
+            <div class="heading flex_1">
+                <span>Date</span>
+            </div>
+            <div class="heading flex_1">
+                <span>Expected Sales</span>
+            </div>
+        </div>';
+    while ($date_next <= $date_end) {
+        $expected_sales =  SalesTable::get_expected_sale(date_format($date_next, 'Y-m-d'));
+        $expected_sales = is_numeric($expected_sales) ? $expected_sales : "";
+        echo'<div class="flex_row div_cell">
+                <div class="flex_1">
+                    <span>'.date_format($date_next, 'jS M Y').'</span>
+                </div>
+                <div class="flex_1">
+                    <input type="number" class="flex_1 row_amount" onchange="updateBulkExpSales(this)" value="'.$expected_sales.'" placeholder="enter value">
+                    <input type="hidden" id="date_hidden" value="'.date_format($date_next, "Y-m-d").'">
+                </div>
+            </div>';
+        $date_next = date_add($date_next, date_interval_create_from_date_string("1 day"));
+    }
+}
+
+if (isset($_POST["getBulkCustom"])) {
+    $date_start = date_create($_POST["dateStart"]);
+    $date_end = date_create($_POST["dateEnd"]);
+    $date_next = $date_start;
+    echo '<div class="flex_row div_cell">
+            <div class="heading flex_1">
+                <span>Date</span>
+            </div>
+            <div class="heading flex_1">
+                <span>Calculated Quantity</span>
+            </div>
+            <div class="heading flex_1">
+                <span>Custom Quantity</span>
+            </div>
+        </div>';
+    while ($date_next <= $date_end) {
+    $result = InventoryTable::get_item_data($_POST["itemId"], date_format($date_next, 'Y-m-d'));
+    $row = $result ->fetch_assoc();
+    $cost = $row["cost_required"] == "" ? 0 : $row["cost_required"];
+    echo'<div class="flex_row div_cell row_data">
+            <div class="flex_1">
+                <span>'.date_format($date_next, 'jS M Y').'</span>
+            </div>
+            <div class="flex_1">
+                <span class="span_required">'.$row["quantity_required"].'</span>
+            </div>
+            <div class="flex_1">
+                <input type="number" class="flex_1 row_amount" onchange="updateBulkQuantityCustom(this)" value="'.$row["quantity_custom"].'" placeholder="enter value">
+            </div>
+            <input type="hidden" id="date" value="'.$row["date"].'">
+            <input type="hidden" id="item_id" value="'.$row["item_id"].'">
+        </div>';
+    $date_next = date_add($date_next, date_interval_create_from_date_string("1 day"));
+    }
+}
+
 if (isset($_POST["AddTimeslotItem"])) {
    echo TimeslotItemTable::add_timeslot_item($_POST["itemName"], $_POST["timeslotName"]);
 }
@@ -775,7 +987,30 @@ if (isset($_POST["updateQuantityDelivered"])) {
 if (isset($_POST["updateQuantityReceived"])) {
     echo InventoryTable::update_quantity_received($_POST["quantity"], $_POST["itemId"], $_POST["date"]);
 }
-
+if (isset($_POST["updateBulkQuantityReceived"])) {
+    $date_start = date_create($_POST["dateStart"]);
+    $date_end = date_create($_POST["dateEnd"]);
+    $date_next = $date_start;
+    $total_received = $_POST["quantity"];
+    while ($date_next <= $date_end) {
+        $row = InventoryTable::get_quantity_delivered(date_format($date_next, 'Y-m-d'), $_POST["itemId"])->fetch_assoc();
+        $item_quantity = $row["quantity_delivered"];
+        $item_quantity = $item_quantity == "" ? 'NULL' : $item_quantity;
+        if ($date_next < $date_end) {
+            if (($total_received - $item_quantity) > 0) {
+                $item_quantity = $item_quantity;
+                $total_received = $total_received - $item_quantity;
+            } else {
+                $item_quantity = $total_received;
+                $total_received = 'NULL';
+            }
+        } else {
+            $item_quantity = $total_received;
+        }
+        echo InventoryTable::update_quantity_received($item_quantity, $_POST["itemId"], date_format($date_next, 'Y-m-d'));
+        $date_next = date_add($date_next, date_interval_create_from_date_string("1 day"));
+    }
+}
 if (isset($_POST["updateQuantityCustom"])) {
     echo InventoryTable::update_quantity_custom($_POST["quantity"], $_POST["itemId"], $_POST["itemDate"]);
 }
@@ -900,6 +1135,7 @@ if (isset($_POST["updateDeviation"])) {
     echo InventoryTable::update_item_deviation($_POST["deviation"], $_POST["itemId"], $_POST["date"]);
 }
 
+
 if (isset($_POST["updateCostDelivered"])) {
     echo InventoryTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["date"]);
 }
@@ -967,6 +1203,32 @@ if (isset($_POST["calcQuantityRequired"])) {
         }
         echo InventoryTable::update_quantity_required($quantity, $row["item_id"], $_SESSION["date"]);
         echo InventoryTable::update_cost_required($cost, $row["item_id"], $_SESSION["date"]);
+    }
+}
+
+if (isset($_POST["calcBulkQuantityRequired"])) {
+    $expected_sales = $_POST["expectedSales"];
+    $result = CategoryTable::get_print_preview($_POST["date"]);
+    while ($row = $result -> fetch_assoc()) {
+        if (is_numeric($expected_sales)) {
+            $sales_factor = $expected_sales / VariablesTable::get_base_sales();
+            $quantity_stock = is_numeric($row["quantity"]) ? $row["quantity"] : 0;
+            $quantity = BaseQuantityTable::get_estimated_quantity($sales_factor, $row["item_id"]) - $row["quantity"];
+            if ($row["rounding_option"] == "up") {
+                $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            } else if ($row["rounding_option"] == "down") {
+                $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            }
+        } else {
+            $quantity = 'NULL';
+        }
+        if (($quantity != "NULL" AND $quantity > 0) AND $row["price"] != "-") {
+            $cost = round($quantity * $row["price"], 2);
+        } else {
+            $cost = "NULL";
+        }
+        echo InventoryTable::update_quantity_required($quantity, $row["item_id"], $_POST["date"]);
+        echo InventoryTable::update_cost_required($cost, $row["item_id"], $_POST["date"]);
     }
 }
 
