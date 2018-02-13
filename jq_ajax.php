@@ -814,6 +814,9 @@ if (isset($_POST["updateBulkQuantityCustom"])) {
     echo InventoryTable::update_quantity_custom($_POST["value"], $_POST["itemId"], $_POST["date"]);
 }
 
+if (isset($_POST["updateBulkNotes"])) {
+    echo InventoryTable::update_notes($_POST["itemNote"], $_POST["itemId"], $_POST["itemDate"]);
+}
 
 if (isset($_POST["saveBulkDates"])) {
     echo BulkOrderDataTable::save_bulk_dates($_POST["dateCreated"], $_POST["dateStart"], $_POST["dateEnd"]);
@@ -873,6 +876,9 @@ if (isset($_POST["getBulkCustom"])) {
             <div class="heading flex_1">
                 <span>Custom Quantity</span>
             </div>
+            <div class="heading flex_1">
+                <span>Cost</span>
+            </div>
         </div>';
     while ($date_next <= $date_end) {
     $result = InventoryTable::get_item_data($_POST["itemId"], date_format($date_next, 'Y-m-d'));
@@ -888,8 +894,13 @@ if (isset($_POST["getBulkCustom"])) {
             <div class="flex_1">
                 <input type="number" class="flex_1 row_amount" onchange="updateBulkQuantityCustom(this)" value="'.$row["quantity_custom"].'" placeholder="enter value">
             </div>
+            <div class="flex_1">
+                $
+                <span class="cost">'.$cost.'</span>
+            </div>
             <input type="hidden" id="date" value="'.$row["date"].'">
             <input type="hidden" id="item_id" value="'.$row["item_id"].'">
+            <input type="hidden" id="item_price" value="'.$row["price"].'">
         </div>';
     $date_next = date_add($date_next, date_interval_create_from_date_string("1 day"));
     }
@@ -1135,6 +1146,13 @@ if (isset($_POST["updateDeviation"])) {
     echo InventoryTable::update_item_deviation($_POST["deviation"], $_POST["itemId"], $_POST["date"]);
 }
 
+if (isset($_POST["updateRequiredCost"])) {
+    echo InventoryTable::update_cost_required($_POST["cost"], $_POST["itemId"], $_SESSION["date"]);
+}
+
+if (isset($_POST["updateBulkRequiredCost"])) {
+    echo InventoryTable::update_cost_required($_POST["cost"], $_POST["itemId"], $_POST["itemDate"]);
+}
 
 if (isset($_POST["updateCostDelivered"])) {
     echo InventoryTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["date"]);

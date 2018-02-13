@@ -271,6 +271,9 @@ $inventory_invoice = count($result);
             <div class="flex_row total_bar">
                 <span class="flex_2">Total Quantity</span>
                 <span class="flex_1" id="total_sales"></span>
+                <div class="divider"></div>
+                <span class="flex_1">Total Cost</span>
+                <span class="flex_1" id="total_cost"></span>
             </div>
             <div class="div_save">
                 <button class="button" id="custom_quantity_done">Done</button>
@@ -314,6 +317,7 @@ $inventory_invoice = count($result);
                 $(".print_tbody").remove();
                 $("#print").append(data);
                 $("#table_date_span").html($("#formatted_date").val());
+                $("#table_date_span").css("color", "initial");
                 $(".print_table_date").css("display", "block");
                 checkRequired();
                 if ($(".span_qc").length > 0) {
@@ -663,6 +667,49 @@ $inventory_invoice = count($result);
         $(".status_view").find("#item_num").html(count);
     }
 
+    function updateCost(obj) {
+        var quantity = obj.value;
+        var itemId = $(obj).parents("tr").find("#hidden_id").val();
+        if (quantity > 0) {
+            var price = $(obj).parents("tr").find("#item_price").val();
+            if (price > 0 ) {
+                var cost = quantity * price;
+                $.post("jq_ajax.php", {updateRequiredCost: "", cost: cost, itemId: itemId});
+                $(obj).parents("tr").find(".cost").html("$ "+cost);
+            } else {
+                $.post("jq_ajax.php", {updateRequiredCost: "", cost: 'NULL', itemId: itemId});
+                $(obj).parents("tr").find(".cost").html("-");
+            }
+        } else {
+            $.post("jq_ajax.php", {updateRequiredCost: "", cost: 'NULL', itemId: itemId});
+            $(obj).parents("tr").find(".cost").html("-");
+        }
+    }
+
+    function updateBulkCost(obj) {
+        var itemDate = $(obj).parents(".div_cell").find("#date").val();
+        var itemId = $(obj).parents(".div_cell").find("#item_id").val();
+        if (obj.value > 0) {
+            var quantity = obj.value;
+        } else {
+            var quantity = $(obj).parents(".div_cell").find(".span_required").html();
+        }
+        if (quantity > 0) {
+            var price = $(obj).parents(".div_cell").find("#item_price").val();
+            if (price > 0 ) {
+                var cost = quantity * price;
+                $.post("jq_ajax.php", {updateBulkRequiredCost: "", cost: cost, itemId: itemId, itemDate: itemDate});
+                $(obj).parents(".div_cell").find(".cost").html(cost);
+            } else {
+                $.post("jq_ajax.php", {updateBulkRequiredCost: "", cost: 'NULL', itemId: itemId, itemDate: itemDate});
+                $(obj).parents(".div_cell").find(".cost").html("0");
+            }
+        } else {
+            $.post("jq_ajax.php", {updateBulkRequiredCost: "", cost: 'NULL', itemId: itemId, itemDate: itemDate});
+            $(obj).parents(".div_cell").find(".cost").html("0");
+        }
+        showTotalBulkCost();
+    }
 
     (function checkExpectedSales() {
         if($(".print_expected").val() == "") {
@@ -752,6 +799,7 @@ $inventory_invoice = count($result);
                 $(".print_tbody").remove();
                 $("#print").append(data);
                 $("#table_date_span").html($("#date_from").html() + " - " +  $("#date_to").html());
+                $("#table_date_span").css("color", "initial");
                 $(".print_table_date").css("display", "block");
                 $(".div_required").each(function() {
                     if ($(this).find(".span_qc").val() != "") {
@@ -813,6 +861,19 @@ $inventory_invoice = count($result);
 
     }
 
+    function showTotalBulkCost() {
+        var row = $(".table_view")
+                                .children().eq($("#bulk_custom_popup").find("#tbody_index").val())
+                                .children().eq($("#bulk_custom_popup").find("#row_index").val());
+        var totalCost = 0;
+        $("#div_total_custom .cost").each(function() {
+            var cost = $(this).html();
+            totalCost += parseFloat(cost);
+        });
+        totalCost = totalCost == 0 ? "-" : "$ "+totalCost;
+        $("#div_total_custom").next().find("#total_cost").html(totalCost);
+        row.find(".cost").html(totalCost);
+    }
 
     function saveBulkDates() {
         var dateStart = $("#date_from_val").val();
@@ -820,6 +881,59 @@ $inventory_invoice = count($result);
         var dateCreated = $("#session_date").val();
 
         $.post("jq_ajax.php", {saveBulkDates: "", dateCreated: dateCreated, dateStart: dateStart, dateEnd: dateEnd});
+    }
+
+    function checkBulkOrderValues() {
+        if ($("#bulk_expected #date_from").html() == "Enter Date") {
+            checkDateFrom();
+        } else if($("#bulk_expected #date_to").html() == "Enter Date") {
+            checkDateTo();
+        } else {
+            createBulkSales();
+        }
+    }
+
+    function checkDateFrom() {
+        $("#bulk_expected #left").css({"border": "1px solid red"});
+        $("#bulk_expected #center").addClass("blur");
+        $("#bulk_expected #right").addClass("blur");
+        $("#table_date_span").html("***Enter Date From***");
+        $("#table_date_span").css("color", "red");
+        $(".print_table_date").css("display", "none")
+        $("#date_from").trigger("click");
+    }
+
+    function checkDateTo() {
+        $("#bulk_expected #left").css({"border": "1px solid #cecece", "border-top": "none"});
+        $("#bulk_expected #center").css({"border": "1px solid red"});
+        $("#bulk_expected div").removeClass("blur");
+        $("#bulk_expected #right").addClass("blur");
+        $("#table_date_span").html("***Enter Date To***");
+        $("#table_date_span").css("color", "red");
+        $(".print_table_date").css("display", "none");
+        $("#date_to").trigger("click");
+    }
+
+    function checkTotalExpected() {
+        $("#bulk_expected #center").css({"border": "1px solid #cecece", "border-top": "none"});
+        $("#bulk_expected div").removeClass("blur");
+        var emptyField = 0;
+        $("#div_total_expected .row_amount").each(function() {
+            if (!$(this).val()) {
+                emptyField++;
+            }
+        });
+        if (emptyField > 0) {
+            $("#bulk_expected #right").css("border", "1px solid red");
+            $(".print_tbody").remove();
+            $("#table_date_span").html("***Enter Expected Sales***");
+            $("#table_date_span").css("color", "red");
+            $(".print_table_date").css("display", "none");
+            $("#bulk_expected #right").trigger("click");
+        } else{
+            $("#bulk_expected #right").css({"border": "1px solid #cecece", "border-top": "none"});
+            getBulkPreview();
+        }
     }
 
     $(document).ready(function() {
@@ -920,10 +1034,12 @@ $inventory_invoice = count($result);
                 $(this).parents("td").find(".span_qc").css("display", "none");
                 $(this).parents("td").find(".span_qr").css("display", "block");
                 $(this).parents("td").find("#heading").html("calculated value");
+                updateCost($(this).parents("td").find(".span_qr")[0]);
             } else {
                 $(this).parents("td").find(".span_qr").css("display", "none");
                 $(this).parents("td").find(".span_qc").css("display", "block");
                 $(this).parents("td").find("#heading").html("custom value");
+                updateCost($(this).parents("td").find(".span_qc")[0]);
             }
         });
 
