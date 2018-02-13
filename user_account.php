@@ -57,7 +57,7 @@ if (isset($_POST["update_user"])) {
                     <li><a class="entypo-bell" onclick=getSettings(this) >notifications</a></li>
                 </ul>
             </div>
-            <span class="version_dark">v3.6.9</span>
+            <span class="version_dark">v3.7.0</span>
         </div>
         <div class="user_div_container right"></div>
     </div>

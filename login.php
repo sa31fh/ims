@@ -41,6 +41,6 @@ if (isset($_POST["username"])) {
             </form>
         </div>
     </div>
-    <span class="version">v3.6.9</span>
+    <span class="version">v3.7.0</span>
 </body>
 </html>
