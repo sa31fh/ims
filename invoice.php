@@ -111,6 +111,7 @@ $_SESSION["last_activity"] = time();
                     </a>
                     <input type="hidden" id="date_start" value="<?php echo $row["date_start"] ?>">
                     <input type="hidden" id="date_end" value="<?php echo $row["date_end"] ?>">
+                    <input type="hidden" id="qp_date" value="<?php echo $row["qp_date"] ?>">
                 </li>
                 <?php endwhile?>
             </ul>
@@ -235,8 +236,9 @@ $_SESSION["last_activity"] = time();
     function showBulkInvoice(obj) {
         var dateStart = obj.parentNode.children[1].value;
         var dateEnd = obj.parentNode.children[2].value;
+        var qpDate = obj.parentNode.children[3].value;
 
-        $.post("jq_ajax.php", {getBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd}, function(data, status) {
+        $.post("jq_ajax.php", {getBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate}, function(data, status) {
             $(".print_tbody").remove();
             $("#invoice_table").append(data);
             checkRequired();

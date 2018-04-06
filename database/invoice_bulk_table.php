@@ -11,12 +11,12 @@ class InvoiceBulkTable extends DataBaseTable {
         return parent::query($sql);
     }
 
-    public static function track_invoice($date_start, $date_end, $date_created) {
-
-        $sql = "INSERT INTO InvoiceBulk (date_start, date_end, date_created)
-                VALUES ('$date_start', '$date_end', '$date_created')
+    public static function track_invoice($date_start, $date_end, $qp_date,  $date_created) {
+        $sql = "INSERT INTO InvoiceBulk (date_start, date_end, date_created, qp_date)
+                VALUES ('$date_start', '$date_end', '$date_created', '$qp_date')
                 ON DUPLICATE KEY UPDATE
-                date_start = VALUES(date_start), date_end = VALUES(date_end), date_created = VALUES(date_created)";
+                date_start = VALUES(date_start), date_end = VALUES(date_end), date_created = VALUES(date_created),
+                qp_date = VALUES(qp_date)";
 
         return parent::query($sql);
     }

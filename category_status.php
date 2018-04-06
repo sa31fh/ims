@@ -177,12 +177,9 @@ $readonly = $_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script type="text/javascript" src="jq/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="jq/jquery-ui.min.js"></script>
 <script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
-<script
-      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-      crossorigin="anonymous"></script>
 <?php if ($_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"]))): ?>
     <script> $("input:not(#search_bar)").prop("readonly", true); </script>
 <?php endif ?>

@@ -67,6 +67,16 @@ class InventoryTable extends DatabaseTable {
         return parent::query($sql);
     }
 
+    public static function update_expected_stock($quantity, $item_id, $date) {
+        $sql = "INSERT INTO Inventory (item_id, expected_stock, `date`)
+                VALUES ('$item_id', $quantity, '$date')
+                ON DUPLICATE KEY UPDATE
+                item_id = VALUES(item_id), expected_stock = VALUES(expected_stock), `date` = VALUES(`date`)";
+
+        return parent::query($sql);
+
+    }
+
     public static function update_quantity_required($quantity, $item_id, $date) {
         $sql = "INSERT INTO Inventory (item_id, quantity_required, `date`)
                 VALUES ('$item_id', $quantity, '$date')
@@ -140,6 +150,22 @@ class InventoryTable extends DatabaseTable {
         $sql = "SELECT * FROM Inventory
                 WHERE date = '$date'
                 AND quantity IS NOT NULL";
+
+        return parent::query($sql);
+    }
+
+    public static function get_expected_stock($item_id, $date) {
+        $sql = "SELECT expected_stock FROM Inventory
+                WHERE `date` = '$date'
+                AND item_id = $item_id";
+
+        return parent::query($sql);
+    }
+
+    public static function get_quantity_present($date, $item_id) {
+        $sql = "SELECT quantity FROM Inventory
+                WHERE `date` = '$date'
+                AND item_id = $item_id";
 
         return parent::query($sql);
     }

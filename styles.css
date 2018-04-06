@@ -1307,6 +1307,14 @@ input:-moz-read-only::-moz-placeholder{
     text-transform: uppercase;
     padding-bottom: 0;
 }
+.table_view th.qp_heading .date{
+    display: block;
+    font-size: 11px;
+    border: 1px solid #cecece;
+    background: #f4f4f5;
+    margin: auto;
+    width: 60%;
+}
 .table_view td{
     text-align: center;
     color: #444;
@@ -1367,6 +1375,9 @@ td .warning:before{
 }
 .div_tab .tab:before{
     font-size: 18px;
+}
+.div_tab .tab.disabled{
+    pointer-events: none;
 }
 .table_view td .div_tab .tab.selected{
     background: white;
@@ -2221,15 +2232,18 @@ a.invoice_date #right span{
     display: inline-block;
     padding: 5px 0px;
 }
-.div_expected #left, .div_expected #right{
+.div_expected .left, .div_expected .right{
     background: #f4f4f5;
 }
-.div_expected #center{
+.div_expected .center{
     position: relative;
     border-left: none;
     border-right: none;
 }
-.div_expected #center #warning{
+.div_expected .daily_qp_date{
+    border-right: none;
+}
+.div_expected .center #warning{
     position: absolute;
     top: 100%;
     font-size: 12px;

@@ -69,7 +69,7 @@ class ItemTable extends DatabaseTable {
     public static function get_items($date) {
         $sql = "SELECT Item.id, name, unit, BaseQuantity.quantity as base_quantity,
                 Inventory.quantity AS quantity_stock, Inventory.quantity_delivered, Inventory.quantity_received,
-                rounding_option, rounding_factor FROM Item
+                rounding_option, rounding_factor, price FROM Item
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 LEFT OUTER JOIN (SELECT item_id, quantity, quantity_delivered, quantity_received FROM Inventory
                                 WHERE date = '$date') AS Inventory ON Inventory.item_id = Item.id

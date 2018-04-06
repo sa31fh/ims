@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 11, 2018 at 12:08 PM
+-- Generation Time: Apr 06, 2018 at 09:32 PM
 -- Server version: 5.6.17
 -- PHP Version: 5.5.12
 
@@ -41,12 +41,13 @@ CREATE TABLE IF NOT EXISTS `basequantity` (
 
 CREATE TABLE IF NOT EXISTS `bulkorderdata` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_start` date NOT NULL,
-  `date_end` date NOT NULL,
-  `date_created` date NOT NULL,
+  `date_start` date DEFAULT NULL,
+  `date_end` date DEFAULT NULL,
+  `date_created` date NOT NULL DEFAULT '0000-00-00',
+  `qp_date` date DEFAULT NULL,
   PRIMARY KEY (`date_created`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=14 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
 
 -- --------------------------------------------------------
 
@@ -225,6 +226,19 @@ CREATE TABLE IF NOT EXISTS `conversationstatus` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `dailyorderdata`
+--
+
+CREATE TABLE IF NOT EXISTS `dailyorderdata` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_created` date NOT NULL,
+  `qp_date` date NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=24 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `inventory`
 --
 
@@ -233,6 +247,7 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `item_id` int(11) NOT NULL,
   `quantity` decimal(11,2) DEFAULT NULL,
   `expected_quantity` decimal(11,2) DEFAULT NULL,
+  `expected_stock` decimal(11,2) DEFAULT NULL,
   `quantity_required` decimal(11,2) DEFAULT NULL,
   `quantity_custom` decimal(11,2) DEFAULT NULL,
   `quantity_delivered` decimal(11,2) DEFAULT NULL,
@@ -257,7 +272,7 @@ CREATE TABLE IF NOT EXISTS `invoice` (
   `status` int(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`date`),
   KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=19 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20 ;
 
 -- --------------------------------------------------------
 
@@ -271,10 +286,11 @@ CREATE TABLE IF NOT EXISTS `invoicebulk` (
   `date_end` date NOT NULL,
   `status` int(11) NOT NULL,
   `date_created` date NOT NULL,
+  `qp_date` date DEFAULT NULL,
   PRIMARY KEY (`date_start`,`date_end`),
   UNIQUE KEY `id` (`id`),
   UNIQUE KEY `id_2` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 -- --------------------------------------------------------
 

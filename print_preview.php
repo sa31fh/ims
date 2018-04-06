@@ -6,6 +6,7 @@ require_once "database/invoice_table.php";
 require_once "database/sales_table.php";
 require_once "database/catering_order_table.php";
 require_once "database/bulk_order_data_table.php";
+require_once "database/daily_order_data_table.php";
 require_once "mpdf/vendor/autoload.php";
 
 if (!isset($_SESSION["username"])) {
@@ -118,21 +119,38 @@ $inventory_invoice = count($result);
 
         <?php if ($_SESSION["userrole"] == "admin"): ?>
             <div class="div_expected" id="daily_expected">
-                <div id="left">
+                 <?php
+                    $result = DailyOrderDataTable::get_dates($_SESSION["date"]);
+                    if (mysqli_num_rows($result) > 0) {
+                        $dates = $result->fetch_assoc();
+                        $qp_date = date_create($dates["qp_date"]);
+                        $qp_date_text = date_format($qp_date, "j M Y");
+                    } else{
+                        $qp_date =  date_create($_SESSION["date"]);
+                        $qp_date_text = date_format($qp_date, "j M Y");
+                    }
+                ?>
+                <div class="daily_qp_date">
+                    <span id="heading">Quantity Present Date</span>
+                    <span ><?php echo date_format($qp_date, "j M Y") ?></span>
+                    <input type="hidden" id="daily_qp_date" value="<?php echo date_format($qp_date, "Y-m-d") ?>">
+                    <div class="div_cal"></div>
+                </div>
+                <div class="left">
                     <span id="heading">Todays sales</span>
                     <span id="amount">
                     <?php $todays_sales = SalesTable::get_actual_sale($_SESSION["date"]);
                     echo is_null($todays_sales) ? "-" :  "$ ".$todays_sales;?>
                     </span>
                 </div>
-                <div id="center">
+                <div class="center daily_expected_sales">
                     <span id="heading">Expected Sales</span>
                     <form action="print_preview.php" method="post" id="expected_form">
                         <span id="icon">$</span>
                         <input class="print_expected" type="number" name="expected_sales" value="<?php echo SalesTable::get_expected_sale($_SESSION['date']) ?>" onchange=updateExpectedSales(this)>
                     </form>
                 </div>
-                <div id="right">
+                <div class="right">
                     <?php $date =  date_sub(date_create($_SESSION["date"]), date_interval_create_from_date_string("6 days"));?>
                     <span id="heading"><?php echo "last ".date_format($date, "l")."s sales" ?></span>
                     <span id="amount">
@@ -151,26 +169,34 @@ $inventory_invoice = count($result);
                     $date_to = date_create($bulk_dates["date_end"]);
                     $date_from_text = date_format($date_from, "j M Y");
                     $date_to_text = date_format($date_to, "j M Y");
+                    $qp_date = date_create($bulk_dates["qp_date"]);
                 } else{
                     $date_from =  date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"));
                     $date_to =  date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("3 day"));
+                    $qp_date = $date_from;
                     $date_from_text = "Enter Date";
                     $date_to_text = "Enter Date";
                 }
                 ?>
-                <div id="left">
+                <div class="center bulk_qp_date">
+                    <span id="heading">Quantity Present Date</span>
+                    <span ><?php echo date_format($qp_date, "j M Y") ?></span>
+                    <input type="hidden" id="bulk_qp_date" value="<?php echo date_format($qp_date, "Y-m-d") ?>">
+                    <div class="div_cal"></div>
+                </div>
+                <div class="left">
                     <span id="heading">Date From</span>
                     <span id="date_from"><?php echo $date_from_text ?></span>
                     <input type="hidden" id="date_from_val" value="<?php echo date_format($date_from, "Y-m-d") ?>">
                     <div class="div_cal"></div>
                 </div>
-                <div id="center">
+                <div class="center" id="bulk_expected_view">
                     <span id="heading">Date To</span>
                     <span id="date_to"><?php echo $date_to_text ?></span>
                     <input type="hidden" id="date_to_val" value="<?php echo date_format($date_to, "Y-m-d") ?>">
                     <div class="div_cal"></div>
                 </div>
-                <div id="right">
+                <div class="right">
                     <span id="heading">Expected Sales</span>
                     <span id="icon">$</span>
                     <span id="total_expected">-</span>
@@ -300,11 +326,8 @@ $inventory_invoice = count($result);
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
-<script
-      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-      crossorigin="anonymous"></script>
+<script type="text/javascript" src="jq/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="jq/jquery-ui.min.js"></script>
 <?php if ($_SESSION["date"] <= date('Y-m-d', strtotime("-".$_SESSION["history_limit"]))): ?>
     <script> $("input").prop("readonly", true); </script>
 <?php endif ?>
@@ -312,8 +335,9 @@ $inventory_invoice = count($result);
     function getTab(tabName) {
         var timeSlotName = tabName.innerHTML;
         var date = document.getElementById("session_date").value;
+        var qpDate = $("#daily_qp_date").val()
         if (timeSlotName == "Full Day") {
-            $.post("jq_ajax.php", {getPrintPreview: "", date: date}, function(data, status) {
+            $.post("jq_ajax.php", {getPrintPreview: "", date: date, qpDate: qpDate}, function(data, status) {
                 $(".print_tbody").remove();
                 $("#print").append(data);
                 $("#table_date_span").html($("#formatted_date").val());
@@ -455,8 +479,9 @@ $inventory_invoice = count($result);
             case 'bulk_order':
                 var dateStart = $("#date_from_val").val();
                 var dateEnd = $("#date_to_val").val();
+                var qpDate = $("#bulk_qp_date").val();
                 if ($(obj).prop("checked")) {
-                    $.post("jq_ajax.php", {trackBulkInvoice: "", dateCreated: date, dateStart: dateStart, dateEnd: dateEnd});
+                    $.post("jq_ajax.php", {trackBulkInvoice: "", dateCreated: date, dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate});
                     $("#bulk_invoice").val(1);
                 } else {
                     $.post("jq_ajax.php", {removeBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd});
@@ -611,6 +636,7 @@ $inventory_invoice = count($result);
             table.innerHTML +=  '<tr id="column_data" class="row" colspan="5"><td class="order_note" colspan="7">'+note+'</td>'
         }
         callBack(table);
+        console.log(table);
     }
 
     function checkRequired() {
@@ -713,16 +739,88 @@ $inventory_invoice = count($result);
 
     (function checkExpectedSales() {
         if($(".print_expected").val() == "") {
-            $("#center").css("border", "1px solid red");
+            $(".daily_expected_sales").css("border", "1px solid red");
             var div = document.createElement("div");
             div.setAttribute("id", "warning");
             div.innerHTML = "enter expected sales";
-            var parent = document.getElementById("center");
-            parent.appendChild(div);
+            $(".daily_expected_sales").append(div);
         }
     })();
 
+    function calculateCustomQp(qpDate) {
+        var expectedSales = $(".print_expected").val();
+        expectedSales = expectedSales == "" ? 'NULL' : expectedSales;
+        $.post("jq_ajax.php", {calcCustomQuantityPresent: "", expectedSales: expectedSales, qpDate: qpDate}, function(status){
+            if (status) {
+                getTab($(".div_child .tab_li span:first")[0]);
+            }
+        });
+    }
+
+    function calculateBulkCustomQp(qpDate) {
+        var dateEnd = $("#date_to_val").val();
+        $.post("jq_ajax.php", {calcBulkCustomQuantityPresent: "", dateEnd: dateEnd, qpDate: qpDate}, function(status){
+            if (status) {
+                getBulkPreview();
+            }
+        });
+    }
+
+    function saveQpDates(qpDate) {
+        var dateCreated = $("#session_date").val();
+
+        $.post("jq_ajax.php", {saveQpDates: "", dateCreated: dateCreated, qpDate: qpDate});
+    }
+
+    function saveBulkQpDates(qpDate) {
+        var dateCreated = $("#session_date").val();
+
+        $.post("jq_ajax.php", {saveBulkQpDates: "", dateCreated: dateCreated, qpDate: qpDate});
+    }
+
     var monthArray = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+
+    function createQpDatePicker(obj) {
+        var defaultDate = obj.find("input").val();
+        $(".ui-datepicker").css("display", "none");
+        obj.find(".ui-datepicker").css("display", "block");
+        obj.find(".div_cal").datepicker({
+                dateFormat: "yy-mm-dd",
+                defaultDate: defaultDate,
+                dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                prevText: "previous",
+                onSelect: function(dateText) {
+                    $(".ui-datepicker").css("display", "none");
+                    var dateObj = new Date(dateText.replace(/-/g, '\/'));
+                    var dateFormat = dateObj.getDate()+" "+monthArray[dateObj.getMonth()]+" "+dateObj.getFullYear();
+                    obj.find("#heading").next().html(dateFormat);
+                    obj.find("input").val(dateText);
+                    calculateCustomQp(dateText);
+                    saveQpDates(dateText);
+                }
+        });
+    }
+
+    function createBulkQpDatePicker(obj) {
+        var defaultDate = obj.find("input").val();
+        $(".ui-datepicker").css("display", "none");
+        obj.find(".ui-datepicker").css("display", "block");
+        obj.find(".div_cal").datepicker({
+                dateFormat: "yy-mm-dd",
+                defaultDate: defaultDate,
+                dayNamesMin: [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ],
+                prevText: "previous",
+                onSelect: function(dateText) {
+                    $(".ui-datepicker").css("display", "none");
+                    var dateObj = new Date(dateText.replace(/-/g, '\/'));
+                    var dateFormat = dateObj.getDate()+" "+monthArray[dateObj.getMonth()]+" "+dateObj.getFullYear();
+                    obj.find("#heading").next().html(dateFormat);
+                    obj.find("input").val(dateText);
+                    checkBulkOrderValues();
+                    saveBulkQpDates(dateText);
+                }
+        });
+    }
 
     function createDatePicker(obj) {
         var defaultDate = obj.find("input").val();
@@ -747,7 +845,7 @@ $inventory_invoice = count($result);
 
     function createBulkSales() {
         $("#div_total_expected").html("");
-        var dateStart = $("#date_from_val").val();
+        var dateStart = $("#bulk_qp_date").val();
         var dateEnd = $("#date_to_val").val();
         if (dateStart != "" && dateEnd != "") {
             $.post("jq_ajax.php", {getBulkSales: "", dateStart: dateStart, dateEnd: dateEnd}, function(data) {
@@ -775,7 +873,7 @@ $inventory_invoice = count($result);
         });
         var totalExpected = totalSales == 0 ? "-" : totalSales;
         var display =  totalExpected == "-" ?  "none" : "inline-block";
-        $("#bulk_expected #right #icon").css("display", display);
+        $("#bulk_expected .right #icon").css("display", display);
         $("#div_total_expected").next().find("#total_sales").html(totalExpected);
         $("#bulk_expected").find("#total_expected").html(totalExpected);
         checkTotalExpected();
@@ -791,11 +889,12 @@ $inventory_invoice = count($result);
     }
 
     function getBulkPreview() {
-        var dateFrom = $("#date_from_val").val();
+        var dateFrom = $("#bulk_qp_date").val();
         var dateTo = $("#date_to_val").val();
+        var qpDate = $("#bulk_qp_date").val();
         var totalExpected = $("#total_expected").html();
         if (dateFrom != "" && dateTo != "" && totalExpected != "-") {
-            $.post("jq_ajax.php", {getBulkPrintPreview: "", dateStart: dateFrom, dateEnd: dateTo}, function(data) {
+            $.post("jq_ajax.php", {getBulkPrintPreview: "", dateStart: dateFrom, dateEnd: dateTo, qpDate: qpDate}, function(data) {
                 $(".print_tbody").remove();
                 $("#print").append(data);
                 $("#table_date_span").html($("#date_from").html() + " - " +  $("#date_to").html());
@@ -823,7 +922,7 @@ $inventory_invoice = count($result);
 
     function getBulkCustom(obj) {
         var itemId = $(obj).parents("tr").find("#item_id").val();
-        var dateStart = $("#date_from_val").val();
+        var dateStart = $("#bulk_qp_date").val();
         var dateEnd = $("#date_to_val").val();
         $.post("jq_ajax.php", {getBulkCustom: "", itemId: itemId, dateStart: dateStart, dateEnd: dateEnd}, function(data) {
             $("#div_total_custom").html(data);
@@ -879,8 +978,9 @@ $inventory_invoice = count($result);
         var dateStart = $("#date_from_val").val();
         var dateEnd = $("#date_to_val").val();
         var dateCreated = $("#session_date").val();
+        var qpDate = $("#bulk_qp_date").val();
 
-        $.post("jq_ajax.php", {saveBulkDates: "", dateCreated: dateCreated, dateStart: dateStart, dateEnd: dateEnd});
+        $.post("jq_ajax.php", {saveBulkDates: "", dateCreated: dateCreated, dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate});
     }
 
     function checkBulkOrderValues() {
@@ -894,9 +994,9 @@ $inventory_invoice = count($result);
     }
 
     function checkDateFrom() {
-        $("#bulk_expected #left").css({"border": "1px solid red"});
-        $("#bulk_expected #center").addClass("blur");
-        $("#bulk_expected #right").addClass("blur");
+        $("#bulk_expected .left").css({"border": "1px solid red"});
+        $("#bulk_expected .center").addClass("blur");
+        $("#bulk_expected .right").addClass("blur");
         $("#table_date_span").html("***Enter Date From***");
         $("#table_date_span").css("color", "red");
         $(".print_table_date").css("display", "none")
@@ -904,10 +1004,11 @@ $inventory_invoice = count($result);
     }
 
     function checkDateTo() {
-        $("#bulk_expected #left").css({"border": "1px solid #cecece", "border-top": "none"});
-        $("#bulk_expected #center").css({"border": "1px solid red"});
+        $("#bulk_expected .left").css({"border": "1px solid #cecece", "border-top": "none"});
+        $("#bulk_expected #bulk_expected_view").css({"border": "1px solid red"});
         $("#bulk_expected div").removeClass("blur");
-        $("#bulk_expected #right").addClass("blur");
+        $("#bulk_expected .right").addClass("blur");
+        $("#bulk_expected .bulk_qp_date").addClass("blur");
         $("#table_date_span").html("***Enter Date To***");
         $("#table_date_span").css("color", "red");
         $(".print_table_date").css("display", "none");
@@ -915,7 +1016,7 @@ $inventory_invoice = count($result);
     }
 
     function checkTotalExpected() {
-        $("#bulk_expected #center").css({"border": "1px solid #cecece", "border-top": "none"});
+        $("#bulk_expected .center").css({"border": "1px solid #cecece", "border-top": "none"});
         $("#bulk_expected div").removeClass("blur");
         var emptyField = 0;
         $("#div_total_expected .row_amount").each(function() {
@@ -924,15 +1025,15 @@ $inventory_invoice = count($result);
             }
         });
         if (emptyField > 0) {
-            $("#bulk_expected #right").css("border", "1px solid red");
+            $("#bulk_expected .right").css("border", "1px solid red");
             $(".print_tbody").remove();
             $("#table_date_span").html("***Enter Expected Sales***");
             $("#table_date_span").css("color", "red");
             $(".print_table_date").css("display", "none");
-            $("#bulk_expected #right").trigger("click");
+            $("#bulk_expected .right").trigger("click");
         } else{
-            $("#bulk_expected #right").css({"border": "1px solid #cecece", "border-top": "none"});
-            getBulkPreview();
+            $("#bulk_expected .right").css({"border": "1px solid #cecece", "border-top": "none"});
+            calculateBulkCustomQp($("#bulk_qp_date").val());
         }
     }
 
@@ -960,7 +1061,7 @@ $inventory_invoice = count($result);
             $("#print_all").parent().css("display", "flex");
             $("#div_table").css("margin-top", "53px");
 
-            if ($("#catering_option #right").html() > 0) {
+            if ($("#catering_option .right").html() > 0) {
                 $("#catering_tabs").css("display", "block");
                 $("#table_date_heading").html("delivery date");
                 $("#catering_tabs .tab_li:first").each(function() {
@@ -1084,7 +1185,16 @@ $inventory_invoice = count($result);
             }
         });
 
-        $("#bulk_expected #right").click(function() {
+        $(".daily_qp_date").click(function() {
+            createQpDatePicker($(this));
+        });
+
+        $(".bulk_qp_date").click(function() {
+            createBulkQpDatePicker($(this));
+             $(this).find(".div_cal").datepicker("option", "maxDate", $("#date_from_val").val());
+        });
+
+        $("#bulk_expected .right").click(function() {
             $("#expected_popup").css("display", "block");
         });
 
