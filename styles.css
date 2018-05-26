@@ -307,6 +307,7 @@ input:-moz-read-only::-moz-placeholder{
     z-index: 5;
 }
 #div_print_table{
+    flex: 1;
     padding: 0px;
     margin: 0;
     overflow: auto;
@@ -565,6 +566,92 @@ input:-moz-read-only::-moz-placeholder{
     min-width: 60px;
     max-width: 180px;
 }
+.invoice_timeline{
+    display: flex;
+    border-top: 1px solid #cecece;
+    background: #f9f9f9;
+}
+.invoice_timeline .status_view{
+    display: flex;
+    flex: 1;
+}
+.status_view .status{
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 5px;
+    flex: 1;
+    font-size: 12px;
+    color: #8e8e8e;
+    text-transform: uppercase;
+}
+.status_view .status .next_bar:after{
+    content: "";
+    display: block;
+    position: absolute;
+    top: 63%;
+    left: 51.5%;
+    height: 1px;
+    width: 97.1%;
+    border-top: 1.5px dotted #8e8e8e;
+}
+.status_view .status .icon:before{
+    font-family: "FontAwesome";
+    font-size: 14px;
+    content: "\f10c";
+}
+.status_view .status.selected{
+    color: #79bc4d;
+    font-weight: bold;
+}
+.status_view .status.selected .icon:before{
+    content: "\f192";
+}
+.status_view .status.completed{
+    color: #79bc4d;
+}
+.status_view .status.completed .icon:before{
+    content: "\f058";
+}
+.status_view .status.completed .next_bar:after{
+    background: #79bc4d;
+    border: none;
+}
+.invoice_timeline .status_option{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 15px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: white;
+}
+.invoice_timeline .status_option .text{
+    font-size: 12px;
+    word-wrap: break-word;
+    width: 71px;
+    text-align: center;
+}
+.invoice_timeline .status_option .icon:before{
+    font-size: 18px;
+}
+.invoice_timeline .status_option.right .icon{
+    margin-left: 5px;
+}
+.invoice_timeline .status_option.left{
+    border-right: 1px solid #cecece;
+    background: #e05d33;
+}
+.invoice_timeline .status_option.right{
+    background: #79bc4d;
+    border-left: 1px solid #cecece;
+}
+.invoice_timeline .status_option.option_disabled{
+    visibility: hidden;
+    pointer-events: none;
+}
 #div_switch{
     float: left;
     padding: 6px 0px;
@@ -757,6 +844,7 @@ input:-moz-read-only::-moz-placeholder{
     transition: border 0.25s;
     text-transform: uppercase;
     color: #555;
+    cursor: pointer;
 }
 .button_flat:hover{
     color: #79bc4d;
@@ -1061,6 +1149,19 @@ input:-moz-read-only::-moz-placeholder{
     color: #555;
     font-family: "Open Sans";
 }
+#div_invoice_send.invoice_send{
+    background: #79bc4d;
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+#div_invoice_send.invoice_view{
+    background: white;
+    border: 1px solid #79bc4d;
+    color: #79bc4d;
+    text-transform: uppercase;
+    cursor: pointer;
+}
 .tr{
     display: table-row;
 }
@@ -1154,10 +1255,15 @@ input:-moz-read-only::-moz-placeholder{
     font-family: "Open Sans";
 }
 .toolbar_print{
-    border-bottom: 1px solid #cecece;
+    border-top: 1px solid #cecece;
 }
 .option_bar{
     border-top: 1px solid #cecece;
+}
+#pp_toolbar{
+    align-items: normal;
+    border: none;
+    border-bottom: 1px solid #cecece;
 }
 #pp_toolbar .toolbar_div{
     flex: 1;
@@ -1940,7 +2046,7 @@ input:focus{
 }
 #div_table{
     flex: 1;
-    margin-top: 35px;
+    margin-top: 30px;
 }
 #toolbar_toggle{
     margin: 5px;
@@ -2521,7 +2627,7 @@ a.invoice_date #right span{
 .div_table .toolbar_print{
     border: 0;
     border-top: 1px solid #cecece;
-}
+`}
 .div_table .option{
     padding: 5px;
 }

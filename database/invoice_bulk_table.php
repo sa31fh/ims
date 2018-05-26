@@ -32,6 +32,21 @@ class InvoiceBulkTable extends DataBaseTable {
         }
     }
 
+    public static function get_status($date_created) {
+        $sql = "SELECT * FROM InvoiceBulk
+                WHERE  date_created = '$date_created'";
+
+        return parent::query($sql);
+    }
+
+    public static function update_invoice_status($date, $status) {
+        $sql = "UPDATE InvoiceBulk
+                SET status = $status
+                WHERE date_created = '$date'";
+
+        return parent::query($sql);
+    }
+
     public static function remove_invoice($date_start, $date_end) {
         $sql = "DELETE FROM InvoiceBulk
                 WHERE date_start = '$date_start'

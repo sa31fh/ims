@@ -28,6 +28,14 @@ class InvoiceTable extends DataBaseTable {
         return parent::query($sql);
     }
 
+    public static function update_invoice_status($date, $status) {
+        $sql = "UPDATE Invoice
+                SET status = $status
+                WHERE `date` = '$date'";
+
+        return parent::query($sql);
+    }
+
     public static function remove_invoice($date) {
         $sql = "DELETE FROM Invoice
                 WHERE `date` = '$date'";

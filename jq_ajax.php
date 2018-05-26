@@ -439,7 +439,22 @@ if(isset($_POST["getPrintPreviewTimeslots"])) {
 
 if (isset($_POST["getTrackedInvoice"])) {
     $result = CategoryTable::get_print_preview($_POST["date"]);
+    $invoice_status = InvoiceTable::get_tracked($_POST["date"])->fetch_assoc()["status"];
     $current_category = null;
+    switch ($invoice_status) {
+        case "1":
+            $invoice_lock = "readonly";
+            break;
+        case "2":
+            $invoice_lock = null;
+            break;
+        case "3":
+            $invoice_lock = "readonly";
+            break;
+        default:
+            $invoice_lock = null;
+            break;
+    }
     while ($row = $result->fetch_assoc()) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
@@ -489,10 +504,10 @@ if (isset($_POST["getTrackedInvoice"])) {
                     <td>'.$row["unit"].'</td>
                     <td id="quantity_required">'.$quantity_required.'</td>
                     <td id="quantity_delivered" class="'.$delivered_warning.'">'.$quantity_delivered.'</td>
-                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
+                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$invoice_lock.' '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$notes.'" '.$readonly.' >'.$notes.'</textarea>
+                        <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$notes.'" '.$invoice_lock.'  '.$readonly.' >'.$notes.'</textarea>
                     </td>
                     <input type="hidden" id="item_id" value="'.$row["item_id"].'">
                 </tr>';
@@ -1014,6 +1029,22 @@ if (isset($_POST["setUserEmail"])) {
 
 if (isset($_POST["trackInvoice"])) {
     echo InvoiceTable::track_invoice($_POST["date"]);
+}
+
+if (isset($_POST["getInvoiceStatus"])) {
+    echo InvoiceTable::get_tracked($_POST["date"]) -> fetch_assoc()["status"];
+}
+
+if (isset($_POST["getBulkInvoiceStatus"])) {
+    echo InvoiceBulkTable::get_status($_POST["dateCreated"]) -> fetch_assoc()["status"];
+}
+
+if (isset($_POST["updateInvoiceStatus"])) {
+    echo InvoiceTable::update_invoice_status($_POST["date"], $_POST["status"]);
+}
+
+if (isset($_POST["updateBulkInvoiceStatus"])) {
+    echo InvoiceBulkTable::update_invoice_status($_POST["date"], $_POST["status"]);
 }
 
 if (isset($_POST["updateQuantityDelivered"])) {

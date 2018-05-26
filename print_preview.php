@@ -106,14 +106,8 @@ $inventory_invoice = count($result);
                 <div class="toolbar_div">
                     <a id="print_all" class="fa-print option" onclick=printAll()>Print All</a>
                 </div>
-                <div class="toolbar_div" id="invoice_div">
-                    <?php $result = InvoiceTable::get_tracked($_SESSION["date"])->fetch_assoc();?>
-                    <span id="track_invoice" class="fa-file-text-o">Invoice</span>
-                    <label class="switch" id="toolbar_toggle">
-                        <input id="invoice_checkbox" class="switch-input" type="checkbox" <?php echo count($result) < 1 ? "" : "" ?> onclick=trackInvoice(this) />
-                        <span class="switch-label" data-on="Tracking" data-off="off"></span>
-                        <span class="switch-handle"></span>
-                    </label>
+                <div class="toolbar_div invoice_send" id="div_invoice_send"onclick="trackInvoice()">
+                    Send Invoice
                 </div>
             </div>
 
@@ -159,6 +153,7 @@ $inventory_invoice = count($result);
                     echo is_null($sales) ? "-" : "$ ".$sales;?>
                     </span>
                 </div>
+
             </div>
             <div class="div_expected" id="bulk_expected">
                 <?php
@@ -309,7 +304,12 @@ $inventory_invoice = count($result);
         </div>
     </div>
 
-    <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
+    <form action="invoice.php" method="post" id="invoice_form">
+        <input type="hidden" name="created_date" id="session_date" value="<?php echo $_SESSION["date"] ?>">
+    </form>
+    <form action="invoice.php" method="post" id="bulk_invoice_form">
+        <input type="hidden" name="bulk_created_date" value="<?php echo $_SESSION["date"] ?>">
+    </form>
     <input type="hidden" id="formatted_date" value="<?php echo date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'D, jS M Y'); ?>">
 
     <form action="compose_messages.php" method="post" id="print_form" target="popup_frame">
@@ -468,24 +468,30 @@ $inventory_invoice = count($result);
         var date = document.getElementById("session_date").value;
         switch ($(".print_preview .active").parent().attr("id")) {
             case "daily_order":
-                if ($(obj).prop("checked")) {
-                    $.post("jq_ajax.php", {trackInvoice: "", date: date});
-                    $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(1);
+                if ($(".selected").parent().find("#inventory_invoice").val() > 0) {
+                    $("#invoice_form").submit();
                 } else {
-                    $.post("jq_ajax.php", {removeInvoice: "", date: date});
-                    $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(0);
+                    $.post("jq_ajax.php", {trackInvoice: "", date: date});
+                    $("#div_invoice_send")
+                        .removeClass("invoice_send")
+                        .addClass("invoice_view")
+                        .html("View Invoice");
+                    $(".tab_ul").find(".selected").parent().find("#inventory_invoice").val(1);
                 }
                 break;
             case 'bulk_order':
                 var dateStart = $("#date_from_val").val();
                 var dateEnd = $("#date_to_val").val();
                 var qpDate = $("#bulk_qp_date").val();
-                if ($(obj).prop("checked")) {
+                if ($("#bulk_invoice").val() > 0) {
+                    $("#bulk_invoice_form").submit();
+                } else {
                     $.post("jq_ajax.php", {trackBulkInvoice: "", dateCreated: date, dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate});
                     $("#bulk_invoice").val(1);
-                } else {
-                    $.post("jq_ajax.php", {removeBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd});
-                    $("#bulk_invoice").val(0);
+                    $("#div_invoice_send")
+                        .removeClass("invoice_send")
+                        .addClass("invoice_view")
+                        .html("View Invoice");
                 }
                 break;
             case "catering_order":
@@ -505,19 +511,29 @@ $inventory_invoice = count($result);
         switch ($(".print_preview .active").parent().attr("id")) {
             case "daily_order":
                 if ($(".selected").parent().find("#inventory_invoice").val() > 0) {
-                    $("#invoice_checkbox").prop("checked", true);
+                    $("#div_invoice_send")
+                        .removeClass("invoice_send")
+                        .addClass("invoice_view")
+                        .html("View Invoice");
                 } else {
-                    $("#invoice_checkbox").prop("checked", false);
-                }
+                    $("#div_invoice_send")
+                        .removeClass("invoice_view")
+                        .addClass("invoice_send")
+                        .html("Send Invoice");                }
                 break;
             case "bulk_order":
                 if ($("#bulk_invoice").val() > 0) {
-                    $("#invoice_checkbox").prop("checked", true);
+                    $("#div_invoice_send")
+                        .removeClass("invoice_send")
+                        .addClass("invoice_view")
+                        .html("View Invoice");
                 } else {
-                    $("#invoice_checkbox").prop("checked", false);
+                    $("#div_invoice_send")
+                        .removeClass("invoice_view")
+                        .addClass("invoice_send")
+                        .html("Send Invoice");
                 }
                 break;
-
             case "catering_order":
                 if ($(".selected").find("#order_invoice").val() != "") {
                     $("#invoice_checkbox").prop("checked", true);

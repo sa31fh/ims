@@ -27,6 +27,16 @@ if (isset($_POST["table_data"])) {
     $mpdf->WriteHtml($_POST["table_data"], 2);
     $mpdf->Output($_POST["table_name"]." - ".$_POST["table_date"].".pdf", "D");
 }
+if (isset($_POST["created_date"])) {
+    $invoice_date = $_POST["created_date"];
+} else {
+    $invoice_date = NULL;
+}
+if (isset($_POST["bulk_created_date"])) {
+    $bulk_invoice_date = $_POST["bulk_created_date"];
+} else {
+    $bulk_invoice_date = NULL;
+}
 $_SESSION["last_activity"] = time();
 ?>
 
@@ -78,7 +88,7 @@ $_SESSION["last_activity"] = time();
                         <input type="hidden" id="selected_date" value="<?php echo date_format($date, "D, jS M Y") ?>">
                         <input type="hidden" id="created_date" value="<?php echo date_format(date_create($row["date"]), "jS M Y") ?>">
                     </a>
-                    <input type="hidden" value="<?php echo $row["date"] ?>">
+                    <input type="hidden" id="invoice_created_date" value="<?php echo $row["date"] ?>">
                 </li>
                 <?php endwhile?>
             </ul>
@@ -112,6 +122,7 @@ $_SESSION["last_activity"] = time();
                     <input type="hidden" id="date_start" value="<?php echo $row["date_start"] ?>">
                     <input type="hidden" id="date_end" value="<?php echo $row["date_end"] ?>">
                     <input type="hidden" id="qp_date" value="<?php echo $row["qp_date"] ?>">
+                    <input type="hidden" id="invoice_created_date" value="<?php echo $row["date_created"] ?>">
                 </li>
                 <?php endwhile?>
             </ul>
@@ -188,6 +199,37 @@ $_SESSION["last_activity"] = time();
                     </tr>
                 </table>
             </div>
+
+            <div class="invoice_timeline">
+                <div class="status_option left option_disabled">
+                    <span class="fa-chevron-circle-left icon"></span>
+                    <span class="text">Verify Delivery</span>
+                </div>
+                <div class="status_view">
+                    <div class="status" data-status="1">
+                        <span class="text">waiting for delivery</span>
+                        <div class="div_icon next_bar">
+                            <span class="icon"></span>
+                        </div>
+                    </div>
+                    <div class="status" data-status="2">
+                        <span class="text">verify delivery</span>
+                        <div class="div_icon next_bar">
+                            <span class="icon"></span>
+                        </div>
+                    </div>
+                    <div class="status" data-status="3">
+                        <span class="text">completed</span>
+                        <div class="div_icon">
+                            <span class="icon"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="status_option right option_disabled">
+                    <span class="text">Completed</span>
+                    <span class="icon fa-chevron-circle-right"></span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -213,12 +255,14 @@ $_SESSION["last_activity"] = time();
         <input type="hidden" id="table_name" name="table_name">
     </form>
 
+    <input type="hidden" id="invoice_view" value="<?php echo $invoice_date ?>">
+    <input type="hidden" id="bulk_invoice_view" value="<?php echo $bulk_invoice_date ?>">
     <?php $page = "invoice";
-    include_once "new_nav.php" ?>
+    include_once "new_nav.php";?>
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script type="text/javascript" src="jq/jquery-3.2.1.min.js"></script>
 <script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script>
 
@@ -228,6 +272,7 @@ $_SESSION["last_activity"] = time();
         $.post("jq_ajax.php", {getTrackedInvoice: "", date: date}, function(data, status) {
             $(".print_tbody").remove();
             $("#invoice_table").append(data);
+            updateTimeLine();
             checkRequired();
             totalCost();
         });
@@ -241,6 +286,7 @@ $_SESSION["last_activity"] = time();
         $.post("jq_ajax.php", {getBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate}, function(data, status) {
             $(".print_tbody").remove();
             $("#invoice_table").append(data);
+            updateTimeLine();
             checkRequired();
             totalCost();
         });
@@ -254,6 +300,89 @@ $_SESSION["last_activity"] = time();
             $("#invoice_table").append(data);
             checkRequired();
             totalCost();
+        });
+    }
+
+    function updateTimeLine() {
+        switch ($(".option.selected").find(".icon_small_text").html()) {
+            case 'Daily Order':
+                var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+                $.post("jq_ajax.php", {getInvoiceStatus: "", date: date}, function(data) {
+                    changeStatus(data);
+                });
+                break;
+            case 'Bulk Order':
+                var date = $("#bulk_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+                $.post("jq_ajax.php", {getBulkInvoiceStatus: "", dateCreated: date}, function(data) {
+                    changeStatus(data);
+                });
+                break;
+        }
+        function changeStatus(status) {
+            $(".invoice_timeline").find(".status").each(function() {
+                $(this).removeClass("selected").removeClass("completed");
+                if ($(this).attr("data-status") < status) {
+                    $(this).addClass("completed");
+                } else if($(this).attr("data-status") == status) {
+                    if ($(this).attr("data-status") == 3) {
+                        $(this).addClass("selected");
+                        $(this).addClass("completed");
+                    } else {
+                        $(this).addClass("selected");
+                    }
+                }
+            });
+            $(".invoice_timeline").find(".status_option").removeClass("option_disabled");
+            switch ($(".invoice_timeline").find(".status.selected").attr("data-status")) {
+                case "1":
+                    $(".invoice_timeline").find(".status_option").addClass("option_disabled");
+                    break;
+                case "2":
+                    $(".invoice_timeline").find(".status_option.left").addClass("option_disabled");
+                    $(".invoice_timeline").find(".status_option.right").removeClass("option_disabled");
+                    break;
+                case "3":
+                    $(".invoice_timeline").find(".status_option.right").addClass("option_disabled");
+                    $(".invoice_timeline").find(".status_option.left").removeClass("option_disabled");
+                    break;
+            }
+        }
+
+    }
+
+    function updateInvoiceStatus() {
+        var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+        var status = 3;
+
+        $.post("jq_ajax.php", {updateInvoiceStatus: "", date: date, status: status}, function() {
+            $("#invoice_ul .invoice_date.active").trigger("click");
+        });
+    }
+
+    function updateBulkInvoiceStatus() {
+        var date = $("#bulk_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+        var status = 3;
+
+        $.post("jq_ajax.php", {updateBulkInvoiceStatus: "", date: date, status: status}, function() {
+            $("#bulk_ul .invoice_date.active").trigger("click");
+        });
+    }
+
+    function revertInvoiceStatus() {
+        var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+        var status = 2;
+
+        $.post("jq_ajax.php", {updateInvoiceStatus: "", date: date, status: status}, function() {
+            $("#invoice_ul .invoice_date.active").trigger("click");
+        });
+    }
+
+    function revertBulkInvoiceStatus() {
+        var date = $("#bulk_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+        var status = 2;
+
+        $.post("jq_ajax.php", {updateBulkInvoiceStatus: "", date: date, status: status}, function() {
+            $("#bulk_ul .invoice_date.active").trigger("click");
         });
     }
 
@@ -314,11 +443,8 @@ $_SESSION["last_activity"] = time();
                         updateBulkQuantity(obj);
                     });
             });
-            // updateCost(itemId, quantity, obj);
         }
     }
-
-
 
      function markCustom(obj) {
         var num = parseFloat(obj.value).toFixed(2);
@@ -672,12 +798,36 @@ $_SESSION["last_activity"] = time();
 
     $(document).ready(function() {
 
-        $("#invoice_ul .invoice_date:first").each(function() {
-            showInvoice($(this)[0]);
-            $(this).addClass("active");
-            $("#print_date span").html($(this).find("#selected_date").val());
-            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
-        });
+        if ($("#invoice_view").val() != "") {
+            $(".invoice_date").each(function() {
+                if ($(this).parent().find("#invoice_created_date").val() == $("#invoice_view").val()) {
+                    showInvoice($(this)[0]);
+                    $(this).addClass("active");
+                    $("#print_date span").html($(this).find("#selected_date").val());
+                    $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+                }
+            });
+        } else if ($("#bulk_invoice_view").val() != "") {
+            $("#bulk_ul .invoice_date").each(function() {
+                if ($(this).parent().find("#invoice_created_date").val() == $("#bulk_invoice_view").val()) {
+                    $(".option").removeClass("selected");
+                    $("#bulk_order_tab").addClass("selected");
+                    $("#invoice_ul").css("display", "none");
+                    $("#bulk_ul").css("display", "block");
+                    showBulkInvoice($(this)[0]);
+                    $(this).addClass("active");
+                    $("#print_date span").html($(this).find("#selected_date").val());
+                    $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+                }
+            });
+        } else{
+            $("#invoice_ul .invoice_date:first").each(function() {
+                showInvoice($(this)[0]);
+                $(this).addClass("active");
+                $("#print_date span").html($(this).find("#selected_date").val());
+                $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+            });
+        }
 
         $('#invoice_ul .invoice_date').click(function() {
             $('#invoice_ul  .invoice_date').removeClass("active");
@@ -727,6 +877,28 @@ $_SESSION["last_activity"] = time();
          $("#popup_close").click(function() {
             $(".div_popup_back").fadeOut(190, "linear");
             $(".main_iframe").removeClass("blur");
+        });
+
+        $(document).on("click", ".status_option.right", function() {
+            switch ($(".option.selected").find(".icon_small_text").html()) {
+                case 'Daily Order':
+                    updateInvoiceStatus();
+                    break;
+                case 'Bulk Order':
+                    updateBulkInvoiceStatus();
+                    break;
+            }
+        });
+
+        $(document).on("click", ".status_option.left", function() {
+            switch ($(".option.selected").find(".icon_small_text").html()) {
+                case 'Daily Order':
+                    revertInvoiceStatus();
+                    break;
+                case 'Bulk Order':
+                    revertBulkInvoiceStatus();
+                    break;
+            }
         });
 
         $(document).on("click", ".row_mark", function() {
