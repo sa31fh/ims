@@ -47,10 +47,9 @@ class InvoiceBulkTable extends DataBaseTable {
         return parent::query($sql);
     }
 
-    public static function remove_invoice($date_start, $date_end) {
+    public static function remove_invoice($date) {
         $sql = "DELETE FROM InvoiceBulk
-                WHERE date_start = '$date_start'
-                AND date_end = '$date_end'";
+                WHERE date_created = '$date'";
 
         return parent::query($sql);
     }

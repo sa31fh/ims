@@ -16,7 +16,9 @@ require_once "database/sales_table.php";
 require_once "database/notification_status_table.php";
 require_once "database/sub_notification_status_table.php";
 require_once "database/invoice_table.php";
+require_once "database/catering_category_table.php";
 require_once "database/catering_item_table.php";
+require_once "database/catering_order_item_table.php";
 require_once "database/catering_order_table.php";
 require_once "database/catering_recipe_table.php";
 require_once "database/catering_recipe_item_table.php";
@@ -45,10 +47,25 @@ if (isset($_POST["updateItemQuantity"])) {
     echo BaseQuantityTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
 }
 
+if (isset($_POST["updateCateringItemQuantity"])) {
+    echo CateringItemTable::update_base_quantity($_POST["itemId"], $_POST["quantity"]);
+}
+
 /*-----------------edit_categories.php-------------*/
 if (isset($_POST["getCategorizedItems"])) {
 
     $result = ItemTable::get_categorized_items($_POST["getCategorizedItems"], $_POST["date"]);
+    if ($result) {
+        echo '<ul class="category_list" id="categorized_list" >';
+        while ($row = $result->fetch_assoc()) {
+            echo '<li class="list_li" id="'.$row["id"].'" item-name="'.$row["name"].'">' .$row["name"]. ' </li>';
+        }
+         echo '</ul>';
+    }
+}
+if (isset($_POST["getCateringCategorizedItems"])) {
+
+    $result = CateringItemTable::get_categorized_items($_POST["categoryName"], $_POST["date"]);
     if ($result) {
         echo '<ul class="category_list" id="categorized_list" >';
         while ($row = $result->fetch_assoc()) {
@@ -66,6 +83,14 @@ if (isset($_POST["UpdateItemOrder"])) {
     }
 }
 
+if (isset($_POST["UpdateCateringItemOrder"])) {
+    $order_number = 0;
+    foreach ($_POST["itemIds"] as $value) {
+        CateringItemTable::update_item_order($value, $order_number);
+        $order_number++;
+    }
+}
+
 if (isset($_POST["updateCategoryName"])) {
     CategoryTable::update_category_name($_POST["name"], $_POST["id"]);
 }
@@ -74,6 +99,14 @@ if (isset($_POST["UpdateCategoryOrder"])) {
     $order_number = 1;
     foreach ($_POST["categoryIds"] as $value) {
         CategoryTable::update_category_order($value, $order_number);
+        $order_number++;
+    }
+}
+
+if (isset($_POST["UpdateCateringCategoryOrder"])) {
+    $order_number = 1;
+    foreach ($_POST["categoryIds"] as $value) {
+        CateringCategoryTable::update_category_order($value, $order_number);
         $order_number++;
     }
 }
@@ -89,6 +122,10 @@ if (isset($_POST["UpdateTimeslotOrder"])) {
 /*----------------edit_categories.php----------------*/
 if (isset($_POST["UpdateItemsCategory"])) {
     ItemTable::update_items_category($_POST["categoryName"], $_POST["itemName"]);
+}
+
+if (isset($_POST["UpdateCateringItemsCategory"])) {
+    CateringItemTable::update_items_category($_POST["categoryName"], $_POST["itemName"]);
 }
 
 /*---------user_account.php--------------*/
@@ -140,6 +177,31 @@ if(isset($_POST["addItem"])) {
     }
 }
 
+if(isset($_POST["addCateringItem"])) {
+     try {
+        if(!CateringItemTable::add_new_item($_POST["itemName"], $_POST["itemUnit"], $_SESSION["date"], $_POST["itemPrice"])) {
+            echo 'item exists';
+        } else{
+            CateringItemTable::set_base_quantity($_POST["itemName"], $_POST["itemQuant"]);
+            echo "item added";
+        }
+    } catch (Exception $e) {
+        echo '<div class="error">'.$e->getMessage().'</div>';
+    }
+}
+
+if (isset($_POST["addCateringCategory"])) {
+    try {
+        if (!CateringCategoryTable::add_category($_POST["name"], $_POST["date"])) {
+            echo "category exists";
+        } else {
+            echo "category added";
+        }
+    } catch (Exception $e) {
+        echo "progress failed";
+    }
+}
+
 if(isset($_POST["getItems"])) {
     $result = ItemTable::get_items_categories($_SESSION["date"]);
     $current_category = 1;
@@ -148,13 +210,13 @@ if(isset($_POST["getItems"])) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="7" class="table_heading">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></td>
+                    <td id="category" colspan="8" class="table_heading">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></td>
                 </tr>';
         } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
             $current_category = $row["category_name"];
             echo '
                 <tr class="item_category_tr">
-                    <td id="category" colspan="7" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
+                    <td id="category" colspan="8" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
                 </tr>';
         }
         echo '
@@ -190,8 +252,63 @@ if(isset($_POST["getItems"])) {
                 <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>
                 <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
                 <td><input type="number" name="item_quantity" step="any" min="0" value="'.$row["quantity"].'" onchange=quantityChange(this) class="align_center number_view"></td>
-                <td>$<input type="number" name="item_price" step="any" min="0" value="'.$row["price"].'" onchange=updateItem(this) class="align_center number_view"></td>
+                <td>
+                    $<input type="number" name="item_price" step="any" min="0" value="'.$row["price"].'" onchange=updateItem(this) class="align_center number_view">
+                    <div class="checkbox table_checkbox">
+                        <input type="checkbox" class="item_checkbox" id="item_tax"  value="'.$row["id"].'" onchange="changeItemTax(this)"';
+                            if ($row["has_tax"]) {
+                                echo "checked";
+                            }
+                        echo '>
+                        <span class="checkbox_style"></span>
+                        <label for="">tax</label>
+                    </div>
+                </td>
                 <td><input type="number" name="item_deviation step="1" min="0" value="'.$row["deviation"].'" onchange=updateItemDeviation(this) class="align_center number_view">%</td>
+                <td id="round_tr">
+                    <select name="" id="" onchange=updateRoundingOption(this)>
+                        <option value="none" '; if ($row["rounding_option"] == "none") {echo "selected";} echo'>none</option>
+                        <option value="up" '; if ($row["rounding_option"] == "up") {echo "selected";} echo'>up</option>
+                        <option value="down" '; if ($row["rounding_option"] == "down") {echo "selected";} echo'>down</option>
+                    </select>
+                    <input id="round_input" type="number" step="any" value="'.$row["rounding_factor"].'" onchange=updateRoundingFactor(this)
+                            class="align_center" '; if ($row["rounding_option"] == "none") {echo "disabled";} echo'>
+                </td>
+                <td><input type="number" name="item_barcode" step="any" min="0" value="'.$row["barcode"].'" onchange=barcodeChange(this) class="align_center"></td>
+            </tr>';
+    }
+}
+
+if(isset($_POST["getCateringItems"])) {
+    $result = CateringItemTable::get_items_categories($_SESSION["date"]);
+    $current_category = 1;
+    while($row = $result->fetch_assoc()) {
+        if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
+            $current_category = $row["category_name"];
+            echo '
+                <tr class="item_category_tr">
+                    <td id="category" colspan="6" class="table_heading">'.$row["category_name"].'<span class="arrow_down float_right collapse_arrow"></span></td>
+                </tr>';
+        } else if ($row["category_name"] != $current_category AND $row["category_name"] == null) {
+            $current_category = $row["category_name"];
+            echo '
+                <tr class="item_category_tr">
+                    <td id="category" colspan="6" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
+                </tr>';
+        }
+        echo '
+            <tr>
+                <input type="hidden" class="item_id" name="item_id" value="'.$row["id"].'">
+                <td class="td_checkbox">
+                    <div class="checkbox">
+                        <input type="checkbox" class="item_checkbox" name="checkbox[]" value="'.$row["id"].'" form="checkbox_form">
+                        <span class="checkbox_style"></span>
+                    </div>
+                </td>
+                <td><input type="text" name="item_name" value="'.$row["name"].'" onchange=updateItem(this) class="align_center item_name"></td>
+                <td><input type="text" name="item_unit" value="'.$row["unit"].'" onchange=updateItem(this) class="align_center"></td>
+                <td><input type="number" name="item_quantity" step="any" min="0" value="' .$row["base_quantity"]. '" onchange=quantityChange(this) class="align_center number_view"></td>
+                <td>$<input type="number" name="item_price" step="any" min="0" value="'.$row["price"].'" onchange=updateItem(this) class="align_center number_view"></td>
                 <td id="round_tr">
                     <select name="" id="" onchange=updateRoundingOption(this)>
                         <option value="none" '; if ($row["rounding_option"] == "none") {echo "selected";} echo'>none</option>
@@ -459,7 +576,7 @@ if (isset($_POST["getTrackedInvoice"])) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="8" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category"><td colspan="9" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
                         <th>Status</th>
                         <th>Item</th>
@@ -469,6 +586,7 @@ if (isset($_POST["getTrackedInvoice"])) {
                         <th>Quantity Received</th>
                         <th>Cost</th>
                         <th>Notes</th>
+                        <th>Bar Code</th>
                     </tr>';
         }
                     $quantity_required = $row["quantity_custom"] == "" ? $row["quantity_required"] : $row["quantity_custom"];
@@ -509,7 +627,9 @@ if (isset($_POST["getTrackedInvoice"])) {
                     <td id="td_notes">
                         <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$notes.'" '.$invoice_lock.'  '.$readonly.' >'.$notes.'</textarea>
                     </td>
+                    <td id="item_barcode">'.$row["barcode"].'</td>
                     <input type="hidden" id="item_id" value="'.$row["item_id"].'">
+                    <input type="hidden" id="has_tax" value="'.$row["has_tax"].'">
                 </tr>';
     }
 }
@@ -518,12 +638,27 @@ if (isset($_POST["getBulkInvoice"])) {
     $date_end = date_format(date_sub(date_create($_POST["dateEnd"]), date_interval_create_from_date_string("1 day")), "Y-m-d");
     $result = CategoryTable::get_bulk_print_preview($_POST["qpDate"], $date_end);
     $current_category = null;
+    $invoice_status = InvoiceBulkTable::get_status($_POST["invoiceDate"])->fetch_assoc()["status"];
+    switch ($invoice_status) {
+        case "1":
+            $invoice_lock = "readonly";
+            break;
+        case "2":
+            $invoice_lock = null;
+            break;
+        case "3":
+            $invoice_lock = "readonly";
+            break;
+        default:
+            $invoice_lock = null;
+            break;
+    }
     while ($row = $result->fetch_assoc()) {
         $item_data = InventoryTable::get_bulk_quantity($row["item_id"], $_POST["qpDate"], $date_end);
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="8" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category"><td colspan="9" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
                         <th>Status</th>
                         <th>Item</th>
@@ -533,6 +668,7 @@ if (isset($_POST["getBulkInvoice"])) {
                         <th>Quantity Received</th>
                         <th>Cost</th>
                         <th>Notes</th>
+                        <th>Bar Code</th>
                     </tr>';
         }
         $total_quantity = "";
@@ -572,11 +708,12 @@ if (isset($_POST["getBulkInvoice"])) {
                     <td>'.$row["unit"].'</td>
                     <td id="quantity_required">'.$total_quantity.'</td>
                     <td id="quantity_delivered" class="'.$delivered_warning.'">'.$quantity_delivered.'</td>
-                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateBulkQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
+                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateBulkQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$invoice_lock .' '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
                     <td class="cost">'.$cost.'</td>
                     <td id="td_notes">
-                        <textarea name="" id="" rows="2" onchange="updateBulkNotes(this)" value="'.$notes.'" '.$readonly.' >'.$notes.'</textarea>
+                        <textarea name="" id="" rows="2" onchange="updateBulkNotes(this)" value="'.$notes.'" '.$invoice_lock .' '.$readonly.' >'.$notes.'</textarea>
                     </td>
+                    <td id="item_barcode">'.$row["barcode"].'</td>
                     <input type="hidden" id="item_id" value="'.$row["item_id"].'">
                 </tr>';
     }
@@ -601,7 +738,7 @@ if (isset($_POST["getInventory"])) {
     }
 }
 
-if (isset($_POST["getCateringItems"])) {
+if (isset($_POST["getCateringOrderItems"])) {
     $result = CateringRecipeTable::get_recipes($_POST["orderId"]);
     if ($result->num_rows > 0) {
         echo '<tbody class="print_tbody" id="print_tbody">
@@ -623,7 +760,7 @@ if (isset($_POST["getCateringItems"])) {
                 </tr>';
         }
     }
-    $result = CateringItemTable::get_items($_POST["orderId"]);
+    $result = CateringOrderItemTable::get_items($_POST["orderId"]);
     $current_category = null;
     while ($row = $result->fetch_assoc()) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
@@ -637,20 +774,39 @@ if (isset($_POST["getCateringItems"])) {
                         <th>Notes</th>
                     </tr>';
         }
+
+        $quantity_required = $row["quantity_required"] == "" ? "-" : $row["quantity_required"];
+        
         echo '<tr id="column_data" class="row">';
         echo  '     <td class="item_name">'.$row["item_name"].'</td>
                     <td>'.$row["unit"].'</td>
-                    <td><input  onchange="updateQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_required"].'"  '.$readonly.' ></td>
+                    <td class="required">
+                        <div class="div_required">
+                            <div class="div_tab">
+                                <span class="tab fa-calculator selected" id="calculated"></span>
+                                <span class="tab fa-pencil" id="custom"></span>
+                            </div>
+                            <div class="div_text">
+                                <div class="heading">
+                                    <span id="heading">calculated value</span>
+                                </div>
+                                <div class="div_value">
+                                    <span class="span_qr">'.$quantity_required.'</span>
+                                    <input type="number" class="span_qc" value="'.$row["quantity_custom"].'" onchange="updateQuantityCustom(this)"  placeholder="enter value" >
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                     <td id="td_notes">
                         <textarea name="" id="" rows="2" onchange="updateNotes(this)" value="'.$row["notes"].'"  '.$readonly.' >'.$row["notes"].'</textarea>
                     </td>
-                    <input type="hidden" value="'.$row["item_id"].'">
+                    <input type="hidden" id="item_id" value="'.$row["item_id"].'">
                 </tr>';
     }
 }
 
 if (isset($_POST["getCateringItemTable"])) {
-    $result = CateringItemTable::get_items_with_recipes($_POST["orderId"]);
+    $result = CateringOrderItemTable::get_items_with_recipes($_POST["orderId"]);
     $current_category = null;
     while ($row = $result->fetch_assoc()) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
@@ -686,42 +842,80 @@ if (isset($_POST["getCateringItemTable"])) {
 }
 
 if (isset($_POST["getCateringOrderInvoice"])) {
-    $result = CateringItemTable::get_items_with_recipes($_POST["orderId"]);
+    $result = CateringOrderItemTable::get_items_with_recipes($_POST["orderId"]);
+    $invoice_status = CateringOrderTable::get_tracked($_POST["orderId"])->fetch_assoc()["status"];
     $current_category = null;
+    switch ($invoice_status) {
+        case "1":
+            $invoice_lock = "readonly";
+            break;
+        case "2":
+            $invoice_lock = null;
+            break;
+        case "3":
+            $invoice_lock = "readonly";
+            break;
+        default:
+            $invoice_lock = null;
+            break;
+    }
     while ($row = $result->fetch_assoc()) {
         if ($row["category_name"] != $current_category AND $row["category_name"] != null) {
             $current_category = $row["category_name"];
             echo '<tbody class="print_tbody" id="print_tbody">
-                    <tr id="category"><td colspan="6" class="table_heading">'.$row["category_name"].'</td></tr>
+                    <tr id="category"><td colspan="8" class="table_heading">'.$row["category_name"].'</td></tr>
                     <tr id="category_columns">
+                        <th>Status</th>
                         <th>Item</th>
                         <th>Unit</th>
                         <th>Quantity Required</th>
                         <th>Quantity Delivered</th>
+                        <th>Quantity Received</th>
                         <th>Cost</th>
                         <th>Notes</th>
                     </tr>';
         }
-                $quantity_required = is_numeric($row["quantity_required"]) ? $row["quantity_required"] : "-";
-                $quantity = is_numeric($row["quantity_delivered"]) ? $row["quantity_delivered"] : "-";
-                if (($quantity != "-" AND $quantity > -1) AND $row["price"] != "-") {
-                    $cost = "$ ".round($quantity * $row["price"], 2);
-                } else {
-                    $cost = "-";
-                }
+                    $quantity_required = $row["quantity_required"];
+                    $quantity_required = $quantity_required == "" ? "-" : $quantity_required;
+                    $quantity_delivered = $row["quantity_delivered"] == "" ? "-" : $row["quantity_delivered"];
+                    $cost = is_numeric($row["cost_delivered"]) ? "$ ".$row["cost_delivered"] : "-";
+                    $delivered_warning = "";
+                    $received_warning = "";
+                    $row_class = "";
+                    $notes = $row["invoice_notes"] != "" ? $row["invoice_notes"] : $row["notes"];
 
-        echo '<tr id="column_data" class="row">
-                <td>'.$row["item_name"].'</td>
-                <td>'.$row["unit"].'</td>
-                <td class="quantity_required">'.$quantity_required.'</td>
-                <td><input  onchange="updateCateringQuantity(this)" type="number" id="quantity_delivered" value="'.$row["quantity_delivered"].'" '.$readonly.' ></td>
-                <td class="cost">'.$cost.'</td>
-                <td id="td_notes">
-                    <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$row["invoice_notes"].'" '.$readonly.' >'.$row["invoice_notes"].'</textarea>
-                </td>
-                <input type="hidden" value="'.$row["item_id"].'">
-                <input type="hidden" value="'.$row["recipe_id"].'">
-            </tr>';
+                    if (($quantity_required <= 0 AND $quantity_delivered > 0) OR ($quantity_required > 0 AND $quantity_delivered == "-")  OR (($quantity_required > 0 AND $quantity_delivered >0) AND $quantity_required != $quantity_delivered)) {
+                        $delivered_warning = "field_warning";
+                    }
+                    if ($quantity_delivered == $row["quantity_received"]) {
+                        $row_class = "marked";
+                        $text = "received";
+                    } else if ($row["quantity_received"] != "" AND $quantity_delivered != $row["quantity_received"]) {
+                        $row_class = "marked_warning";
+                        $text = "received <br> discrepancy";
+                        $received_warning = "field_warning";
+                    } else {
+                        $row_class = "";
+                        $text = "not received";
+                    }
+
+        echo   '<tr id="column_data" class="row">
+                    <td class="row_mark '.$row_class.'">
+                        <span class="icon entypo-cancel"></span>
+                        <span class="text">'.$text.'</span>
+                    </td>
+                    <td id="item_name">'.$row["item_name"].'</td>
+                    <td>'.$row["unit"].'</td>
+                    <td id="quantity_required">'.$quantity_required.'</td>
+                    <td id="quantity_delivered" class="'.$delivered_warning.'">'.$quantity_delivered.'</td>
+                    <td class="'.$received_warning.'"><input  onchange="markCustom(this); updateCateringQuantity(this);" type="number" id="quantity_received" value="'.$row["quantity_received"].'" '.$invoice_lock.' '.$readonly.' '.($row["quantity_received"] != "" ? "readonly" : "").' ></td>
+                    <td class="cost">'.$cost.'</td>
+                    <td id="td_notes">
+                        <textarea name="" id="" rows="2" onchange="updateCateringNotes(this)" value="'.$notes.'" '.$invoice_lock.'  '.$readonly.' >'.$notes.'</textarea>
+                    </td>
+                    <input type="hidden" id="item_id" value="'.$row["item_id"].'">
+                    <input type="hidden" id="recipe_id" value="'.$row["recipe_id"].'">
+                </tr>';
     }
 }
 
@@ -832,6 +1026,14 @@ if (isset($_POST["printAll"])) {
     }
 }
 
+if (isset($_POST["changeItemTax"])) {
+    echo ItemTable::update_item_tax($_POST["id"], $_POST["hasTax"]);
+}
+
+if (isset($_POST["changeMultipleItemTax"])) {
+    echo ItemTable::update_multiple_item_tax($_POST["ids"], $_POST["hasTax"]);
+}
+
 if (isset($_POST["getExpSales"])) {
     echo SalesTable::get_expected_sale($_POST["date"]);
 }
@@ -864,8 +1066,8 @@ if (isset($_POST["trackBulkInvoice"])) {
     echo InvoiceBulkTable::track_invoice($_POST["dateStart"], $_POST["dateEnd"], $_POST["qpDate"], $_POST["dateCreated"]);
 }
 
-if (isset($_POST["removeBulkInvoice"])) {
-    echo InvoiceBulkTable::remove_invoice($_POST["dateStart"], $_POST["dateEnd"]);
+if (isset($_POST["deleteBulkInvoice"])) {
+    echo InvoiceBulkTable::remove_invoice($_POST["date"]);
 }
 
 if (isset($_POST["getBulkTrackedInvoice"])) {
@@ -961,8 +1163,16 @@ if (isset($_POST["updateItems"])) {
     echo ItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"], $_POST["itemPrice"]);
 }
 
+if (isset($_POST["updateCateringItems"])) {
+    echo CateringItemTable::update_item_details($_POST["itemId"], $_POST["itemName"], $_POST["itemUnit"], $_POST["itemPrice"]);
+}
+
 if (isset($_POST["updateItemDeviation"])) {
     echo ItemTable::update_deviation($_POST["deviation"], $_POST["itemId"]);
+}
+
+if (isset($_POST["updateItemBarcode"])) {
+    echo ItemTable::update_barcode($_POST["barcode"], $_POST["itemId"]);
 }
 
 if (isset($_POST["updateRoundingOption"])) {
@@ -971,6 +1181,14 @@ if (isset($_POST["updateRoundingOption"])) {
 
 if (isset($_POST["updateRoundingFactor"])) {
     echo ItemTable::update_rounding_factor($_POST["roundingFactor"], $_POST["itemId"]);
+}
+
+if (isset($_POST["updateCateringRoundingOption"])) {
+    echo CateringItemTable::update_rounding_option($_POST["roundingOption"], $_POST["itemId"]);
+}
+
+if (isset($_POST["updateCateringRoundingFactor"])) {
+    echo CateringItemTable::update_rounding_factor($_POST["roundingFactor"], $_POST["itemId"]);
 }
 
 if (isset($_POST["addRecipeItem"])) {
@@ -1039,12 +1257,28 @@ if (isset($_POST["getBulkInvoiceStatus"])) {
     echo InvoiceBulkTable::get_status($_POST["dateCreated"]) -> fetch_assoc()["status"];
 }
 
+if (isset($_POST["getCateringInvoiceStatus"])) {
+    echo CateringOrderTable::get_tracked($_POST["id"]) -> fetch_assoc()["status"];
+}
+
 if (isset($_POST["updateInvoiceStatus"])) {
     echo InvoiceTable::update_invoice_status($_POST["date"], $_POST["status"]);
 }
 
 if (isset($_POST["updateBulkInvoiceStatus"])) {
     echo InvoiceBulkTable::update_invoice_status($_POST["date"], $_POST["status"]);
+}
+
+if (isset($_POST["updateCateringInvoiceStatus"])) {
+    echo CateringOrderTable::update_invoice_status($_POST["id"], $_POST["status"]);
+}
+
+if (isset($_POST["getCateringPeople"])) {
+    echo CateringOrderTable::get_catering_people($_POST["orderId"]);
+}
+
+if (isset($_POST["updateCateringPeople"])) {
+    echo CateringOrderTable::update_catering_people($_POST["people"], $_POST["orderId"]);
 }
 
 if (isset($_POST["updateQuantityDelivered"])) {
@@ -1081,6 +1315,10 @@ if (isset($_POST["updateQuantityCustom"])) {
     echo InventoryTable::update_quantity_custom($_POST["quantity"], $_POST["itemId"], $_POST["itemDate"]);
 }
 
+if (isset($_POST["updateCateringQuantityCustom"])) {
+    echo CateringOrderItemTable::update_quantity_custom($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
+}
+
 if (isset($_POST["updateInvoiceNotes"])) {
     echo InventoryTable::update_invoice_note($_POST["note"], $_POST["itemId"], $_POST["date"]);
 }
@@ -1089,12 +1327,20 @@ if (isset($_POST["getItemPrice"])) {
     echo ItemTable::get_item_price($_POST["itemId"]);
 }
 
-if (isset($_POST["removeInvoice"])) {
+if (isset($_POST["getCateringItemPrice"])) {
+    echo CateringItemTable::get_item_price($_POST["itemId"]);
+}
+
+if (isset($_POST["deleteDailyInvoice"])) {
     echo InvoiceTable::remove_invoice($_POST["date"]);
 }
 
-if (isset($_POST["addCateringItem"])) {
-    echo CateringItemTable::add_item($_POST["itemId"], $_POST["orderId"]);
+if (isset($_POST["deleteCateringInvoice"])) {
+    echo CateringOrderTable::remove_invoice($_POST["id"]);
+}
+
+if (isset($_POST["addCateringOrderItem"])) {
+    echo CateringOrderItemTable::add_item($_POST["itemId"], $_POST["orderId"]);
 }
 
 if (isset($_POST["updateOrderRecipeItems"])) {
@@ -1107,10 +1353,11 @@ if (isset($_POST["removeOrderRecipeItems"])) {
 
 if (isset($_POST["updateOrderItemQuantity"])) {
     echo CateringRecipeItemTable::update_quantity_required($_POST["quantity"], $_POST["recipeId"], $_POST["orderId"]);
+    echo CateringRecipeItemTable::update_cost_required($_POST["recipeId"], $_POST["orderId"]);
 }
 
 if (isset($_POST["removeCateringItem"])) {
-    echo CateringItemTable::remove_item($_POST["itemId"], $_POST["orderId"]);
+    echo CateringOrderItemTable::remove_item($_POST["itemId"], $_POST["orderId"]);
 }
 
 if (isset($_POST["addCateringRecipe"])) {
@@ -1122,12 +1369,12 @@ if (isset($_POST["removeCateringRecipe"])) {
 }
 
 if (isset($_POST["updateCateringQuantity"])) {
-    echo CateringItemTable::update_quantity($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
+    echo CateringOrderItemTable::update_quantity($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
 }
 
 if (isset($_POST["updateCateringNotes"])) {
-    if (CateringItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
-        echo CateringItemTable::update_notes($_POST["notes"], $_POST["itemId"], $_POST["orderId"]);
+    if (CateringOrderItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
+        echo CateringOrderItemTable::update_notes($_POST["notes"], $_POST["itemId"], $_POST["orderId"]);
     } else {
         echo CateringRecipeItemTable::update_notes($_POST["notes"], $_POST["itemId"], $_POST["recipeId"], $_POST["orderId"]);
     }
@@ -1142,18 +1389,18 @@ if (isset($_POST["updateCateringRecipeNotes"])) {
 }
 
 if (isset($_POST["updateCateringInvoiceNotes"])) {
-    if (CateringItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
-        echo CateringItemTable::update_invoice_notes($_POST["notes"], $_POST["itemId"], $_POST["orderId"]);
+    if (CateringOrderItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
+        echo CateringOrderItemTable::update_invoice_notes($_POST["notes"], $_POST["itemId"], $_POST["orderId"]);
     } else {
        echo CateringRecipeItemTable::update_invoice_notes($_POST["notes"], $_POST["itemId"], $_POST["recipeId"], $_POST["orderId"]);
     }
 }
 
 if (isset($_POST["updateCateringInvoiceQuantity"])) {
-    if (CateringItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
-        echo CateringItemTable::update_quantity_delivered($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
+    if (CateringOrderItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
+        echo CateringOrderItemTable::update_quantity_received($_POST["quantity"], $_POST["itemId"], $_POST["orderId"]);
     } else {
-       echo CateringRecipeItemTable::update_quantity_delivered($_POST["quantity"], $_POST["itemId"], $_POST["recipeId"], $_POST["orderId"]);
+       echo CateringRecipeItemTable::update_quantity_received($_POST["quantity"], $_POST["itemId"], $_POST["recipeId"], $_POST["orderId"]);
     }
 }
 
@@ -1211,6 +1458,14 @@ if (isset($_POST["updateBulkRequiredCost"])) {
 
 if (isset($_POST["updateCostDelivered"])) {
     echo InventoryTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["date"]);
+}
+
+if (isset($_POST["updateCateringCostDelivered"])) {
+    if (CateringOrderItemTable::check_item($_POST["itemId"], $_POST["orderId"]) > 0) {
+        echo CateringOrderItemTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["orderId"]);
+    } else {
+       echo CateringRecipeItemTable::update_cost_delivered($_POST["cost"], $_POST["itemId"], $_POST["recipeId"], $_POST["orderId"]);
+    }
 }
 
 if (isset($_POST["updateContactDetails"])) {
@@ -1377,6 +1632,32 @@ if (isset($_POST["calcBulkQuantityRequired"])) {
         echo InventoryTable::update_expected_stock($expected_stock, $row["item_id"], $_POST["date"]);
         echo InventoryTable::update_quantity_required($quantity, $row["item_id"], $_POST["date"]);
         echo InventoryTable::update_cost_required($cost, $row["item_id"], $_POST["date"]);
+    }
+}
+
+if (isset($_POST["calcCateringQuantityRequired"])) {
+    $people = $_POST["people"];
+    $result = CateringOrderItemTable::get_items($_POST["orderId"]);
+
+    while ($row = $result -> fetch_assoc()) {
+        if (is_numeric($people)) {
+            $factor = $people / VariablesTable::get_catering_people();
+            $quantity = CateringItemTable::get_estimated_quantity($factor, $row["item_id"]);
+            if ($row["rounding_option"] == "up") {
+                $quantity = ceil($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            } else if ($row["rounding_option"] == "down") {
+                $quantity = floor($quantity / $row["rounding_factor"]) * $row["rounding_factor"];
+            }
+        } else {
+            $quantity = 'NULL';
+        }
+        if (($quantity != "NULL" AND $quantity > 0) AND $row["price"] != "-") {
+            $cost = round($quantity * $row["price"], 2);
+        } else {
+            $cost = "NULL";
+        }
+        echo CateringOrderItemTable::update_quantity_required($quantity, $row["item_id"], $_POST["orderId"]);
+        echo CateringOrderItemTable::update_cost_required($cost, $row["item_id"], $_POST["orderId"]);
     }
 }
 

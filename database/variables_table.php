@@ -97,5 +97,23 @@ class VariablesTable extends DatabaseTable {
             throw new Exception("get_history_edit query failed");
         }
     }
+
+    public static function get_catering_people() {
+        $sql = "SELECT value FROM Variables WHERE name = 'CateringPeople' ";
+
+        if ($result = parent::query($sql)) {
+            return (int) $result->fetch_assoc()['value'];
+        } else {
+            throw new Exception("get_catering_people query failed");
+        }
+    }
+
+    public static function update_catering_people($catering_people) {
+        $sql = "INSERT INTO Variables (name, value)
+                VALUES ('CateringPeople', '$catering_people')
+                ON DUPLICATE KEY UPDATE name = VALUES(name), value = VALUES(value)";
+
+        return parent::query($sql);
+    }
 }
 ?>

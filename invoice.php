@@ -37,6 +37,11 @@ if (isset($_POST["bulk_created_date"])) {
 } else {
     $bulk_invoice_date = NULL;
 }
+if (isset($_POST["catering_invoice_date"])) {
+    $catering_invoice_date = $_POST["catering_invoice_date"];
+} else {
+    $catering_invoice_date = NULL;
+}
 $_SESSION["last_activity"] = time();
 ?>
 
@@ -50,17 +55,14 @@ $_SESSION["last_activity"] = time();
 <body class="overflow_hidden font_open_sans">
     <div class="main overflow_hidden">
         <div class="sidenav" id="invoice_sidenav">
-            <div class="list_dropdown">
-                <select name="" id="" onchange="selectList(this)">
-                    <option value="Inventory">
-                        <span>Inventory</span>
-                    </option>
-                    <option value="Catering">
-                        <span>Catering</span>
-                    </option>
-                </select>
+        <div class="toolbar_print" id="list_tabs">
+            <div class="toolbar_div option selected" id="inventory_tab" onclick="selectList(this)">
+               <span class="icon_small_text">Inventory</span>
             </div>
-            <div id="heading"><h4>Tracked Invoices</h4></div>
+            <div class="toolbar_div option" id="catering_tab" onclick="selectList(this)" >
+                <span class="icon_small_text">Catering</span>
+            </div>
+        </div>
         <div id="div_inventory_list">
             <ul class="side_nav" id="invoice_ul">
                 <?php $result = InvoiceTable::get_tracked_invoices();
@@ -126,7 +128,7 @@ $_SESSION["last_activity"] = time();
                 </li>
                 <?php endwhile?>
             </ul>
-            <div class="toolbar_print">
+            <div class="toolbar_print" id="inventory_tabs">
                 <div class="toolbar_div option selected" id="daily_order_tab">
                    <span class="icon_small fa-file-text"></span>
                    <span class="icon_small_text">Daily Order</span>
@@ -156,6 +158,8 @@ $_SESSION["last_activity"] = time();
                         <input id="order_id" type="hidden" value="<?php echo $row["id"] ?>">
                         <input id="order_date" type="hidden" value="<?php echo $row["date_delivery"] ?>">
                         <input type="hidden" id="order_date_format" value="<?php echo date("D, jS M Y", strtotime($row["date_delivery"])); ?>">
+                        <input id="order_note" type="hidden" value="<?php echo $row["notes"] ?>">
+                        <input id="order_invoice" type="hidden" value="<?php echo $row["date_invoice"] ?>">
                     </li>
                 <?php endwhile ?>
             </ul>
@@ -179,6 +183,10 @@ $_SESSION["last_activity"] = time();
                 <div class="toolbar_div">
                     <a id="print_pdf" class="option" onclick=printPdf()>PDF</a>
                 </div>
+                <div class="divider"></div>
+                <div class="toolbar_div float_right">
+                    <a id="delete_invoice" class="option" onclick=deleteInvoice()>Delete</a>
+                </div>
                 <div class="toolbar_div float_right" id="totalcost_div">
                     <span id="label">total cost</span>
                     <span id="cost_span">-</span>
@@ -191,13 +199,21 @@ $_SESSION["last_activity"] = time();
             <div class="div_invoice_table">
                 <table class="table_view" id="invoice_table">
                     <tr id="print_date" class="row">
-                        <th colspan="8">
+                        <th colspan="9">
                             <div id="table_date_heading"></div>
                             <span id="table_date_span"></span>
                             <div class="print_table_date"></div>
+                            <div class="catering_people display_none">
+                                <span>Number of People: </span>
+                                <span id="number"></span>
+                            </div>
                         </th>
                     </tr>
                 </table>
+                <div class="display_none">
+                    <span class="note_heading entypo-pencil">Special Instructions</span>
+                    <textarea id="note_text" class="note_text" readonly>No special instructions for this order</textarea>
+                </div>
             </div>
 
             <div class="invoice_timeline">
@@ -257,6 +273,7 @@ $_SESSION["last_activity"] = time();
 
     <input type="hidden" id="invoice_view" value="<?php echo $invoice_date ?>">
     <input type="hidden" id="bulk_invoice_view" value="<?php echo $bulk_invoice_date ?>">
+    <input type="hidden" id="catering_invoice_date" value="<?php echo $catering_invoice_date ?>">
     <?php $page = "invoice";
     include_once "new_nav.php";?>
 </body>
@@ -282,8 +299,9 @@ $_SESSION["last_activity"] = time();
         var dateStart = obj.parentNode.children[1].value;
         var dateEnd = obj.parentNode.children[2].value;
         var qpDate = obj.parentNode.children[3].value;
+        var invoiceDate = obj.parentNode.children[4].value;
 
-        $.post("jq_ajax.php", {getBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate}, function(data, status) {
+        $.post("jq_ajax.php", {getBulkInvoice: "", dateStart: dateStart, dateEnd: dateEnd, qpDate: qpDate, invoiceDate: invoiceDate}, function(data, status) {
             $(".print_tbody").remove();
             $("#invoice_table").append(data);
             updateTimeLine();
@@ -295,28 +313,41 @@ $_SESSION["last_activity"] = time();
     function getCateringInvoice(obj) {
         var orderId = obj.parentNode.children[1].value;
 
+        $.post("jq_ajax.php", {getCateringPeople : "", orderId: orderId}, function(data) {
+            data = data != "" ? data : "-";
+            $(".catering_people").css("display", "block");
+            $(".catering_people #number").html(data);
+        });
         $.post("jq_ajax.php", {getCateringOrderInvoice: "", orderId: orderId}, function(data, status) {
             $(".print_tbody").remove();
             $("#invoice_table").append(data);
             checkRequired();
             totalCost();
+            updateTimeLine();
         });
     }
 
     function updateTimeLine() {
-        switch ($(".option.selected").find(".icon_small_text").html()) {
-            case 'Daily Order':
-                var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
-                $.post("jq_ajax.php", {getInvoiceStatus: "", date: date}, function(data) {
-                    changeStatus(data);
-                });
-                break;
-            case 'Bulk Order':
-                var date = $("#bulk_ul .invoice_date.active").parent().find("#invoice_created_date").val();
-                $.post("jq_ajax.php", {getBulkInvoiceStatus: "", dateCreated: date}, function(data) {
-                    changeStatus(data);
-                });
-                break;
+        if ($("#list_tabs .selected").find("span").html() == "Inventory") {
+            switch ($("#inventory_tabs .selected").find(".icon_small_text").html()) {
+                case 'Daily Order':
+                    var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+                    $.post("jq_ajax.php", {getInvoiceStatus: "", date: date}, function(data) {
+                        changeStatus(data);
+                    });
+                    break;
+                case 'Bulk Order':
+                    var date = $("#bulk_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+                    $.post("jq_ajax.php", {getBulkInvoiceStatus: "", dateCreated: date}, function(data) {
+                        changeStatus(data);
+                    });
+                    break;
+            }
+        } else {
+            var id = $("#catering_ul .active").parent().find("#order_id").val();
+            $.post("jq_ajax.php", {getCateringInvoiceStatus: "", id: id}, function(data) {
+                changeStatus(data);
+            });
         }
         function changeStatus(status) {
             $(".invoice_timeline").find(".status").each(function() {
@@ -336,14 +367,17 @@ $_SESSION["last_activity"] = time();
             switch ($(".invoice_timeline").find(".status.selected").attr("data-status")) {
                 case "1":
                     $(".invoice_timeline").find(".status_option").addClass("option_disabled");
+                    $(document).off("click", ".row_mark", rowMarkClick());
                     break;
                 case "2":
                     $(".invoice_timeline").find(".status_option.left").addClass("option_disabled");
                     $(".invoice_timeline").find(".status_option.right").removeClass("option_disabled");
+                     $(document).on("click", ".row_mark", rowMarkClick());
                     break;
                 case "3":
                     $(".invoice_timeline").find(".status_option.right").addClass("option_disabled");
                     $(".invoice_timeline").find(".status_option.left").removeClass("option_disabled");
+                     $(document).off("click", ".row_mark", rowMarkClick());
                     break;
             }
         }
@@ -368,12 +402,21 @@ $_SESSION["last_activity"] = time();
         });
     }
 
+     function updateCateringInvoiceStatus() {
+        var id = $("#catering_ul .active").parent().find("#order_id").val();
+        var status = 3;
+
+        $.post("jq_ajax.php", {updateCateringInvoiceStatus: "", id: id, status: status}, function() {
+            $("#catering_ul .active").trigger("click");
+        });
+    }
+
     function revertInvoiceStatus() {
         var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
         var status = 2;
 
         $.post("jq_ajax.php", {updateInvoiceStatus: "", date: date, status: status}, function() {
-            $("#invoice_ul .invoice_date.active").trigger("click");
+            $(".active").trigger("click");
         });
     }
 
@@ -383,6 +426,33 @@ $_SESSION["last_activity"] = time();
 
         $.post("jq_ajax.php", {updateBulkInvoiceStatus: "", date: date, status: status}, function() {
             $("#bulk_ul .invoice_date.active").trigger("click");
+        });
+    }
+
+    function revertCateringInvoiceStatus() {
+        var id = $("#catering_ul .active").parent().find("#order_id").val();
+        var status = 2;
+
+        $.post("jq_ajax.php", {updateCateringInvoiceStatus: "", id: id, status: status}, function() {
+            $("#catering_ul .active").trigger("click");
+        });
+    }
+
+    function deleteInvoice() {
+        alertify.confirm("Delete this invoice?", function() {
+            if ($("#list_tabs .selected").find("span").html() == "Inventory") {
+                if ($("#inventory_tabs .selected").find(".icon_small_text").html() == "Daily Order") {
+                    var date = $("#invoice_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+                    $.post("jq_ajax.php", {deleteDailyInvoice: "", date: date});
+                } else {
+                    var date = $("#bulk_ul .invoice_date.active").parent().find("#invoice_created_date").val();
+                    $.post("jq_ajax.php", {deleteBulkInvoice: "", date: date});
+                }
+            } else {
+                var id = $("#catering_ul .active").parent().find("#order_id").val();
+                $.post("jq_ajax.php", {deleteCateringInvoice: "", id: id});
+            }
+            location.reload();
         });
     }
 
@@ -447,7 +517,7 @@ $_SESSION["last_activity"] = time();
     }
 
      function markCustom(obj) {
-        var num = parseFloat(obj.value).toFixed(2);
+        var num = parseFloat(obj.value);
         if ($(obj).val() == "") {
             $(obj).parents("tr").find(".row_mark").removeClass("marked_warning");
             $(obj).parents("tr").find(".row_mark .text").html("not received");
@@ -483,9 +553,30 @@ $_SESSION["last_activity"] = time();
             saveCost();
         }
         function saveCost() {
-            if ($(".option.selected").find(".icon_small_text").html() == "Inventory") {
+            if ($("#inventory_tabs .selected").find(".icon_small_text").html() == "Daily Order") {
                 $.post("jq_ajax.php", {updateCostDelivered: "", cost: cost, itemId: itemId, date: date});
             }
+        }
+    }
+
+    function updateCateringCost(itemId, quantity, orderId, recipeId, obj) {
+        var cost = "";
+        if (quantity != "NULL") {
+            $.post("jq_ajax.php", {getCateringItemPrice: "", itemId: itemId}, function(data) {
+                var price = data;
+                cost = quantity * price;
+                $(obj).parents("tr").find(".cost").html("$ " + cost);
+                totalCost();
+                saveCost();
+            });
+        } else {
+            $(obj).parents("tr").find(".cost").html("-");
+            cost = "NULL";
+            totalCost();
+            saveCost();
+        }
+        function saveCost() {
+            $.post("jq_ajax.php", {updateCateringCostDelivered: "", cost: cost, itemId: itemId, orderId: orderId, recipeId: recipeId});
         }
     }
 
@@ -537,9 +628,9 @@ $_SESSION["last_activity"] = time();
 
     function updateCateringNotes(obj) {
         var itemNote = obj.value;
-        var itemId = obj.parentNode.parentNode.children[6].value;
-        var recipeId = obj.parentNode.parentNode.children[7].value;
-        var orderId = $(".active").parent().find("#order_id").val();
+        var itemId = $(obj).parents("tr").find("#item_id").val();
+        var recipeId = $(obj).parents("tr").find("#recipe_id").val();
+        var orderId = $("#catering_ul .active").parent().find("#order_id").val();
 
         $.post("jq_ajax.php", {updateCateringInvoiceNotes: "", notes: itemNote, itemId: itemId, recipeId: recipeId, orderId: orderId });
     }
@@ -549,21 +640,21 @@ $_SESSION["last_activity"] = time();
             obj.value = "";
         } else {
             var quantity = obj.value  == "" ? "NULL" : obj.value;
-            var itemId = obj.parentNode.parentNode.children[6].value;
-            var recipeId = obj.parentNode.parentNode.children[7].value;
-            var orderId = $(".active").parent().find("#order_id").val();
-
+            var itemId = $(obj).parents("tr").find("#item_id").val();
+            var recipeId = $(obj).parents("tr").find("#recipe_id").val();
+            var orderId = $("#catering_ul .active").parent().find("#order_id").val();
+            
             $.post("jq_ajax.php", {updateCateringInvoiceQuantity: "", quantity: quantity, itemId: itemId, recipeId: recipeId, orderId: orderId });
-            updateCost(itemId, quantity, obj);
+            updateCateringCost(itemId, quantity, orderId, recipeId, obj);
         }
     }
 
     function checkRequired() {
         if ($(".switch-input").prop("checked")) {
             $(".print_tbody").each(function() {
-                var total = $(this).find("tr > input").length;
+                var total = $(this).find("td > input").length;
                 var remove = 0;
-                $(this).find("tr input").each(function() {
+                $(this).find("td input").each(function() {
                   if ((this.value <=0 || this.value == "") && $(this).parent().nextAll("#td_notes").children("textarea").val() == ""
                        && (($(this).parent().prev().html() == "-") || $(this).parent().prev().html() <= 0)) {
                     $(this).parent().parent().hide();
@@ -585,8 +676,8 @@ $_SESSION["last_activity"] = time();
 
     function sendPrint() {
         createTable(function(table) {
-            if ($(".list_dropdown select").val() == "Inventory") {
-                switch ($(".option.selected").find(".icon_small_text").html()) {
+            if ($("#list_tabs .selected").find("span").html() == "Inventory") {
+                switch ($("#inventory_tabs .selected").find(".icon_small_text").html()) {
                     case 'Daily Order':
                         var name = "Daily Order Invoice";
                         break;
@@ -595,7 +686,7 @@ $_SESSION["last_activity"] = time();
                         break;
                 }
             } else {
-                var name = "Catering Order Invoice - "+$(".active").find("#order_name").html();
+                var name = "Catering Order Invoice - "+$("#catering_ul .active").find("#order_name").html();
             }
             document.getElementById("new_print_data").value = table.outerHTML;
             document.getElementById("print_table_name").value = name;
@@ -607,8 +698,8 @@ $_SESSION["last_activity"] = time();
 
     function printPdf() {
         createTable(function(table) {
-            if ($(".list_dropdown select").val() == "Inventory") {
-                switch ($(".option.selected").find(".icon_small_text").html()) {
+            if ($("#list_tabs .selected").find("span").html() == "Inventory") {
+                switch ($("#inventory_tabs .selected").find(".icon_small_text").html()) {
                     case 'Daily Order':
                         var name = "Daily Order Invoice";
                         break;
@@ -617,7 +708,7 @@ $_SESSION["last_activity"] = time();
                         break;
                 }
             } else {
-                var name = "Catering Order Invoice - "+$(".active").find("#order_name").html();
+                var name = "Catering Order Invoice - "+$("#catering_ul .active").find("#order_name").html();
             }
             $("#table_data").val(table.outerHTML);
             document.getElementById("table_name").value = name;
@@ -629,18 +720,18 @@ $_SESSION["last_activity"] = time();
     function createTable(callBack) {
         var table = document.createElement("table");
         table.setAttribute("class", "table_view");
-        if ($(".list_dropdown select").val() == "Catering") {
-            var orderName = $(".active").find("#order_name").html();
-            table.innerHTML += "<tr class='row'><th colspan='6'>Catering Order</th></tr>";
-            table.innerHTML += "<tr class='row'><th colspan='6' class='heading'>"+orderName+"</th></tr>";
+        if ($("#list_tabs .selected").find("span").html() == "Catering") {
+            var orderName = $("#catering_ul .active").find("#order_name").html();
+            table.innerHTML += "<tr class='row'><th colspan='9'>Catering Invoice</th></tr>";
+            table.innerHTML += "<tr class='row'><th colspan='9' class='heading'>"+orderName+"</th></tr>";
         } else {
-            table.innerHTML += "<tr class='row'><th colspan='8' class='heading'>Invoice</th></tr>";
-            switch ($(".option.selected").find(".icon_small_text").html()) {
+            table.innerHTML += "<tr class='row'><th colspan='9'>Invoice</th></tr>";
+            switch ($("#inventory_tabs .selected").find(".icon_small_text").html()) {
                 case 'Daily Order':
-                    table.innerHTML += "<tr class='row'><th colspan='8' class='heading'>Daily Order</th></tr>";
+                    table.innerHTML += "<tr class='row'><th colspan='9' class='heading'>Daily Order</th></tr>";
                     break;
                 case 'Bulk Order':
-                    table.innerHTML += "<tr class='row'><th colspan='8' class='heading'>Bulk Order</th></tr>";
+                    table.innerHTML += "<tr class='row'><th colspan='9' class='heading'>Bulk Order</th></tr>";
                     break;
             }
         }
@@ -648,7 +739,7 @@ $_SESSION["last_activity"] = time();
             if($(this).css('display') != 'none') {
                 var row = document.createElement("TR");
                 var cell = "";
-                $(this).children(":lt(8)").each(function() {
+                $(this).children(":lt(9)").each(function() {
                     if ($(this).hasClass("row_mark")) {
                         var td = document.createElement("TD");
                         if ($(this).hasClass("marked")) {
@@ -677,26 +768,35 @@ $_SESSION["last_activity"] = time();
         });
         var totalCost = $("#cost_span").html();
         table.innerHTML += "<tr><td class='table_heading' colspan='5'><h4>Total Cost</h4></td>"+
-                           "<td class='table_heading' colspan='3'><h4>"+totalCost+"</h4></td></tr>";
+                           "<td class='table_heading' colspan='4'><h4>"+totalCost+"</h4></td></tr>";
         callBack(table);
     }
 
     function totalCost() {
         var totalCost = "";
+        var totalTaxCost = "";
+        var taxAmount = "";
         var tax = $("#sales_tax").val();
         var costSpan = document.getElementById("cost_span");
         $(".cost").each(function() {
             var value = $(this).html() != "-" ? $(this).html() : "";
-            totalCost = +totalCost + +value.replace('$ ', "");
+            value = value.replace('$ ', "");
+            totalCost = +totalCost + +value;
+            var hasTax = $(this).parent().find("#has_tax").val();
+            if (tax > 0 && hasTax == 1 && value != "") {
+                var taxCost = (value*tax/100);
+                taxAmount = +taxAmount + +taxCost;
+            } 
         });
-        totalCost != "" ? costSpan.innerHTML = "$" + totalCost  : costSpan.innerHTML = "-";
+        if (taxAmount != "") {
+            totalTaxCost = totalCost + taxAmount;
+            totalTaxCost = totalTaxCost.toFixed(2);
+            $("#tax_cost").html("$" + totalTaxCost);
 
-        if (tax > 0 && totalCost != "") {
-            var taxCost = (totalCost*tax/100) + totalCost;
-            $("#tax_cost").html("$" + taxCost);
         } else {
             $("#tax_cost").html("-");
         }
+        totalCost != "" ? costSpan.innerHTML = "$" + totalCost  : costSpan.innerHTML = "-";
     }
 
     function updateMonthHeader(obj) {
@@ -711,9 +811,9 @@ $_SESSION["last_activity"] = time();
                                          .css("width", $(this).width())
                                          .addClass("floating_header");
             }
-            if (position.top < 113) {
+            if (position.top < 71) {
                 el.css("visibility", "hidden");
-                floatingHeader.css("top", 113);
+                floatingHeader.css("top", 71);
                 floatingHeader.css("visibility", "visible");
                 floatingHeaderTop = floatingHeader;
             } else {
@@ -723,11 +823,11 @@ $_SESSION["last_activity"] = time();
             if (floatingHeaderTop) {
                 if (floatingHeaderTop.nextAll(".invoice_month:first").length > 0) {
                     var nextTopPos = floatingHeaderTop.nextAll(".invoice_month:first").offset().top;
-                    if (nextTopPos <= 142) {
+                    if (nextTopPos <= 102) {
                         var prevTopPos = nextTopPos - (floatingHeader.height() + 11);
                         floatingHeaderTop.css("top", prevTopPos);
                     } else {
-                        floatingHeaderTop.css("top", 113);
+                        floatingHeaderTop.css("top", 71);
                     }
                 }
             }
@@ -747,26 +847,26 @@ $_SESSION["last_activity"] = time();
                                          .css("width", $(this).width())
                                          .addClass("floating_header");
             }
-             if (position.top < 82) {
+             if (position.top < 40) {
                 el.css("visibility", "hidden");
-                floatingHeader.css({"visibility": "visible", "top": 82});
+                floatingHeader.css({"visibility": "visible", "top": 40});
                 floatingHeaderTop = floatingHeader;
             }
-            if (position.top > 82 && position.top < 145) {
+            if (position.top > 40 && position.top < 105) {
                 el.css("visibility", "hidden");
                 floatingHeader.css({"visibility": "visible", "top": position.top});
-            } else if (position.top > 145){
+            } else if (position.top > 105){
                 floatingHeader.css("visibility", "hidden");
                 el.css("visibility", "visible");
             }
             if (floatingHeaderTop) {
                 if (floatingHeaderTop.nextAll(".invoice_year:first").length > 0) {
                     var nextTopPos = floatingHeaderTop.nextAll(".invoice_year:first").offset().top;
-                    if (nextTopPos <= 110 && nextTopPos > 80) {
+                    if (nextTopPos <= 70 && nextTopPos > 40) {
                         var prevTopPos = nextTopPos - (floatingHeader.height() + 10);
                         floatingHeaderTop.css("top", prevTopPos);
                     } else {
-                        floatingHeaderTop.css("top", 82);
+                        floatingHeaderTop.css("top", 40);
                     }
                 }
             }
@@ -774,134 +874,40 @@ $_SESSION["last_activity"] = time();
     }
 
     function selectList(obj) {
-        switch (obj.value) {
+        $("#list_tabs").children().removeClass("selected");
+        $(".side_nav li a").removeClass("active");
+        switch ($(obj).children().html()) {
             case 'Inventory':
-                $("#invoice_sidenav #heading h4").html("Tracked Invoices");
                 $("#div_catering_list").css("display", "none");
                 $("#div_inventory_list").css("display", "flex");
                 $("#daily_order_tab").trigger("click");
+                $(".note_heading").parent().css("display", "none");
+                $(obj).addClass("selected");
+                $(".catering_people").css("display", "none");
                 break;
             case 'Catering':
-                $("#invoice_sidenav #heading h4").html("Tracked Orders");
                 $("#div_inventory_list").css("display", "none");
                 $("#div_catering_list").css("display", "flex");
+                $(obj).addClass("selected");
                 $("#catering_ul #order_li:first a").each(function() {
                     getCateringInvoice($(this)[0]);
                     $(this).addClass("active");
                     $("#table_date_heading").html("Delivery Date");
-                    $("#print_date span").html($(this).parent().find("#order_date_format").val());
+                    $("#print_date #table_date_span").html($(this).parent().find("#order_date_format").val());
                     $("#print_date .print_table_date").html($(this).parent().find("#order_date_created").html());
+                    $(".note_heading").parent().css("display", "block");
+                    if ($(this).parent().find("#order_note").val() != "") {
+                        $("#note_text").html($(this).parent().find("#order_note").val());
+                    } else {
+                        $("#note_text").html("No special instructions for this order");
+                    }
                 });
                 break;
         }
     }
 
-    $(document).ready(function() {
-
-        if ($("#invoice_view").val() != "") {
-            $(".invoice_date").each(function() {
-                if ($(this).parent().find("#invoice_created_date").val() == $("#invoice_view").val()) {
-                    showInvoice($(this)[0]);
-                    $(this).addClass("active");
-                    $("#print_date span").html($(this).find("#selected_date").val());
-                    $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
-                }
-            });
-        } else if ($("#bulk_invoice_view").val() != "") {
-            $("#bulk_ul .invoice_date").each(function() {
-                if ($(this).parent().find("#invoice_created_date").val() == $("#bulk_invoice_view").val()) {
-                    $(".option").removeClass("selected");
-                    $("#bulk_order_tab").addClass("selected");
-                    $("#invoice_ul").css("display", "none");
-                    $("#bulk_ul").css("display", "block");
-                    showBulkInvoice($(this)[0]);
-                    $(this).addClass("active");
-                    $("#print_date span").html($(this).find("#selected_date").val());
-                    $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
-                }
-            });
-        } else{
-            $("#invoice_ul .invoice_date:first").each(function() {
-                showInvoice($(this)[0]);
-                $(this).addClass("active");
-                $("#print_date span").html($(this).find("#selected_date").val());
-                $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
-            });
-        }
-
-        $('#invoice_ul .invoice_date').click(function() {
-            $('#invoice_ul  .invoice_date').removeClass("active");
-            $(this).addClass('active');
-            $("#table_date_heading").html("");
-            $("#print_date span").html($(this).find("#selected_date").val());
-            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
-        });
-
-        $('#bulk_ul .invoice_date').click(function() {
-            $('#bulk_ul .invoice_date').removeClass("active");
-            $(this).addClass('active');
-            $("#table_date_heading").html("");
-            $("#print_date span").html($(this).find("#selected_date").val());
-            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
-        });
-
-        $('#catering_ul li a').click(function() {
-            $('.side_nav li a').removeClass("active");
-            $(this).addClass('active');
-            $("#table_date_heading").html("Delivery Date");
-            $("#print_date span").html($(this).parent().find("#order_date_format").val());
-            $("#print_date .print_table_date").html($(this).parent().find("#order_date_created").html());
-        });
-
-        $("#daily_order_tab").click(function() {
-            $(".option").removeClass("selected");
-            $(this).addClass("selected");
-            $("#bulk_ul").css("display", "none");
-            $("#invoice_ul").css("display", "block");
-            $("#invoice_ul .invoice_date:first").trigger("click");
-        });
-
-        $("#bulk_order_tab").click(function() {
-            $(".option").removeClass("selected");
-            $(this).addClass("selected");
-            $("#invoice_ul").css("display", "none");
-            $("#bulk_ul").css("display", "block");
-            $("#bulk_ul .invoice_date:first").trigger("click");
-        });
-
-        $("#invoice_ul").on("scroll", function(){
-            updateMonthHeader(this);
-            updateYearHeader(this);
-        });
-
-         $("#popup_close").click(function() {
-            $(".div_popup_back").fadeOut(190, "linear");
-            $(".main_iframe").removeClass("blur");
-        });
-
-        $(document).on("click", ".status_option.right", function() {
-            switch ($(".option.selected").find(".icon_small_text").html()) {
-                case 'Daily Order':
-                    updateInvoiceStatus();
-                    break;
-                case 'Bulk Order':
-                    updateBulkInvoiceStatus();
-                    break;
-            }
-        });
-
-        $(document).on("click", ".status_option.left", function() {
-            switch ($(".option.selected").find(".icon_small_text").html()) {
-                case 'Daily Order':
-                    revertInvoiceStatus();
-                    break;
-                case 'Bulk Order':
-                    revertBulkInvoiceStatus();
-                    break;
-            }
-        });
-
-        $(document).on("click", ".row_mark", function() {
+    function rowMarkClick() {
+         $(document).on("click", ".row_mark", function() {
             if ($(this).hasClass("marked") || $(this).hasClass("marked_warning")) {
                 $(this).removeClass("marked marked_warning")
                 $(this).find(".text").html("not received");
@@ -919,6 +925,135 @@ $_SESSION["last_activity"] = time();
                 $(this).parent().find("#quantity_received").trigger("onchange");
             }
         });
+    }
+
+    $(document).ready(function() {
+
+        $('#catering_ul li a').click(function() {
+            $('#catering_ul li a').removeClass("active");
+            $(this).addClass('active');
+            $("#table_date_heading").html("Delivery Date");
+            $("#print_date #table_date_span").html($(this).parent().find("#order_date_format").val());
+            $("#print_date .print_table_date").html($(this).parent().find("#order_date_created").html());
+            if ($(this).parent().find("#order_note").val() != "") {
+                $("#note_text").html($(this).parent().find("#order_note").val());
+            } else {
+                $("#note_text").html("No special intructions for this order");
+            }
+        });
+
+        if ($("#invoice_view").val() != "") {
+            $(".invoice_date").each(function() {
+                if ($(this).parent().find("#invoice_created_date").val() == $("#invoice_view").val()) {
+                    showInvoice($(this)[0]);
+                    $(this).addClass("active");
+                    $("#print_date #table_date_span").html($(this).find("#selected_date").val());
+                    $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+                }
+            });
+        } else if ($("#bulk_invoice_view").val() != "") {
+            $("#bulk_ul .invoice_date").each(function() {
+                if ($(this).parent().find("#invoice_created_date").val() == $("#bulk_invoice_view").val()) {
+                    $("#inventory_tabs .option").removeClass("selected");
+                    $("#bulk_order_tab").addClass("selected");
+                    $("#invoice_ul").css("display", "none");
+                    $("#bulk_ul").css("display", "block");
+                    showBulkInvoice($(this)[0]);
+                    $(this).addClass("active");
+                    $("#print_date #table_date_span").html($(this).find("#selected_date").val());
+                    $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+                }
+            });
+        } else if ($("#catering_invoice_date").val() !="") {
+            $("#catering_tab").trigger("click");
+            $("#catering_ul a").each(function() {
+                if ($(this).parent().find("#order_invoice").val() == $("#catering_invoice_date").val()) {
+                    $(this).trigger("click");
+                }
+            });
+        } else{
+            $("#invoice_ul .invoice_date:first").each(function() {
+                showInvoice($(this)[0]);
+                $(this).addClass("active");
+                $("#print_date #table_date_span").html($(this).find("#selected_date").val());
+                $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+            });
+        }
+
+        $('#invoice_ul .invoice_date').click(function() {
+            $('#invoice_ul  .invoice_date').removeClass("active");
+            $(this).addClass('active');
+            $("#table_date_heading").html("");
+            $("#print_date #table_date_span").html($(this).find("#selected_date").val());
+            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+        });
+
+        $('#bulk_ul .invoice_date').click(function() {
+            $('#bulk_ul .invoice_date').removeClass("active");
+            $(this).addClass('active');
+            $("#table_date_heading").html("");
+            $("#print_date #table_date_span").html($(this).find("#selected_date").val());
+            $("#print_date .print_table_date").html("created on " + $(this).find("#created_date").val());
+        });
+        
+
+        $("#daily_order_tab").click(function() {
+            $("#inventory_tabs .option").removeClass("selected");
+            $(this).addClass("selected");
+            $("#bulk_ul").css("display", "none");
+            $("#invoice_ul").css("display", "block");
+            $("#invoice_ul .invoice_date:first").trigger("click");
+        });
+
+        $("#bulk_order_tab").click(function() {
+            $("#inventory_tabs .option").removeClass("selected");
+            $(this).addClass("selected");
+            $("#invoice_ul").css("display", "none");
+            $("#bulk_ul").css("display", "block");
+            $("#bulk_ul .invoice_date:first").trigger("click");
+        });
+
+        $("#invoice_ul").on("scroll", function(){
+            updateMonthHeader(this);
+            updateYearHeader(this);
+        });
+
+         $("#popup_close").click(function() {
+            $(".div_popup_back").fadeOut(190, "linear");
+            $(".main_iframe").removeClass("blur");
+        });
+
+        $(document).on("click", ".status_option.right", function() {
+        if ($("#list_tabs .selected").find("span").html() == "Inventory") {
+            switch ($("#inventory_tabs .selected").find(".icon_small_text").html()) {
+                case 'Daily Order':
+                    updateInvoiceStatus();
+                    break;
+                case 'Bulk Order':
+                    updateBulkInvoiceStatus();
+                    break;
+            }
+        } else {
+            updateCateringInvoiceStatus();
+        }
+        });
+
+        $(document).on("click", ".status_option.left", function() {
+        if ($("#list_tab .selected").find("span").html() == "Inventory") {
+            switch ($("#inventory_tabs .selected").find(".icon_small_text").html()) {
+                case 'Daily Order':
+                    revertInvoiceStatus();
+                    break;
+                case 'Bulk Order':
+                    revertBulkInvoiceStatus();
+                    break;
+            }
+        } else{
+            revertCateringInvoiceStatus();
+        }
+        });
+
+       
 
      });
 

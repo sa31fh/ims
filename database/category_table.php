@@ -106,9 +106,9 @@ class CategoryTable extends DatabaseTable {
      */
     public static function get_print_preview($date) {
         $sql = "SELECT Category.name AS category_name, Item.name AS item_name, Item.id AS item_id,
-                    IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes AS notes,
+                    IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes AS notes, IFNULL(Item.barcode, '-') AS barcode,
                     Inv.invoice_notes, Inv.quantity_delivered, Category.order_id AS Cat_order, Item.order_id AS Item_order,
-                    Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price, Inv.quantity_required,
+                    Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price, Item.has_tax, Inv.quantity_required,
                     Inv.quantity_custom, Inv.quantity_received, Inv.cost_required, Inv.cost_delivered, Inv.expected_stock
                 FROM Category
                 INNER JOIN Item ON Item.category_id = Category.id
@@ -122,7 +122,7 @@ class CategoryTable extends DatabaseTable {
 
     public static function get_bulk_print_preview($date_start, $date_end) {
         $sql = "SELECT Category.name AS category_name, Item.name AS item_name, Item.id AS item_id,
-                    IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes,
+                    IFNULL(unit, '-') AS unit, IFNULL(quantity, '-') AS quantity, Inv.notes, IFNULL(Item.barcode, '-') AS barcode,
                     Inv.invoice_notes, Category.order_id AS Cat_order, Item.order_id AS Item_order,
                     Item.rounding_option, Item.rounding_factor, IFNULL(price, '-') AS price, Inv.quantity_required,
                     Inv.quantity_custom, Inv.quantity_delivered, Inv.quantity_received, Inv.cost_required, Inv.cost_delivered

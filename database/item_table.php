@@ -103,7 +103,7 @@ class ItemTable extends DatabaseTable {
      */
     public static function get_items_categories($date) {
         $sql = "SELECT Item.name, unit, quantity, deviation, rounding_option, rounding_factor,
-                       Item.id, Item.price, Category.name AS category_name, Item.order_id FROM Item
+                       Item.id, Item.price, Item.has_tax, Item.barcode, Category.name AS category_name, Item.order_id FROM Item
                 LEFT JOIN Category ON Item.category_id = Category.id
                 LEFT OUTER JOIN BaseQuantity ON BaseQuantity.item_id = Item.id
                 WHERE Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)
@@ -354,5 +354,62 @@ class ItemTable extends DatabaseTable {
 
         return parent::query($sql);
     }
+
+    public static function update_barcode($barcode, $item_id) {
+        $sql = "UPDATE Item
+                SET barcode = '$barcode'
+                WHERE id = '$item_id'";
+
+        return parent::query($sql);
+    }
+
+    public static function update_item_tax($id, $tax) {
+        $sql = "UPDATE Item
+                SET has_tax = '$tax'
+                WHERE id = $id";
+
+        return parent::query($sql);
+    }
+
+    public static function update_multiple_item_tax($ids, $tax) {
+        $sql = "UPDATE Item
+                SET has_tax = '$tax'
+                WHERE id IN ('".implode("','", $ids)."')";
+
+        return parent::query($sql);
+    }
+
+    public static function item_table_data($date){
+        $sql = "SELECT name, unit, price, deviation FROM Item
+                WHERE Item.creation_date <= '{$date}' AND (Item.deletion_date > '{$date}' OR Item.deletion_date IS NULL)
+                ORDER BY name ASC";
+
+        return parent::query($sql);
+    } 
+
+    public static function import_data($name, $unit, $price, $deviation, $date){
+
+        $sql = "SELECT * FROM Item
+                WHERE name = '$name'
+                AND deletion_date IS NULL";
+
+        $result = parent::query($sql);
+        if ($result->num_rows != 0) {
+            $sql = "UPDATE Item  
+                    SET name = '$name',
+                        unit = '$unit',
+                        price = $price, 
+                        deviation = $deviation
+                    WHERE name = '$name'
+                    AND deletion_date IS NULL";
+
+        } else {
+            $sql = "INSERT INTO Item (name, unit, creation_date, price, deviation)
+                    VALUES('$name', '$unit', '$date', $price, $deviation)";
+        }
+        
+        return parent::query($sql);
+    }
+
 }
 ?>

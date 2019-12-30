@@ -44,6 +44,11 @@ if(isset($_POST["new_date"])) {
                     </div>
                     <div class="flex_2 right">
                         <li>
+                            <div class="heading">
+                                <span>Restaurant</span>
+                            </div>
+                        </li>
+                        <li>
                             <a class="active" href="edit_categories.php" target="task_frame" >
                                 <span class="image entypo-archive" ></span>
                                 <span class="text">Categories</span>
@@ -55,6 +60,29 @@ if(isset($_POST["new_date"])) {
                                 <span class="text">Items</span>
                             </a>
                         </li>
+                        <li>
+                            <div class="heading">
+                                <span>Catering</span>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="catering_category.php" target="task_frame" >
+                                <span class="image entypo-archive" ></span>
+                                <span class="text">Categories</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="catering_items.php" target="task_frame" >
+                                <span class="image entypo-basket"></span>
+                                <span class="text">Items</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="recipes.php" target="task_frame" >
+                                <span class="image entypo-book-open"></span>
+                                <span class="text">Recipes</span>
+                            </a>
+                        </li>
                     </div>
                 </div>
                 <div class="flex_row flex_1">
@@ -62,12 +90,6 @@ if(isset($_POST["new_date"])) {
                         <span>dateless</span>
                     </div>
                     <div class="flex_2">
-                        <li>
-                            <a href="recipes.php" target="task_frame" >
-                                <span class="image entypo-book-open"></span>
-                                <span class="text">Recipes</span>
-                            </a>
-                        </li>
                         <li>
                             <a href="manage_users.php" target="task_frame">
                                 <span class="image entypo-users"></span>
@@ -98,6 +120,12 @@ if(isset($_POST["new_date"])) {
                                 <span class="text">Settings</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="data_transfer.php" target="task_frame">
+                                <span class="image fa-database"></span>
+                                <span class="text">Data Transfer</span>
+                            </a>
+                        </li>
                     </div>
                 </div>
             </div>
@@ -116,7 +144,7 @@ if(isset($_POST["new_date"])) {
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script type="text/javascript" src="jq/jquery-3.2.1.min.js"></script>
 <script
       src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
       integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="

@@ -6,7 +6,7 @@ class CateringRecipeItemTable extends DatabaseTable{
     public static function add_recipe_items($recipe_id, $order_id) {
         $sql = "INSERT INTO CateringRecipeItems (item_id, recipe_id, order_id, base_quantity, price)
                 SELECT item_id, $recipe_id, $order_id, quantity, price FROM RecipeItems
-                INNER JOIN Item ON RecipeItems.item_id = Item.id
+                INNER JOIN CateringItems ON RecipeItems.item_id = CateringItems.id
                 WHERE RecipeItems.recipe_id = $recipe_id";
 
         return parent::query($sql);
@@ -16,6 +16,25 @@ class CateringRecipeItemTable extends DatabaseTable{
         $sql = "UPDATE CateringRecipeItems
                 SET quantity_required = base_quantity * $recipe_quantity
                 WHERE recipe_id = $recipe_id AND order_id = $order_id";
+
+        return parent::query($sql);
+    }
+
+    public static function update_cost_required($recipe_id, $order_id) {
+        $sql = "UPDATE CateringRecipeItems
+                SET cost_required = price * quantity_required
+                WHERE recipe_id = $recipe_id 
+                AND order_id = $order_id";
+
+        return parent::query($sql);
+    }
+
+    public static function update_cost_delivered($cost, $item_id, $recipe_id, $order_id) {
+        $sql = "UPDATE CateringRecipeItems
+                SET cost_delivered = $cost
+                WHERE recipe_id = $recipe_id 
+                AND item_id = $item_id 
+                AND order_id = $order_id";
 
         return parent::query($sql);
     }
@@ -35,6 +54,16 @@ class CateringRecipeItemTable extends DatabaseTable{
                 VALUES($quantity, $item_id, $recipe_id, $order_id)
                 ON DUPLICATE KEY UPDATE
                 quantity_delivered= VALUES(quantity_delivered), item_id = VALUES(item_id), recipe_id = VALUES(recipe_id),
+                order_id = VALUES(order_id)";
+
+        return parent::query($sql);
+    }
+
+    public static function update_quantity_received($quantity, $item_id, $recipe_id, $order_id) {
+        $sql = "INSERT INTO CateringRecipeItems (quantity_received, item_id, recipe_id, order_id)
+                VALUES($quantity, $item_id, $recipe_id, $order_id)
+                ON DUPLICATE KEY UPDATE
+                quantity_received= VALUES(quantity_received), item_id = VALUES(item_id), recipe_id = VALUES(recipe_id),
                 order_id = VALUES(order_id)";
 
         return parent::query($sql);

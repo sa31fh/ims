@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once "database/recipe_table.php";
-require_once "database/item_table.php";
+require_once "database/catering_item_table.php";
 require_once "database/recipe_item_table.php";
 
 if (!isset($_SESSION["username"])) {
@@ -97,7 +97,7 @@ if(isset($_POST["delete_id"])) {
                 <h4 class="font_roboto">Items List</h4>
                 <div class="div_list">
                     <ul class="category_list" >
-                    <?php $result = ItemTable::get_items(); ?>
+                    <?php $result = CateringItemTable::get_items($_SESSION["date"]); ?>
                     <?php while ($row = $result->fetch_assoc()): ?>
                         <li class="list_li all_items" id="list_li" item-id="<?php echo $row['id'] ?>"><?php echo $row["name"];?></li>
                     <?php endwhile ?>
@@ -217,15 +217,15 @@ if(isset($_POST["delete_id"])) {
         });
 
         $(".all_items").click(function() {
-            $(this).toggleClass(function() {
                 if ($(this).hasClass("selected")) {
                     deleteRecipeItem($(this)[0]);
                 } else {
                     addRecipeItem($(this)[0]);
                 }
-                recipeSelect($(".list_category_li.active")[0]);
-                return "selected";
-            });
+            // $(this).toggleClass(function() {
+            //     return "selected";
+            // });
+            recipeSelect($(".list_category_li.active")[0]);
         });
     });
 

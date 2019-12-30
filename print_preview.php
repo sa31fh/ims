@@ -72,7 +72,7 @@ $inventory_invoice = count($result);
                         <input type="hidden" id="bulk_invoice" value="0">
                     </a>
                 </li>
-                <li id="order_li">
+                <!-- <li id="order_li">
                     <div class="heading" id="catering_option">
                         <span>Catering</span>
                     </div>
@@ -82,7 +82,7 @@ $inventory_invoice = count($result);
                         <span id="left">Catering Orders</span>
                         <span id="right"><?php echo CateringOrderTable::get_order_count($_SESSION["date"], $future_date); ?></span>
                     </a>
-                </li>
+                </li> -->
             </ul>
         </div>
         <div class="main_top_side">
@@ -310,6 +310,9 @@ $inventory_invoice = count($result);
     <form action="invoice.php" method="post" id="bulk_invoice_form">
         <input type="hidden" name="bulk_created_date" value="<?php echo $_SESSION["date"] ?>">
     </form>
+    <form action="invoice.php" method="post" id="catering_invoice_form">
+        <input type="hidden" name="catering_created_date" value="<?php echo $_SESSION["date"] ?>">
+    </form>
     <input type="hidden" id="formatted_date" value="<?php echo date_format((date_add(date_create($_SESSION["date"]), date_interval_create_from_date_string("1 day"))), 'D, jS M Y'); ?>">
 
     <form action="compose_messages.php" method="post" id="print_form" target="popup_frame">
@@ -372,8 +375,8 @@ $inventory_invoice = count($result);
     }
 
     function getOrderTab(obj) {
-        var orderId = $(obj).attr("id");
-        $.post("jq_ajax.php", {getCateringItemTable: "", orderId: orderId}, function(data, status) {
+        var orderId = $(obj).attr("id"); 
+       $.post("jq_ajax.php", {getCateringItemTable: "", orderId: orderId}, function(data, status) {
             $("#table_date_span").html($(obj).find("#order_date").val());
             $(".print_tbody").remove();
             $("#print").append(data);
@@ -464,7 +467,7 @@ $inventory_invoice = count($result);
         });
     }
 
-    function trackInvoice(obj) {
+    function trackInvoice() {
         var date = document.getElementById("session_date").value;
         switch ($(".print_preview .active").parent().attr("id")) {
             case "daily_order":
@@ -496,12 +499,15 @@ $inventory_invoice = count($result);
                 break;
             case "catering_order":
                 var orderId = $(".tab_ul").find(".selected").attr("id");
-                if ($(obj).prop("checked")) {
+                if ($(".tab_ul").find(".selected").find("#order_invoice").val() !="") {
+                    $("#catering_invoice_form").submit();
+                } else {
                     $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "'"+date+"'"});
                     $(".tab_ul").find(".selected").find("#order_invoice").val(date);
-                } else {
-                    $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: "NULL"});
-                    $(".tab_ul").find(".selected").find("#order_invoice").val("");
+                    $("#div_invoice_send")
+                        .removeClass("invoice_send")
+                        .addClass("invoice_view")
+                        .html("View Invoice");
                 }
                 break;
         }
@@ -536,9 +542,15 @@ $inventory_invoice = count($result);
                 break;
             case "catering_order":
                 if ($(".selected").find("#order_invoice").val() != "") {
-                    $("#invoice_checkbox").prop("checked", true);
+                   $("#div_invoice_send")
+                        .removeClass("invoice_send")
+                        .addClass("invoice_view")
+                        .html("View Invoice");
                 } else {
-                    $("#invoice_checkbox").prop("checked", false);
+                    $("#div_invoice_send")
+                        .removeClass("invoice_view")
+                        .addClass("invoice_send")
+                        .html("Send Invoice");
                 }
                 break;
         }
@@ -576,11 +588,11 @@ $inventory_invoice = count($result);
             case 'bulk_order':
                 table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Bulk Order</th></tr>";
                 break;
-            case 'catering_order':
-                table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Catering Order</th></tr>";
-                table.innerHTML += "<tr class='row'><th colspan='7' class='heading'> " +
-                                    $(".tab_li.selected").children().html(); + "</th></tr>";
-                break;
+            // case 'catering_order':
+            //     table.innerHTML += "<tr class='row'><th colspan='7' class='table_title'>Catering Order</th></tr>";
+            //     table.innerHTML += "<tr class='row'><th colspan='7' class='heading'> " +
+            //                         $(".tab_li.selected").children().html(); + "</th></tr>";
+            //     break;
         }
         $(".table_view tr").each(function() {
             if($(this).css('display') != 'none') {
@@ -1077,7 +1089,7 @@ $inventory_invoice = count($result);
             $("#print_all").parent().css("display", "flex");
             $("#div_table").css("margin-top", "53px");
 
-            if ($("#catering_option .right").html() > 0) {
+            if ($("#catering_order #right").html() > 0) {
                 $("#catering_tabs").css("display", "block");
                 $("#table_date_heading").html("delivery date");
                 $("#catering_tabs .tab_li:first").each(function() {

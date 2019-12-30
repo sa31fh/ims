@@ -2,8 +2,8 @@
 session_start();
 require_once "mpdf/vendor/autoload.php";
 require_once "database/catering_order_table.php";
+require_once "database/catering_order_item_table.php";
 require_once "database/catering_item_table.php";
-require_once "database/item_table.php";
 require_once "database/recipe_table.php";
 
 if (!isset($_SESSION["username"])) {
@@ -66,6 +66,7 @@ if (isset($_POST["delete_order_id"])) {
                     <input id="order_date" type="hidden" value="<?php echo $row["date_delivery"] ?>">
                     <input type="hidden" id="order_date_format" value="<?php echo date("D, jS M Y", strtotime($row["date_delivery"])); ?>">
                     <input id="order_note" type="hidden" value="<?php echo $row["notes"] ?>">
+                    <input id="order_invoice" type="hidden" value="<?php echo $row["date_invoice"] ?>">
                 </li>
             <?php endwhile ?>
             </ul>
@@ -90,7 +91,7 @@ if (isset($_POST["delete_order_id"])) {
             </div>
             <div id="add_heading"><h4></h4></div>
             <ul class="category_list display_none" id="order_items">
-                <?php $result = ItemTable::get_items_categories($_SESSION["date"]); ?>
+                <?php $result = CateringItemTable::get_items_categories($_SESSION["date"]); ?>
                 <?php $current_category = 1; ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <?php if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
@@ -128,29 +129,32 @@ if (isset($_POST["delete_order_id"])) {
         </div>
 
         <div class="main_top_side">
-            <div class="toolbar_print"  id="invoice_toolbar">
-                <div class="toolbar_div">
+            <div class="toolbar_print"  id="catering_toolbar">
+                <div class="toolbar_div flex_1">
                     <a class="option" onclick=addItems()>Add Items</a>
                 </div>
-                <div class="divider"></div> 
-                <div class="toolbar_div">
+                <div class="toolbar_div flex_1">
                     <a class="option" onclick=addRecipes()>Add Recipes</a>
                 </div>
-                <div class="divider"></div>
-                <div class="toolbar_div">
+                <div class="toolbar_div flex_1">
                     <label class="switch">
                         <input class="switch-input" type="checkbox" onclick=checkRequired() />
                         <span class="switch-label" data-on="Required" data-off="All"></span>
                         <span class="switch-handle"></span>
                     </label>
                 </div>
-                <div class="divider"></div>
-                <div class="toolbar_div">
+                <div class="toolbar_div flex_1 people_div">
+                    <span>Number of people</span>
+                    <input type="number" id="catering_people" name="catering_people" value=""onchange=updateCateringPeople(this)>
+                </div>
+                <div class="toolbar_div flex_1">
                     <a id="print_share" class="option" onclick=sendPrint()>Share</a>
                 </div>
-                <div class="divider"></div>
-                <div class="toolbar_div">
+                <div class="toolbar_div flex_1">
                     <a id="print_pdf" class="option" onclick=printPdf()>PDF</a>
+                </div>
+                <div class="toolbar_div flex_1 invoice_send" id="div_invoice_send"onclick="trackInvoice()">
+                    Send Invoice
                 </div>
             </div>
 
@@ -209,12 +213,19 @@ if (isset($_POST["delete_order_id"])) {
         <input type="hidden" id="delete_order_id" name="delete_order_id">
     </form>
 
+    <form action="invoice.php" method="post" id="catering_invoice_form">
+        <input type="hidden" name="catering_invoice_date" id="catering_invoice_date" value="">
+    </form>
+
+    <input type="hidden" id="session_date" value="<?php echo $_SESSION["date"] ?>">
+
+
     <?php $page = "catering";
     include_once "new_nav.php" ?>
 </body>
 </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script type="text/javascript" src="jq/jquery-3.2.1.min.js"></script>
 <script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script>
 
@@ -225,17 +236,21 @@ if (isset($_POST["delete_order_id"])) {
     }
 
     function addItems() {
-        $("#add_heading").children().html("add items");
-        $("#order_item_list").css("display", "flex");
-        $("#order_recipes").css("display", "none");
-        $("#order_items").css("display", "block");
+        if ($("#div_invoice_send").html() != "View Invoice") {
+            $("#add_heading").children().html("add items");
+            $("#order_item_list").css("display", "flex");
+            $("#order_recipes").css("display", "none");
+            $("#order_items").css("display", "block");
+        }
     }
 
     function addRecipes() {
-        $("#add_heading").children().html("add recipes");
-        $("#order_item_list").css("display", "flex");
-        $("#order_items").css("display", "none");
-        $("#order_recipes").css("display", "block");
+        if ($("#div_invoice_send").html() != "View Invoice") {
+            $("#add_heading").children().html("add recipes");
+            $("#order_item_list").css("display", "flex");
+            $("#order_items").css("display", "none");
+            $("#order_recipes").css("display", "block");
+        }
     }
 
     function editOrder() {
@@ -258,7 +273,7 @@ if (isset($_POST["delete_order_id"])) {
         var orderId = obj.parentNode.children[1].value;
         var heading = "";
 
-        $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
+        $.post("jq_ajax.php", {getCateringOrderItems: "", orderId: orderId}, function(data, status) {
             $(".print_tbody").remove();
             $("#invoice_table").append(data);
             $(".delivery_date").html($(".active").parent().find("#order_date_format").val());
@@ -292,7 +307,34 @@ if (isset($_POST["delete_order_id"])) {
                     $("#order_recipes").append(recipe);
                 }
             });
+            $(".div_required").each(function() {
+                if ($(this).find(".span_qc").val() != "") {
+                    $(this).find(".tab").trigger("click");
+                }
+            });
             checkRequired();
+            getCateringPeople(orderId);
+            checkInvoice();
+        });
+    }
+
+    function getCateringPeople(orderId) {
+        $.post("jq_ajax.php", {getCateringPeople: "", orderId: orderId}, function(data){
+            $("#catering_people").val(data);
+        });
+    }
+
+    function updateCateringPeople(obj) {
+        var people = obj.value;
+        people = people <= 0 ? 'NULL' : people;
+        var orderId = $(".active").next().val();
+           
+        $.post("jq_ajax.php", {calcCateringQuantityRequired : "", people: people, orderId: orderId});
+           
+        $.post("jq_ajax.php", {updateCateringPeople: "", people: people, orderId: orderId}, function(status){
+            if (status) {
+                $(".active").trigger("click");
+            }
         });
     }
 
@@ -321,6 +363,20 @@ if (isset($_POST["delete_order_id"])) {
         }
     }
 
+    function updateQuantityCustom(obj) {
+        var quantity = obj.value;
+        if (quantity < 0) {
+            obj.value = "";
+        } else {
+            quantity = quantity == "" ? 'NULL' : quantity;
+            var itemId = $(obj).parents("tr").find("#item_id").val();
+            var orderId = $(".active").next().val();
+
+            $.post("jq_ajax.php", {updateCateringQuantityCustom: "", quantity: quantity, itemId: itemId, orderId: orderId});
+            // updateCost(obj);
+        }
+    }
+
     function updateNotes(obj) {
         var notes = obj.value;
         var itemId = obj.parentNode.parentNode.children[4].value;
@@ -343,6 +399,44 @@ if (isset($_POST["delete_order_id"])) {
         $(".active").parent().find("#order_note").val(note);
 
         $.post("jq_ajax.php", {updateOrderNote: "", note: note, orderId: orderId});
+    }
+
+    function checkInvoice() {
+        if ($(".active").parent().find("#order_invoice").val() != "") {
+            $("#div_invoice_send")
+                .removeClass("invoice_send")
+                .addClass("invoice_view")
+                .html("View Invoice");
+                lockInvoice();
+        } else {
+            $("#div_invoice_send")
+                .removeClass("invoice_view")
+                .addClass("invoice_send")
+                .html("Send Invoice");
+        }
+    }
+
+    function trackInvoice() {
+        var orderId = $(".active").parent().find("#order_id").val();
+        var date = $("#session_date").val();
+        if ($(".active").parent().find("#order_invoice").val() != "") {
+            $("#catering_invoice_date").val($(".active").parent().find("#order_invoice").val());
+            $("#catering_invoice_form").submit();
+        } else {
+            $.post("jq_ajax.php", {updateOrderInvoiceDate: "", orderId: orderId, date: date});
+            $(".active").parent().find("#order_invoice").val(date);
+            $("#div_invoice_send")
+                .removeClass("invoice_send")
+                .addClass("invoice_view")
+                .html("View Invoice");
+            lockInvoice();
+        }
+    }
+
+    function lockInvoice() {
+        $(".div_invoice_table").find("input[type='number']").prop("readonly", "true");
+        $(".div_invoice_table").find("textarea").prop("readonly", "true");
+        $("#catering_people").prop("readonly", "true");
     }
 
     function checkRequired() {
@@ -393,6 +487,7 @@ if (isset($_POST["delete_order_id"])) {
         var table = document.createElement("table");
         var orderName = $(".active").find("#order_name").html();
         table.setAttribute("class", "table_view");
+        table.innerHTML += "<tr class='row'><th colspan='4' class='table_title'>Waterloo</th></tr>";
         table.innerHTML += "<tr class='row'><th colspan='4' class='table_title'>Catering Order</th></tr>";
         table.innerHTML += "<tr class='row'><th colspan='4' class=:heading>"+orderName+"</th></tr>";
         $(".table_view tr").each(function() {
@@ -400,9 +495,21 @@ if (isset($_POST["delete_order_id"])) {
                 var row = document.createElement("TR");
                 var cell = "";
                 $(this).children(":lt(4)").each(function() {
-                    if ($(this).children().attr("id") == "quantity_delivered" || $(this).children("textarea").length > 0) {
+                    if ($(this).children(".div_required").length > 0) {
+                        var td = document.createElement("TD");
+                        if ($(this).find(".span_qc").val() != "") {
+                            td.innerHTML = $(this).find(".span_qc").val();
+                        } else {
+                            td.innerHTML = $(this).find(".span_qr").html();
+                        }
+                        cell += td.outerHTML;
+                    } else if ($(this).children("textarea").length > 0) {
                         var td = document.createElement("TD");
                         td.innerHTML = $(this).children().val();
+                        cell += td.outerHTML;
+                    } else if ($(this).children("#quantity_delivered").length > 0) {
+                        var td = document.createElement("TD");
+                        td.innerHTML = $(this).find("#quantity_delivered").val();
                         cell += td.outerHTML;
                     } else {
                         cell += this.outerHTML;
@@ -431,6 +538,7 @@ if (isset($_POST["delete_order_id"])) {
             $("#note_text").val($(this).parent().find("#order_note").val());
             $('.side_nav li a').removeClass("active");
             $(this).addClass('active');
+            $("#catering_people").prop("readonly", false);
         });
 
         $(".popup_close").click(function() {
@@ -447,9 +555,9 @@ if (isset($_POST["delete_order_id"])) {
                     if ($(this).hasClass("selected")) {
                         $.post("jq_ajax.php", {removeCateringItem: "", itemId: itemId, orderId: orderId});
                     } else {
-                        $.post("jq_ajax.php", {addCateringItem: "", itemId: itemId, orderId: orderId});
+                        $.post("jq_ajax.php", {addCateringOrderItem: "", itemId: itemId, orderId: orderId});
                     }
-                    $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
+                    $.post("jq_ajax.php", {getCateringOrderItems: "", orderId: orderId}, function(data, status) {
                         $(".print_tbody").remove();
                         $("#invoice_table").append(data);
                     });
@@ -464,7 +572,7 @@ if (isset($_POST["delete_order_id"])) {
                         $.post("jq_ajax.php", {addCateringRecipe: "", itemId: itemId, orderId: orderId});
                         $.post("jq_ajax.php", {updateOrderRecipeItems: "", recipeId: itemId, orderId: orderId});
                     }
-                    $.post("jq_ajax.php", {getCateringItems: "", orderId: orderId}, function(data, status) {
+                    $.post("jq_ajax.php", {getCateringOrderItems: "", orderId: orderId}, function(data, status) {
                         $(".print_tbody").remove();
                         $("#invoice_table").append(data);
                     });
@@ -484,6 +592,22 @@ if (isset($_POST["delete_order_id"])) {
 
         $("#item_list_cancel").click(function() {
             $("#order_item_list").css("display", "none");
+        });
+
+        $(document).on("click", ".tab", function() {
+            $(this).parent().find(".selected").removeClass("selected");
+            $(this).addClass("selected");
+            if ($(this).attr("id") == "calculated") {
+                $(this).parents("td").find(".span_qc").css("display", "none");
+                $(this).parents("td").find(".span_qr").css("display", "block");
+                $(this).parents("td").find("#heading").html("calculated value");
+                // updateCost($(this).parents("td").find(".span_qr")[0]);
+            } else {
+                $(this).parents("td").find(".span_qr").css("display", "none");
+                $(this).parents("td").find(".span_qc").css("display", "block");
+                $(this).parents("td").find("#heading").html("custom value");
+                // updateCost($(this).parents("td").find(".span_qc")[0]);
+            }
         });
     });
 </script>

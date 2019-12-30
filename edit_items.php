@@ -140,7 +140,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                             <div class="divider"></div>
                             <button class="button_flat entypo-trash" id="delete_item">Delete</button>
                         </th>
-                        <th colspan="2" id="th_sales">
+                        <th colspan="3" id="th_sales">
                             <div class="none" id="div_quantity_sales">
                                 Quantity for sales
                                 <form action="edit_items.php" method="post" class="inline">
@@ -156,6 +156,11 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                                     <span>%</span>
                                     <input type="number" name="sales_tax" value="<?php echo VariablesTable::get_sales_tax(); ?>" onchange="this.form.submit()">
                                 </form>
+                                <div class="checkbox" id="tax_checkbox">
+                                    <input type="checkbox" class="item_checkbox" id="check_tax">
+                                    <span class="checkbox_style"></span>
+                                    <label for="">all items</label>
+                                </div>
                             </div>
                         </th>
                         <th >
@@ -164,7 +169,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                     </tr>
                     <tr class="tr_confirm">
                         <td class="td_checkbox">
-                            <div class="checkbox">
+                            <div class="checkbox" id="delete_all_checkbox">
                                 <input type="checkbox" class="item_checkbox" id="select_all">
                                 <span class="checkbox_style"></span>
                             </div>
@@ -180,6 +185,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                         <th id="th_price">Price</th>
                         <th id="th_deviation">Deviation</th>
                         <th id="th_rounding">Rounding</th>
+                        <th id="th_rounding">Bar Code</th>
                     </tr>
                     <tbody id="item_tbody">
                     <?php  $current_category = 1;?>
@@ -188,12 +194,12 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                     <?php  if ($row["category_name"] != $current_category AND $row["category_name"] != null): ?>
                             <?php $current_category = $row["category_name"];?>
                             <tr class="item_category_tr">
-                                <td id="category" colspan="7" class="table_heading"><?php echo $row["category_name"]?><span class="arrow_down float_right collapse_arrow"></span></td>
+                                <td id="category" colspan="8" class="table_heading"><?php echo $row["category_name"]?><span class="arrow_down float_right collapse_arrow"></span></td>
                             </tr>
                     <?php elseif ($row["category_name"] != $current_category AND $row["category_name"] == null): ?>
                     <?php  $current_category = $row["category_name"];?>
                             <tr class="item_category_tr">
-                                <td id="category" colspan="7" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
+                                <td id="category" colspan="8" class="table_heading">Uncategorized Items<span class="arrow_down float_right collapse_arrow"></span></td>
                             </tr>
                     <?php endif ?>
                         <tr>
@@ -219,7 +225,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                             </td>
                             <input type="hidden" class="item_id" name="item_id" value="<?php echo $row["id"]?>">
                             <td class="td_checkbox">
-                                <div class="checkbox">
+                                <div class="checkbox  delete_checkbox">
                                     <input type="checkbox" class="item_checkbox" name="checkbox[]" value="<?php echo $row["id"]?>" form="checkbox_form">
                                     <span class="checkbox_style"></span>
                                 </div>
@@ -230,7 +236,18 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                             <td><input type="text" name="item_name" value="<?php echo $row["name"]?>" onchange=updateItem(this) class="align_center item_name"></td>
                             <td><input type="text" name="item_unit" value="<?php echo $row["unit"]?>" onchange=updateItem(this) class="align_center"></td>
                             <td><input type="number" name="item_quantity" step="any" min="0" value="<?php echo $row["quantity"]?>" onchange=quantityChange(this) class="align_center number_view"></td>
-                            <td>$<input type="number" name="item_price" step="any" min="0" value="<?php echo $row["price"]?>" onchange=updateItem(this) class="align_center number_view"></td>
+                            <td>
+                                $<input type="number" name="item_price" step="any" min="0" value="<?php echo $row["price"]?>" onchange=updateItem(this) class="align_center number_view">
+                                <div class="checkbox table_checkbox">
+                                    <input type="checkbox" class="item_checkbox" id="item_tax"  value="<?php echo $row["id"]?>" onchange="changeItemTax(this)" 
+                                        <?php if ($row["has_tax"]): ?>
+                                            checked
+                                        <?php endif ?>
+                                    >
+                                    <span class="checkbox_style"></span>
+                                    <label for="">tax</label>
+                                </div>
+                            </td>
                             <td><input type="number" name="item_deviation step="1" min="0" value="<?php echo $row["deviation"]?>" onchange=updateItemDeviation(this) class="align_center number_view">%</td>
                             <td id="round_tr">
                                 <select name="" id="" onchange=updateRoundingOption(this)>
@@ -241,6 +258,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                                 <input id="round_input" type="number" step="any" value="<?php echo $row["rounding_factor"]?>" onchange=updateRoundingFactor(this)
                                         class="align_center" <?php echo $row["rounding_option"] == "none" ? "disabled" : ""?> >
                             </td>
+                            <td><input type="number" name="item_barcode" step="any" min="0" value="<?php echo $row["barcode"]?>" onchange=barcodeChange(this) class="align_center"></td>
                         </tr>
                     <?php endwhile ?>
                     </tbody>
@@ -269,7 +287,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
  </body>
  </html>
 
-<script type="text/javascript" src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script type="text/javascript" src="jq/jquery-3.2.1.min.js"></script>
 <script src="https://cdn.rawgit.com/alertifyjs/alertify.js/v1.0.10/dist/js/alertify.js"></script>
 <script
       src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
@@ -288,7 +306,7 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
                     var deleteButton = '<button id="delete_item" class="button_flat entypo-trash">Delete</button>';
                     $("#button_th").append(deleteButton);
                 }
-                $("#th_sales").attr("colspan", "4");
+                $("#th_sales").attr("colspan", "3");
                 $("#div_quantity_sales").css("display", "block");
                 $("#th_quantity").html("Quantity");
                 $("#th_deviation").css("display", "table-cell");
@@ -452,6 +470,30 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         });
     }
 
+    function barcodeChange(obj) {
+        var barcode = obj.value;
+        var rowIndex = obj.parentNode.parentNode.rowIndex;
+        var itemId = document.getElementById("item_table_view").rows[rowIndex].children[1].value;
+        var itemName = document.getElementById("item_table_view").rows[rowIndex].children[3].children[0].value;
+
+        $.post("jq_ajax.php", {updateItemBarcode: "", itemId: itemId, barcode: barcode}, function(data) {
+            if (data) {
+                    alertify
+                    .delay(2000)
+                    .success("Changes Saved");
+            }
+        })
+        .fail(function() {
+            alertify
+                .maxLogItems(10)
+                .delay(0)
+                .closeLogOnClick(true)
+                .error("Barcode for Item '"+itemName+"' did not save. Click here to try again", function(event) {
+                    barcodeChange(obj);
+                });
+        });
+    }
+
     function updateItem(obj) {
         var row =document.getElementById("item_table_view").rows[obj.parentNode.parentNode.rowIndex];
         var itemName = row.children[3].children[0].value;
@@ -488,6 +530,28 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
             });
         } else {
             $("#item_tbody").children().show();
+        }
+    }
+
+    function changeItemTax(obj) {
+        var id = $(obj).val();
+
+        if ($(obj).prop("checked") == true) {
+            $.post("jq_ajax.php", {changeItemTax: "", id: id, hasTax: "1"});
+        } else {
+            $.post("jq_ajax.php", {changeItemTax: "", id: id, hasTax: "0"});
+        }
+    }
+
+    function itemTaxCheck(obj) {
+        var ids = $(".table_checkbox input[type='checkbox']").map(function(){
+            return $(this).val();
+        }).get();
+
+         if ($(obj).prop("checked") == true) {
+            $.post("jq_ajax.php", {changeMultipleItemTax: "", ids: ids, hasTax: "1"});
+        } else {
+            $.post("jq_ajax.php", {changeMultipleItemTax: "", ids: ids, hasTax: "0"});
         }
     }
 
@@ -617,7 +681,8 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         $(document).on("click", "#delete_item", function() {
             $(".calendar").css("display", "none");
             $(".tr_confirm").css("display", "table");
-            $(".checkbox").css("display", "block");
+            $("#delete_all_checkbox").css("display", "block");
+            $(".delete_checkbox").css("display", "block");
             $(".tab_li:not(.selected)").addClass("disabled");
             $(".tab_li.selected").css("pointer-events", "none");
             $(".tab_add_button").addClass("disabled");
@@ -629,7 +694,8 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
 
         $("#td_cancel").click(function() {
             $(".tr_confirm").css("display", "none");
-            $(".checkbox").css("display", "none");
+            $("#delete_all_checkbox").css("display", "none");
+            $(".delete_checkbox").css("display", "none");
             $(".calendar").css("display", "block");
             $(".tab_li").removeClass("disabled");
             $(".tab_add_button").removeClass("disabled");
@@ -641,7 +707,12 @@ $item_table = ItemTable::get_items_categories($_SESSION["date"]);
         });
 
         $("#select_all").change(function() {
-            $("input[type='checkbox']").prop("checked", $(this).prop("checked"));
+            $(".delete_checkbox input[type='checkbox']").prop("checked", $(this).prop("checked"));
+        });
+
+        $("#check_tax").change(function() {
+            $(".table_checkbox input[type='checkbox']").prop("checked", $(this).prop("checked"));
+            itemTaxCheck($(this)[0]);
         });
 
         $(document).on("click", "input.incorrect", function() {

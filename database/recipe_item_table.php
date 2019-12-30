@@ -24,8 +24,8 @@ class RecipeItemTable extends DatabaseTable {
      * @return object|false      Returns mysqli_result object if data is retrieved or false if query fails.
      */
     public static function get_recipe_items($recipe_id) {
-        $sql = "SELECT Item.name, RecipeItems.quantity, RecipeItems.id FROM RecipeItems
-                INNER JOIN Item ON Item.id = item_id
+        $sql = "SELECT CateringItems.name, RecipeItems.quantity, RecipeItems.id FROM RecipeItems
+                INNER JOIN CateringItems ON CateringItems.id = item_id
                 WHERE recipe_id = '$recipe_id'";
 
         return parent::query($sql);

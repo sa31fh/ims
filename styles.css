@@ -49,6 +49,7 @@ label{
     color: #555;
     font-weight: 600;
     padding: 5px;
+    cursor: inherit;
 }
 input{
     margin: 5px 0px;
@@ -312,6 +313,7 @@ input:-moz-read-only::-moz-placeholder{
     margin: 0;
     overflow: auto;
     border-top: 1px solid #cecece;
+    min-width: 1320px;
 }
 #div_print_table table{
     border: none;
@@ -901,7 +903,7 @@ input:-moz-read-only::-moz-placeholder{
     bottom: 0;
     width: 100%;
     box-shadow: 0px -1px 15px -3px #9C9C9C;
-    z-index: 200;
+    z-index: 1;
 }
 .category_delete{
     display: none;
@@ -1257,16 +1259,50 @@ input:-moz-read-only::-moz-placeholder{
 .toolbar_print{
     border-top: 1px solid #cecece;
 }
+.toolbar_print#list_tabs{
+    border: none;
+    border-bottom: 1px solid #cecece;
+    z-index: 4;
+}
+.toolbar_print#list_tabs span{
+    padding: 1.5px 0px;
+    font-size: 13px;
+}
 .option_bar{
     border-top: 1px solid #cecece;
 }
-#pp_toolbar{
+#pp_toolbar, #catering_toolbar{
     align-items: normal;
     border: none;
     border-bottom: 1px solid #cecece;
 }
 #pp_toolbar .toolbar_div{
     flex: 1;
+}
+#catering_toolbar .people_div{
+    flex-direction: column;
+    background: white;
+    border-right: 1px solid #cecece;
+    border-left: 1px solid #cecece;
+}
+#catering_toolbar .people_div span{
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+#catering_toolbar .people_div input{
+    background: none;
+    border: none;
+    border-bottom: 1px solid #bebebe;
+    margin: 2px 0px;
+    padding: 0px;
+    max-width: 150px;
+    min-width: 60px;
+    width: 10vw;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
 }
 .table_view{
     position: relative;
@@ -1331,6 +1367,21 @@ input:-moz-read-only::-moz-placeholder{
     border-top: 1px solid white;
     cursor: pointer;
     transition: background 0.25s;
+}
+.table_view .table_checkbox{
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: initial;
+    padding-left: 10px;
+}
+.table_view .table_checkbox span{
+    line-height: 0.9s;
+}
+.table_view .table_checkbox label{
+    font-size: 10px;
+    padding: 0;
 }
 .row_mark span{
     display: block;
@@ -1407,6 +1458,7 @@ input:-moz-read-only::-moz-placeholder{
 }
 .table_view th#buffer{
     min-width: 0px;
+    width: 40px;
 }
 .table_view th.heading{
     font-size: 20px;
@@ -1459,6 +1511,8 @@ td .warning:before{
 .table_view td .div_required{
     display: flex;
     height: 100%;
+    max-width: 200px;
+    margin: auto;
 }
 .table_view td .div_tab{
     display: flex;
@@ -1675,8 +1729,33 @@ td.table_heading{
     max-width: 110px;
     font-size: 16px;
     margin: 0px;
-    padding-left: 0px 0px 0px 20px;
 }
+#div_sales_tax{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#div_sales_tax #tax_checkbox{
+    display: flex;
+    flex-direction: column;
+    padding: 0px 10px;
+    width: initial;
+}
+#div_sales_tax #tax_checkbox input {
+    min-width: 18px;
+    width: 18px;
+    height: 18px;
+    left: 25px;
+}
+#div_sales_tax #tax_checkbox span {
+    position: initial;
+}
+#div_sales_tax #tax_checkbox label {
+    font-size: 9px;
+    padding: 0;
+    line-height: 0.5;
+}
+
 #div_quantity_sales span, #div_sales_tax span{
     font-size: 18px;
     font-weight: normal;
@@ -1700,6 +1779,11 @@ td.table_heading{
     color: #667;
     font-weight: normal;
 }
+#print_date .catering_people{
+    margin-top: 5px;
+    padding-top: 10px;
+    border-top: 1px solid #cecece;
+}
 .toolbar_div .option:before{
     margin: 0px 5px;
     vertical-align: text-top;
@@ -1719,6 +1803,11 @@ td.table_heading{
 #print_pdf:before{
     content: "\f1c1";
     font-family: "FontAwesome";
+    font-size: 20px;
+}
+#delete_invoice:before{
+    content: "\e848";
+    font-family: "entypo";
     font-size: 20px;
 }
 #invoice_div{
@@ -2431,7 +2520,7 @@ a.invoice_date #right span{
     max-width: 231px;
     min-width: 201px;
     box-sizing: border-box;
-    z-index: 2;
+    z-index: 5;
 }
 #catering_sidenav{
     flex: initial;
@@ -2525,6 +2614,7 @@ a.invoice_date #right span{
 }
 .icon_small_text{
     font-size: 11px;
+    font-weight: bold;
     display: block;
 }
 #invoice_sidenav{
@@ -3428,6 +3518,17 @@ a.invoice_date #right span{
     font-weight: 600;
     font-family: "Open Sans";
     color: #555;
+}
+.sidenav .heading{
+    margin-top: -1px;
+    padding: 10px 0px;
+    background: #f4f4f5;
+    border-top: 1px solid #cecece;
+    border-bottom: 1px solid #cecece;
+    text-align: center;
+    font-size: 14px;
+    color: #111;
+    text-transform: uppercase;
 }
 .sidenav .list_dropdown{
     display: flex;
